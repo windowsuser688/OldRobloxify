@@ -5,3 +5,9 @@ PC is highly recommended, Mobile works too except its just a bit buggy lol
 
 # Preview
 ![Image](https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/preview.png)
+
+## Loadstring
+
+```lua
+loadstring(game:HttpGet("https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/Source.lua"))
+```
