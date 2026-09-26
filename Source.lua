@@ -18377,7 +18377,7 @@ local script = G2L["3"];
 		LoadTenFootInterface()
 	end)
 	
-	print("[Topbar] 2016 prototype API compatibility loaded; legacy modules are post-start/lazy")
+	print("2016 Roblox client started")
 	
 end;
 task.spawn(C_3);
