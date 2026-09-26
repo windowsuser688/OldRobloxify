@@ -1,4 +1,5 @@
 game.CoreGui.TopBarApp:Destroy()
+game.StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)
 local CoreGui = game:GetService("CoreGui")
 local ContextActionService = game:GetService("ContextActionService")
 
@@ -263,74 +264,74 @@ G2L["9"] = Instance.new("ModuleScript", G2L["4"]);
 G2L["9"]["Name"] = [[PlayerDropDown]];
 
 
+-- StarterGui.RobloxGui.Modules.Chat
+G2L["a"] = Instance.new("ModuleScript", G2L["4"]);
+G2L["a"]["Name"] = [[Chat]];
+
+
 -- StarterGui.RobloxGui.Modules.Settings
-G2L["a"] = Instance.new("Folder", G2L["4"]);
-G2L["a"]["Name"] = [[Settings]];
+G2L["b"] = Instance.new("Folder", G2L["4"]);
+G2L["b"]["Name"] = [[Settings]];
 
 
 -- StarterGui.RobloxGui.Modules.Settings.SettingsPageFactory
-G2L["b"] = Instance.new("ModuleScript", G2L["a"]);
-G2L["b"]["Name"] = [[SettingsPageFactory]];
+G2L["c"] = Instance.new("ModuleScript", G2L["b"]);
+G2L["c"]["Name"] = [[SettingsPageFactory]];
 
 
 -- StarterGui.RobloxGui.Modules.Settings.Utility
-G2L["c"] = Instance.new("ModuleScript", G2L["a"]);
-G2L["c"]["Name"] = [[Utility]];
+G2L["d"] = Instance.new("ModuleScript", G2L["b"]);
+G2L["d"]["Name"] = [[Utility]];
 
 
 -- StarterGui.RobloxGui.Modules.Settings.SettingsHub
-G2L["d"] = Instance.new("ModuleScript", G2L["a"]);
-G2L["d"]["Name"] = [[SettingsHub]];
+G2L["e"] = Instance.new("ModuleScript", G2L["b"]);
+G2L["e"]["Name"] = [[SettingsHub]];
 
 
 -- StarterGui.RobloxGui.Modules.Settings.Pages
-G2L["e"] = Instance.new("Folder", G2L["a"]);
-G2L["e"]["Name"] = [[Pages]];
+G2L["f"] = Instance.new("Folder", G2L["b"]);
+G2L["f"]["Name"] = [[Pages]];
 
 
 -- StarterGui.RobloxGui.Modules.Settings.Pages.GameSettings
-G2L["f"] = Instance.new("ModuleScript", G2L["e"]);
-G2L["f"]["Name"] = [[GameSettings]];
+G2L["10"] = Instance.new("ModuleScript", G2L["f"]);
+G2L["10"]["Name"] = [[GameSettings]];
 
 
 -- StarterGui.RobloxGui.Modules.Settings.Pages.Help
-G2L["10"] = Instance.new("ModuleScript", G2L["e"]);
-G2L["10"]["Name"] = [[Help]];
+G2L["11"] = Instance.new("ModuleScript", G2L["f"]);
+G2L["11"]["Name"] = [[Help]];
 
 
 -- StarterGui.RobloxGui.Modules.Settings.Pages.Home
-G2L["11"] = Instance.new("ModuleScript", G2L["e"]);
-G2L["11"]["Name"] = [[Home]];
+G2L["12"] = Instance.new("ModuleScript", G2L["f"]);
+G2L["12"]["Name"] = [[Home]];
 
 
 -- StarterGui.RobloxGui.Modules.Settings.Pages.LeaveGame
-G2L["12"] = Instance.new("ModuleScript", G2L["e"]);
-G2L["12"]["Name"] = [[LeaveGame]];
+G2L["13"] = Instance.new("ModuleScript", G2L["f"]);
+G2L["13"]["Name"] = [[LeaveGame]];
 
 
 -- StarterGui.RobloxGui.Modules.Settings.Pages.ResetCharacter
-G2L["13"] = Instance.new("ModuleScript", G2L["e"]);
-G2L["13"]["Name"] = [[ResetCharacter]];
+G2L["14"] = Instance.new("ModuleScript", G2L["f"]);
+G2L["14"]["Name"] = [[ResetCharacter]];
 
 
 -- StarterGui.RobloxGui.Modules.Settings.Pages.Record
-G2L["14"] = Instance.new("ModuleScript", G2L["e"]);
-G2L["14"]["Name"] = [[Record]];
+G2L["15"] = Instance.new("ModuleScript", G2L["f"]);
+G2L["15"]["Name"] = [[Record]];
 
 
 -- StarterGui.RobloxGui.Modules.Settings.Pages.Players
-G2L["15"] = Instance.new("ModuleScript", G2L["e"]);
-G2L["15"]["Name"] = [[Players]];
+G2L["16"] = Instance.new("ModuleScript", G2L["f"]);
+G2L["16"]["Name"] = [[Players]];
 
 
 -- StarterGui.RobloxGui.Modules.Settings.Pages.ReportAbuseMenu
-G2L["16"] = Instance.new("ModuleScript", G2L["e"]);
-G2L["16"]["Name"] = [[ReportAbuseMenu]];
-
-
--- StarterGui.RobloxGui.Modules.Chat
-G2L["17"] = Instance.new("ModuleScript", G2L["4"]);
-G2L["17"]["Name"] = [[Chat]];
+G2L["17"] = Instance.new("ModuleScript", G2L["f"]);
+G2L["17"]["Name"] = [[ReportAbuseMenu]];
 
 
 -- StarterGui.RobloxGui.ControlFrame
@@ -5242,5737 +5243,9 @@ end
 return moduleApiTable
 end;
 };
-G2L_MODULES[G2L["b"]] = {
+G2L_MODULES[G2L["a"]] = {
 Closure = function()
-    local script = G2L["b"];--[[
-		Filename: SettingsPageFactory.lua
-		Written by: jeditkacheff
-		Version 1.0
-		Description: Base Page Functionality for all Settings Pages
---]]
------------------ SERVICES ------------------------------
-local GuiService = _G:GetService("GuiService")
-local HttpService = game:GetService("HttpService")
-local UserInputService = game:GetService("UserInputService")
-
-local CoreGui = _G:GetService("CoreGui")
-local RobloxGui = CoreGui:WaitForChild("RobloxGui")
-
------------ UTILITIES --------------
-local utility = require(RobloxGui.Modules.Settings.Utility)
-
-
------------ VARIABLES --------------
-RobloxGui:WaitForChild("Modules"):WaitForChild("TenFootInterface")
-local isTenFootInterface = require(RobloxGui.Modules.TenFootInterface):IsEnabled()
-
------------ CONSTANTS --------------
-local HEADER_SPACING = 5
-if utility:IsSmallTouchScreen() then
-	HEADER_SPACING = 0
-end
-
------------ CLASS DECLARATION --------------
-local function Initialize()
-	local this = {}
-	this.HubRef = nil
-	this.LastSelectedObject = nil
-	this.TabPosition = 0
-	this.Active = false
-	this.OpenStateChangedCount = 0
-	local rows = {}
-	local displayed = false
-
-	------ TAB CREATION -------
-	this.TabHeader = utility:Create'TextButton'
-	{
-		Name = "Header",
-		Text = "",
-		BackgroundTransparency = 1,
-		Size = UDim2.new(0,169,1,0),
-		Position = UDim2.new(0.5,0,0,0)
-	};
-	if utility:IsSmallTouchScreen() then
-		this.TabHeader.Size = UDim2.new(0,84,1,0)
-	elseif isTenFootInterface then
-		this.TabHeader.Size = UDim2.new(0,220,1,0)
-	end
-	this.TabHeader.MouseButton1Click:connect(function()
-		if this.HubRef then
-			this.HubRef:SwitchToPage(this, true)
-		end
-	end)
-
-	local icon = utility:Create'ImageLabel'
-	{
-		Name = "Icon",
-		BackgroundTransparency = 1,
-		Size = UDim2.new(0,44,0,37),
-		Position = UDim2.new(0,10,0.5,-18),
-		Image = "",
-		ImageTransparency = 0.5,
-		Parent = this.TabHeader
-	};
-
-	local title = utility:Create'TextLabel'
-	{
-		Name = "Title",
-		Text = "Change Me",
-		Font = Enum.Font.SourceSansBold,
-		FontSize = Enum.FontSize.Size24,
-		TextColor3 = Color3.new(1,1,1),
-		BackgroundTransparency = 1,
-		Size = UDim2.new(1.05,0,1,0),
-		Position = UDim2.new(1.2,0,0,0),
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextTransparency = 0.5,
-		Parent = icon
-	};
-	if utility:IsSmallTouchScreen() then
-		title.FontSize = Enum.FontSize.Size18
-	elseif isTenFootInterface then
-		title.FontSize = Enum.FontSize.Size48
-	end
-
-	local tabSelection = utility:Create'ImageLabel'
-	{
-		Name = "TabSelection",
-		Image = "rbxasset://textures/ui/Settings/MenuBarAssets/MenuSelection.png",
-		ScaleType = Enum.ScaleType.Slice,
-		SliceCenter = Rect.new(3,1,4,5),
-		Visible = false,
-		BackgroundTransparency = 1,
-		Size = UDim2.new(1,0,0,6),
-		Position = UDim2.new(0,0,1,-6),
-		Parent = this.TabHeader
-	};
-
-	------ PAGE CREATION -------
-	this.Page = utility:Create'Frame'
-	{
-		Name = "Page",
-		BackgroundTransparency = 1,
-		Size = UDim2.new(1,0,1,0)
-	};
-
-	-- make sure each page has a unique selection group (for gamepad selection)
-	GuiService:AddSelectionParent(HttpService:GenerateGUID(false), this.Page)
-
-	----------------- Events ------------------------
-
-	this.Displayed = Instance.new("BindableEvent")
-	this.Displayed.Name = "Displayed"
-
-	this.Displayed.Event:connect(function()
-		if not this.HubRef.Shield.Visible then return end
-
-		this:SelectARow()
-	end)
-
-	this.Hidden = Instance.new("BindableEvent")
-	this.Hidden.Event:connect(function()
-		if GuiService.SelectedObject and GuiService.SelectedObject:IsDescendantOf(this.Page) then
-			GuiService.SelectedObject = nil
-		end
-	end)
-	this.Hidden.Name = "Hidden"
-
-	----------------- FUNCTIONS ------------------------
-	function this:SelectARow(forced) -- Selects the first row or the most recently selected row
-		if forced or not GuiService.SelectedObject or not GuiService.SelectedObject:IsDescendantOf(this.Page) then
-			if this.LastSelectedObject then
-				GuiService.SelectedObject = this.LastSelectedObject
-			else
-				if rows and #rows > 0 then
-					local valueChangerFrame = nil
-
-					if type(rows[1].ValueChanger) ~= "table" then
-						valueChangerFrame = rows[1].ValueChanger
-					else
-						valueChangerFrame = rows[1].ValueChanger.SliderFrame and 
-							rows[1].ValueChanger.SliderFrame or rows[1].ValueChanger.SelectorFrame
-					end
-					GuiService.SelectedObject = valueChangerFrame
-				end
-			end
-		end
-	end
-
-	function this:Display(pageParent, skipAnimation)
-		this.OpenStateChangedCount = this.OpenStateChangedCount + 1
-
-		if this.TabHeader then
-			this.TabHeader.TabSelection.Visible = true
-			this.TabHeader.Icon.ImageTransparency = 0
-			this.TabHeader.Icon.Title.TextTransparency = 0
-		end
-
-		this.Page.Parent = pageParent
-		this.Page.Visible = true
-
-		local endPos = UDim2.new(0,0,0,0)
-		local animationComplete = function()
-			this.Page.Visible = true
-			displayed = true
-			this.Displayed:Fire()
-		end
-		if skipAnimation then
-			this.Page.Position = endPos
-			animationComplete()
-		else
-			this.Page:TweenPosition(endPos, Enum.EasingDirection.In, Enum.EasingStyle.Quad, 0.1, true, animationComplete)
-		end
-	end
-	function this:Hide(direction, newPagePos, skipAnimation, delayBeforeHiding)
-		this.OpenStateChangedCount = this.OpenStateChangedCount + 1
-
-		if this.TabHeader then
-			this.TabHeader.TabSelection.Visible = false
-			this.TabHeader.Icon.ImageTransparency = 0.5
-			this.TabHeader.Icon.Title.TextTransparency = 0.5
-		end
-
-		if this.Page.Parent then
-			local endPos = UDim2.new(1 * direction,0,0,0)
-			local animationComplete = function()
-				this.Page.Visible = false
-				this.Page.Position = UDim2.new(this.TabPosition - newPagePos,0,0,0)
-				displayed = false
-				this.Hidden:Fire()
-			end
-
-			local remove = function()
-				if skipAnimation then
-					this.Page.Position = endPos
-					animationComplete()
-				else
-					this.Page:TweenPosition(endPos, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true, animationComplete)
-				end
-			end
-
-			if delayBeforeHiding then
-				local myOpenStateChangedCount = this.OpenStateChangedCount
-				delay(delayBeforeHiding, function()
-					if myOpenStateChangedCount == this.OpenStateChangedCount then
-						remove()
-					end
-				end)
-			else
-				remove()
-			end
-		end
-	end
-
-	function this:GetDisplayed()
-		return displayed
-	end
-
-	function this:GetVisibility()
-		return this.Page.Parent
-	end
-
-	function this:GetTabHeader()
-		return this.TabHeader
-	end
-
-	function this:SetHub(hubRef)
-		this.HubRef = hubRef
-
-		for i, row in next, rows do
-			if type(row.ValueChanger) == 'table' then
-				row.ValueChanger.HubRef = this.HubRef
-			end
-		end
-	end
-
-	function this:GetSize()
-		return this.Page.AbsoluteSize
-	end
-
-	function this:AddRow(RowFrame, RowLabel, ValueChangerInstance, ExtraRowSpacing)
-		rows[#rows + 1] = {SelectionFrame = RowFrame, Label = RowLabel, ValueChanger = ValueChangerInstance}
-
-		local rowFrameYSize = 0
-		if RowFrame then 
-			rowFrameYSize = RowFrame.Size.Y.Offset
-		end
-
-		if ExtraRowSpacing then
-			this.Page.Size = UDim2.new(1, 0, 0, this.Page.Size.Y.Offset + rowFrameYSize + ExtraRowSpacing)
-		else
-			this.Page.Size = UDim2.new(1, 0, 0, this.Page.Size.Y.Offset + rowFrameYSize)
-		end
-
-		if this.HubRef and type(ValueChangerInstance) == 'table' then
-			ValueChangerInstance.HubRef = this.HubRef
-		end
-	end
-
-	return this
-end
-
-
--------- public facing API ----------------
-local moduleApiTable = {}
-
-function moduleApiTable:CreateNewPage()
-	return Initialize()
-end
-
-return moduleApiTable
-end;
-};
-G2L_MODULES[G2L["c"]] = {
-Closure = function()
-    local script = G2L["c"];--[[
-		Filename: SettingsPage.lua
-		Written by: jeditkacheff
-		Version 1.0
-		Description: Base Page Functionality for all Settings Pages
---]]
-
------------------- CONSTANTS --------------------
-local SELECTED_COLOR = Color3.new(0,162/255,1)
-local NON_SELECTED_COLOR = Color3.new(78/255,84/255,96/255)
-
-local SELECTED_LEFT_IMAGE = "rbxasset://textures/ui/Settings/Slider/SelectedBarLeft.png"
-local NON_SELECTED_LEFT_IMAGE = "rbxasset://textures/ui/Settings/Slider/BarLeft.png"
-local SELECTED_RIGHT_IMAGE = "rbxasset://textures/ui/Settings/Slider/SelectedBarRight.png"
-local NON_SELECTED_RIGHT_IMAGE= "rbxasset://textures/ui/Settings/Slider/BarRight.png"
-
-local CONTROLLER_SCROLL_DELTA = 0.2
-local CONTROLLER_THUMBSTICK_DEADZONE = 0.8
-
-------------- SERVICES ----------------
-local HttpService = game:GetService("HttpService")
-local UserInputService = game:GetService("UserInputService")
-local GuiService = _G:GetService("GuiService")
-local RunService = game:GetService("RunService")
-local CoreGui = _G:GetService("CoreGui")
-local RobloxGui = CoreGui:FindFirstChild("RobloxGui")
-local ContextActionService = game:GetService("ContextActionService")
-
------------------- VARIABLES --------------------
-local tenFootInterfaceEnabled = false
-do
-	RobloxGui:WaitForChild("Modules"):WaitForChild("TenFootInterface")
-	tenFootInterfaceEnabled = require(RobloxGui.Modules.TenFootInterface):IsEnabled()
-end
-
-
-
------------ UTILITIES --------------
-local Util = {}
-do
-	function Util.Create(instanceType)
-		return function(data)
-			local obj = Instance.new(instanceType)
-			for k, v in pairs(data) do
-				if type(k) == 'number' then
-					v.Parent = obj
-				else
-					obj[k] = v
-				end
-			end
-			return obj
-		end
-	end
-end
-
-
--- used by several guis to show no selection adorn
-local noSelectionObject = Util.Create'ImageLabel'
-{
-	Image = "",
-	BackgroundTransparency = 1
-};
-
-
--- MATH --
-function clamp(low, high, input)
-	return math.max(low, math.min(high, input))
-end
-
-function ClampVector2(low, high, input)
-	return Vector2.new(clamp(low.x, high.x, input.x), clamp(low.y, high.y, input.y))
-end
-
----- TWEENZ ----
-local Linear = function(t, b, c, d)
-	if t >= d then return b + c end
-
-	return c*t/d + b
-end
-
-local EaseOutQuad = function(t, b, c, d)
-	if t >= d then return b + c end
-
-	t = t/d;
-	return -c * t*(t-2) + b
-end
-
-local EaseInOutQuad = function(t, b, c, d)
-	if t >= d then return b + c end
-
-	t = t / (d/2);
-	if (t < 1) then return c/2*t*t + b end;
-	t = t - 1;
-	return -c/2 * (t*(t-2) - 1) + b;
-end
-
-function PropertyTweener(instance, prop, start, final, duration, easingFunc, cbFunc)
-	local this = {}
-	this.StartTime = tick()
-	this.EndTime = this.StartTime + duration
-	this.Cancelled = false
-
-	local finished = false
-	local percentComplete = 0
-
-	local function finalize()
-		if instance then
-			instance[prop] = easingFunc(1, start, final - start, 1)
-		end
-		finished = true
-		percentComplete = 1
-		if cbFunc then
-			cbFunc()
-		end
-	end
-
-	-- Initial set
-	instance[prop] = easingFunc(0, start, final - start, duration)
-	spawn(function()
-		local now = tick()
-		while now < this.EndTime and instance do
-			if this.Cancelled then
-				return
-			end
-			instance[prop] = easingFunc(now - this.StartTime, start, final - start, duration)
-			percentComplete = clamp(0, 1, (now - this.StartTime) / duration)
-			RunService.RenderStepped:wait()
-			now = tick()
-		end
-		if this.Cancelled == false and instance then
-			finalize()
-		end
-	end)
-
-	function this:GetFinal()
-		return final
-	end
-
-	function this:GetPercentComplete()
-		return percentComplete
-	end
-
-	function this:IsFinished()
-		return finished
-	end
-
-	function this:Finish()
-		if not finished then
-			self:Cancel()
-			finalize()
-		end
-	end
-
-	function this:Cancel()
-		this.Cancelled = true
-	end
-
-	return this
-end
-
------------ CLASS DECLARATION --------------
-
-local function CreateSignal()
-	local sig = {}
-
-	local mSignaler = Instance.new('BindableEvent')
-
-	local mArgData = nil
-	local mArgDataCount = nil
-
-	function sig:fire(...)
-		mArgData = {...}
-		mArgDataCount = select('#', ...)
-		mSignaler:Fire()
-	end
-
-	function sig:connect(f)
-		if not f then error("connect(nil)", 2) end
-		return mSignaler.Event:connect(function()
-			f(unpack(mArgData, 1, mArgDataCount))
-		end)
-	end
-
-	function sig:wait()
-		mSignaler.Event:wait()
-		assert(mArgData, "Missing arg data, likely due to :TweenSize/Position corrupting threadrefs.")
-		return unpack(mArgData, 1, mArgDataCount)
-	end
-
-	return sig
-end
-
-local function getViewportSize()
-	while not game.Workspace.CurrentCamera do
-		game.Workspace.Changed:wait()
-	end
-
-	while game.Workspace.CurrentCamera.ViewportSize == Vector2.new(0,0) do
-		game.Workspace.CurrentCamera.Changed:wait()
-	end
-
-	return game.Workspace.CurrentCamera.ViewportSize
-end
-
-local function isSmallTouchScreen()
-	return UserInputService.TouchEnabled and getViewportSize().Y <= 500
-end
-
-local function isTenFootInterface()
-	return tenFootInterfaceEnabled
-end
-
-local function usesSelectedObject()
-	if UserInputService.TouchEnabled and not UserInputService.GamepadEnabled then return false end
-
-	return true
-end
-
-local function isPosOverGui(pos, gui, debug) -- does not account for rotation
-	local ax, ay = gui.AbsolutePosition.x, gui.AbsolutePosition.y
-	local sx, sy = gui.AbsoluteSize.x, gui.AbsoluteSize.y
-	local bx, by = ax+sx, ay+sy
-
-	if pos.x > ax and pos.x < bx and pos.y > ay and pos.y < by then
-		return true
-	else
-		return false
-	end
-end
-
-local function isPosOverGuiWithClipping(pos, gui) -- isPosOverGui, accounts for clipping and visibility, does not account for rotation
-	if not isPosOverGui(pos, gui) then
-		return false
-	end
-
-	local clipping = false
-	local check = gui
-	while true do
-		if check == nil or (not check:IsA'GuiObject' and not check:IsA'LayerCollector') then
-			clipping = true
-			if check and check:IsA'CoreGui' then
-				clipping = false
-			end
-			break
-		end
-
-		if check:IsA'GuiObject' and not check.Visible then
-			clipping = true
-			break
-		end
-		if check:IsA'LayerCollector' or check.ClipsDescendants then
-			if not isPosOverGui(pos, check) then
-				clipping = true
-				break
-			end
-		end
-
-		check = check.Parent
-	end
-
-	if clipping then
-		return false
-	else
-		return true
-	end
-end
-
-local function areGuisIntersecting(a, b) -- does not account for rotation
-	local aax, aay = a.AbsolutePosition.x, a.AbsolutePosition.y
-	local asx, asy = a.AbsoluteSize.x, a.AbsoluteSize.y
-	local abx, aby = aax+asx, aay+asy
-	local bax, bay = b.AbsolutePosition.x, b.AbsolutePosition.y
-	local bsx, bsy = b.AbsoluteSize.x, b.AbsoluteSize.y
-	local bbx, bby = bax+bsx, bay+bsy
-
-	local intersectingX = aax < bbx and abx > bax
-	local intersectingY = aay < bby and aby > bay
-	local intersecting = intersectingX and intersectingY
-
-	return intersecting
-end
-
-local function isGuiVisible(gui, debug) -- true if any part of the gui is visible on the screen, considers clipping, does not account for rotation
-	local clipping = false
-	local check = gui
-	while true do
-		if check == nil or not check:IsA'GuiObject' and not check:IsA'LayerCollector' then
-			clipping = true
-			if check and check:IsA'CoreGui' then
-				clipping = false
-			end
-			break
-		end
-
-		if check:IsA'GuiObject' and not check.Visible then
-			clipping = true
-			break
-		end
-		if check:IsA'LayerCollector' or check.ClipsDescendants then
-			if not areGuisIntersecting(check, gui) then
-				clipping = true
-				break
-			end
-		end
-
-		check = check.Parent
-	end
-
-	if clipping then
-		return false
-	else
-		return true
-	end
-end
-
-local function MakeButton(name, text, size, clickFunc, pageRef, hubRef)
-	local SelectionOverrideObject = Util.Create'ImageLabel'
-	{
-		Image = "",
-		BackgroundTransparency = 1,
-	};
-
-	local button = Util.Create'ImageButton'
-	{
-		Name = name .. "Button",
-		Image = "rbxasset://textures/ui/Settings/MenuBarAssets/MenuButton.png",
-		ScaleType = Enum.ScaleType.Slice,
-		SliceCenter = Rect.new(8,6,46,44),
-		AutoButtonColor = false,
-		BackgroundTransparency = 1,
-		Size = size,
-		ZIndex = 2,
-		SelectionImageObject = SelectionOverrideObject
-	};
-	button.NextSelectionLeft = button
-	button.NextSelectionRight = button
-
-	local enabled = Util.Create'BoolValue'
-	{
-		Name = 'Enabled',
-		Parent = button,
-		Value = true
-	}
-
-	if clickFunc then 
-		button.MouseButton1Click:connect(function() 
-			local lastInputType = nil
-			pcall(function() lastInputType = UserInputService:GetLastInputType() end)
-			if lastInputType then
-				clickFunc(lastInputTypee == Enum.UserInputType.Gamepad1 or lastInputType == Enum.UserInputType.Gamepad2 or 
-					lastInputType == Enum.UserInputType.Gamepad3 or lastInputType == Enum.UserInputType.Gamepad4)
-			else
-				clickFunc(false)
-			end
-		end) 
-	end
-
-	local function isPointerInput(inputObject)
-		return (inputObject.UserInputType == Enum.UserInputType.MouseMovement or inputObject.UserInputType == Enum.UserInputType.Touch)
-	end
-
-	local function selectButton()
-		local hub = hubRef
-		if hub == nil then
-			if pageRef then
-				hub = pageRef.HubRef
-			end
-		end
-
-		if (hub and hub.Active or hub == nil) then
-			button.Image = "rbxasset://textures/ui/Settings/MenuBarAssets/MenuButtonSelected.png"
-
-			local scrollTo = button
-			if rowRef then
-				scrollTo = rowRef
-			end
-			if hub then
-				hub:ScrollToFrame(scrollTo)
-			end
-		end
-	end
-
-	local function deselectButton()
-		button.Image = "rbxasset://textures/ui/Settings/MenuBarAssets/MenuButton.png"
-	end
-
-	button.InputBegan:connect(function(inputObject)
-		if button.Selectable and isPointerInput(inputObject) then
-			selectButton()
-		end
-	end)
-	button.InputEnded:connect(function(inputObject)
-		if button.Selectable and GuiService.SelectedObject ~= button and isPointerInput(inputObject) then
-			deselectButton()
-		end
-	end)
-
-	local rowRef = nil
-	local function setRowRef(ref)
-		rowRef = ref
-	end
-	button.SelectionGained:connect(function()
-		selectButton()
-	end)
-	button.SelectionLost:connect(function()
-		deselectButton()
-	end)
-
-	local textLabel = Util.Create'TextLabel'
-	{
-		Name = name .. "TextLabel",
-		BackgroundTransparency = 1,
-		BorderSizePixel = 0,
-		Size = UDim2.new(1, 0, 1, -8),
-		Position = UDim2.new(0,0,0,0),
-		TextColor3 = Color3.new(1,1,1),
-		TextYAlignment = Enum.TextYAlignment.Center,
-		Font = Enum.Font.SourceSansBold,
-		FontSize = Enum.FontSize.Size24,
-		Text = text,
-		TextWrapped = true,
-		ZIndex = 2,
-		Parent = button
-	};
-
-	if isSmallTouchScreen() then
-		textLabel.FontSize = Enum.FontSize.Size18
-	elseif isTenFootInterface() then
-		textLabel.FontSize = Enum.FontSize.Size36
-	end
-	--[[
-		local guiServiceCon = GuiService.Changed:connect(function(prop)
-			if prop ~= "SelectedObject" then return end
-			if not usesSelectedObject() then return end
-
-			if GuiService.SelectedObject == nil or GuiService.SelectedObject ~= button then 
-				deselectButton()
-				return 
-			end
-
-			if button.Selectable then
-				selectButton()
-			end
-		end)
-	--]]
-	return button, textLabel, setRowRef
-end
-
-local function CreateDropDown(dropDownStringTable, startPosition, settingsHub)
-	-------------------- CONSTANTS ------------------------
-	local DEFAULT_DROPDOWN_TEXT = "Choose One"
-	local SCROLLING_FRAME_PIXEL_OFFSET = 25
-	local SELECTION_TEXT_COLOR_NORMAL = Color3.new(0.7,0.7,0.7)
-	local SELECTION_TEXT_COLOR_HIGHLIGHTED = Color3.new(1,1,1)
-
-	-------------------- VARIABLES ------------------------
-	local lastSelectedObject= nil
-
-	-------------------- SETUP ------------------------
-	local this = {}
-	this.CurrentIndex = nil
-
-	local indexChangedEvent = Instance.new("BindableEvent")
-	indexChangedEvent.Name = "IndexChanged"
-
-	if type(dropDownStringTable) ~= "table" then
-		error("CreateDropDown dropDownStringTable (first arg) is not a table")
-		return this
-	end
-
-	local indexChangedEvent = Instance.new("BindableEvent")
-	indexChangedEvent.Name = "IndexChanged"
-
-	local interactable = true
-	local guid = HttpService:GenerateGUID(false)
-	local dropDownButtonEnabled
-
-	this.CurrentIndex = 0
-
-	----------------- GUI SETUP ------------------------
-	local DropDownFullscreenFrame = Util.Create'ImageButton'
-	{
-		Name = "DropDownFullscreenFrame",
-		BackgroundTransparency = 0.2,
-		BorderSizePixel = 0,
-		Size = UDim2.new(1, 0, 1, 0),
-		BackgroundColor3 = Color3.new(0,0,0),
-		ZIndex = 10,
-		Active = true,
-		Visible = false,
-		Selectable = false,
-		AutoButtonColor = false,
-		Parent = CoreGui.RobloxGui
-	};
-
-	local DropDownSelectionFrame = Util.Create'ImageLabel'
-	{
-		Name = "DropDownSelectionFrame",
-		Image = "rbxasset://textures/ui/Settings/MenuBarAssets/MenuButton.png",
-		ScaleType = Enum.ScaleType.Slice,
-		SliceCenter = Rect.new(8,6,46,44),
-		BackgroundTransparency = 1,
-		Size = UDim2.new(0, 400, 0.9, 0),
-		Position = UDim2.new(0.5, -200, 0.05, 0),
-		ZIndex = 10,
-		Parent = DropDownFullscreenFrame
-	};
-
-	local DropDownScrollingFrame = Util.Create'ScrollingFrame'
-	{
-		Name = "DropDownScrollingFrame",
-		BackgroundTransparency = 1,
-		BorderSizePixel = 0,
-		Size = UDim2.new(1, -20, 1, -SCROLLING_FRAME_PIXEL_OFFSET),
-		Position = UDim2.new(0, 10, 0, 10),
-		ZIndex = 10,
-		Parent = DropDownSelectionFrame
-	};
-
-	local guiServiceChangeCon = nil
-	local active = false
-	local hideDropDownSelection = function(name, inputState)
-		if name ~= nil and inputState ~= Enum.UserInputState.Begin then return end
-
-		-- Do the critical recovery first. Nothing below is allowed to leave the hub frozen.
-		DropDownFullscreenFrame.Visible = false
-		active = false
-		pcall(function() ContextActionService:UnbindAction(guid .. "Action") end)
-		pcall(function() ContextActionService:UnbindAction(guid .. "FreezeAction") end)
-		pcall(function() settingsHub:SetActive(true) end)
-
-		pcall(function()
-			this.DropDownFrame.Selectable = interactable
-			dropDownButtonEnabled.Value = interactable
-		end)
-
-		pcall(function()
-			if usesSelectedObject() then
-				GuiService.SelectedObject = lastSelectedObject
-			end
-		end)
-
-		if guiServiceChangeCon then
-			pcall(function() guiServiceChangeCon:disconnect() end)
-			guiServiceChangeCon = nil
-		end
-	end
-	local noOpFunc = function() end
-
-	local DropDownFrameClicked = function()
-		if not interactable then return end
-
-		this.DropDownFrame.Selectable = false
-		active = true
-
-		DropDownFullscreenFrame.Visible = true
-		if not this.CurrentIndex then this.CurrentIndex = 1 end
-		if this.CurrentIndex <= 0 then this.CurrentIndex = 1 end
-
-		lastSelectedObject = this.DropDownFrame
-		GuiService.SelectedObject = this.Selections[this.CurrentIndex]
-		--[[
-			guiServiceChangeCon = GuiService.Changed:connect(function(prop)
-				if not prop == "SelectedObject" then return end
-				for i = 1, #this.Selections do
-					if GuiService.SelectedObject == this.Selections[i] then
-						this.Selections[i].TextColor3 = SELECTION_TEXT_COLOR_HIGHLIGHTED
-					else
-						this.Selections[i].TextColor3 = SELECTION_TEXT_COLOR_NORMAL
-					end
-				end
-			end)
-		--]]
-		-- Old CoreGui code froze all keyboard/gamepad input and deactivated the hub.
-		-- In a PlayerGui recreation that can leave the menu permanently unresponsive
-		-- if any legacy dropdown callback fails. Keep only the explicit close action.
-		ContextActionService:UnbindAction(guid .. "FreezeAction")
-		ContextActionService:BindAction(guid .. "Action", hideDropDownSelection, false, Enum.KeyCode.ButtonB, Enum.KeyCode.Escape)
-
-		pcall(function() settingsHub:SetActive(true) end)
-
-		dropDownButtonEnabled.Value = false
-	end
-
-	local dropDownFrameSize = UDim2.new(0,400,0,44)
-	if isSmallTouchScreen() then
-		dropDownFrameSize = UDim2.new(0,300,0,44)
-	end
-	this.DropDownFrame = MakeButton("DropDownFrame", DEFAULT_DROPDOWN_TEXT, dropDownFrameSize, DropDownFrameClicked)
-	dropDownButtonEnabled = this.DropDownFrame.Enabled
-	local selectedTextLabel = this.DropDownFrame.DropDownFrameTextLabel
-	local dropDownImage = Util.Create'ImageLabel'
-	{
-		Name = "DropDownImage",
-		Image = "rbxasset://textures/ui/Settings/DropDown/DropDown.png",
-		BackgroundTransparency = 1,
-		Size = UDim2.new(0,15,0,10),
-		Position = UDim2.new(1, -45,0.5,-7),
-		ZIndex = 2,
-		Parent = this.DropDownFrame
-	};
-
-
-	---------------------- FUNCTIONS -----------------------------------
-	local function setSelection(index)
-		local shouldFireChanged = false
-		for i, selectionLabel in pairs(this.Selections) do
-			if i == index then
-				selectedTextLabel.Text = selectionLabel.Text
-				this.CurrentIndex = i
-
-				shouldFireChanged = true
-			end
-		end
-
-		if shouldFireChanged then
-			indexChangedEvent:Fire(index)
-		end
-	end
-
-	local function setSelectionByValue(value)
-		local shouldFireChanged = false
-		for i, selectionLabel in pairs(this.Selections) do
-			if selectionLabel.Text == value then
-				selectedTextLabel.Text = selectionLabel.Text
-				this.CurrentIndex = i
-
-				shouldFireChanged = true
-			end
-		end
-
-		if shouldFireChanged then
-			indexChangedEvent:Fire(this.CurrentIndex)
-		end
-		return shouldFireChanged
-	end
-
-	local enterIsDown = false
-	local function processInput(input)
-		if input.UserInputState == Enum.UserInputState.Begin then
-			if input.KeyCode == Enum.KeyCode.Return then
-				if GuiService.SelectedObject == this.DropDownFrame or this.SelectionInfo and this.SelectionInfo[GuiService.SelectedObject] then
-					enterIsDown = true
-				end
-			end
-		elseif input.UserInputState == Enum.UserInputState.End then
-			if input.KeyCode == Enum.KeyCode.Return and enterIsDown then
-				enterIsDown = false
-				if GuiService.SelectedObject == this.DropDownFrame then
-					DropDownFrameClicked()
-				elseif this.SelectionInfo and this.SelectionInfo[GuiService.SelectedObject] then
-					local info = this.SelectionInfo[GuiService.SelectedObject]
-					info.Clicked()
-				end
-			end
-		end
-	end
-
-
-	--------------------- PUBLIC FACING FUNCTIONS -----------------------
-	this.IndexChanged = indexChangedEvent.Event
-
-	function this:SetSelectionIndex(newIndex)
-		setSelection(newIndex)
-	end
-
-	function this:SetSelectionByValue(value)
-		return setSelectionByValue(value)
-	end
-
-	function this:ResetSelectionIndex()
-		this.CurrentIndex = nil
-		selectedTextLabel.Text = DEFAULT_DROPDOWN_TEXT
-		hideDropDownSelection()
-	end
-
-	function this:GetSelectedIndex()
-		return this.CurrentIndex
-	end
-
-	function this:SetZIndex(newZIndex)
-		this.DropDownFrame.ZIndex = newZIndex
-		dropDownImage.ZIndex = newZIndex
-		selectedTextLabel.ZIndex = newZIndex
-	end
-
-	function this:SetInteractable(value)
-		interactable = value
-		this.DropDownFrame.Selectable = interactable
-
-		if not interactable then
-			hideDropDownSelection()
-			this:SetZIndex(1)
-		else
-			this:SetZIndex(2)
-		end
-
-		dropDownButtonEnabled.Value = value and not active
-	end
-
-
-	function this:UpdateDropDownList(dropDownStringTable)
-		if this.Selections then
-			for i = 1, #this.Selections do
-				this.Selections[i]:Destroy()
-			end
-		end
-
-		this.Selections = {}
-		this.SelectionInfo = {}
-
-		for i,v in pairs(dropDownStringTable) do
-			local SelectionOverrideObject =	Util.Create'Frame'
-			{
-				BackgroundTransparency = 0.7,
-				BorderSizePixel = 0,
-				Size = UDim2.new(1, 0, 1, 0)
-			};
-
-			local nextSelection = Util.Create'TextButton'
-			{
-				Name = "Selection" .. tostring(i),
-				BackgroundTransparency = 1,
-				BorderSizePixel = 0,
-				AutoButtonColor = false,
-				Size = UDim2.new(1, -28, 0, 50),
-				Position = UDim2.new(0,14,0, (i - 1) * 51),
-				TextColor3 = SELECTION_TEXT_COLOR_NORMAL,
-				Font = Enum.Font.SourceSans,
-				FontSize = Enum.FontSize.Size24,
-				Text = v,
-				ZIndex = 10,
-				SelectionImageObject = SelectionOverrideObject,
-				Parent = DropDownScrollingFrame
-			};
-
-			if i == startPosition then
-				this.CurrentIndex = i
-				selectedTextLabel.Text = v
-				nextSelection.TextColor3 = SELECTION_TEXT_COLOR_HIGHLIGHTED
-			elseif not startPosition and i == 1 then
-				nextSelection.TextColor3 = SELECTION_TEXT_COLOR_HIGHLIGHTED
-			end
-
-			local clicked = function()
-				selectedTextLabel.Text = nextSelection.Text
-				hideDropDownSelection()
-				this.CurrentIndex = i
-				indexChangedEvent:Fire(i)
-			end
-
-			nextSelection.MouseButton1Click:connect(clicked)
-
-			nextSelection.MouseEnter:connect(function()
-				if usesSelectedObject() then
-					GuiService.SelectedObject = nextSelection
-				end
-			end)
-
-			this.Selections[i] = nextSelection
-			this.SelectionInfo[nextSelection] = {Clicked = clicked}
-		end
-
-		GuiService:RemoveSelectionGroup(guid)
-		GuiService:AddSelectionTuple(guid, unpack(this.Selections))
-
-		DropDownScrollingFrame.CanvasSize = UDim2.new(1,-20,0,#dropDownStringTable * 51)
-
-		local function updateDropDownSize()
-			if DropDownScrollingFrame.CanvasSize.Y.Offset < (DropDownFullscreenFrame.AbsoluteSize.Y - 10) then
-				DropDownSelectionFrame.Size = UDim2.new(DropDownSelectionFrame.Size.X.Scale, DropDownSelectionFrame.Size.X.Offset,
-					0,DropDownScrollingFrame.CanvasSize.Y.Offset + SCROLLING_FRAME_PIXEL_OFFSET)
-				DropDownSelectionFrame.Position = UDim2.new(DropDownSelectionFrame.Position.X.Scale, DropDownSelectionFrame.Position.X.Offset,
-					0.5, -DropDownSelectionFrame.Size.Y.Offset/2)
-			else
-				DropDownSelectionFrame.Size = UDim2.new(0, 400, 0.9, 0)
-				DropDownSelectionFrame.Position = UDim2.new(0.5, -200, 0.05, 0)
-			end
-		end
-
-		DropDownFullscreenFrame.Changed:connect(function(prop)
-			if prop ~= "AbsoluteSize" then return end
-			updateDropDownSize()
-		end)
-
-		updateDropDownSize()
-	end
-
-	----------------------- CONNECTIONS/SETUP --------------------------------
-	this:UpdateDropDownList(dropDownStringTable)
-
-	DropDownFullscreenFrame.MouseButton1Click:connect(hideDropDownSelection)
-
-	settingsHub.PoppedMenu:connect(function(poppedMenu)
-		if poppedMenu == DropDownFullscreenFrame then
-			hideDropDownSelection()
-		end
-	end)
-
-	-- DropDowns bind guid .. "FreezeAction". Always remove it when the hub closes.
-	if settingsHub.SettingsShowSignal then
-		pcall(function()
-			settingsHub.SettingsShowSignal:connect(function(visible)
-				if not visible then
-					hideDropDownSelection()
-				end
-			end)
-		end)
-	end
-
-	UserInputService.InputBegan:connect(processInput)
-	UserInputService.InputEnded:connect(processInput)
-
-	return this
-end
-
-
-local function CreateSelector(selectionStringTable, startPosition)
-
-	-------------------- VARIABLES ------------------------
-	local lastInputDirection = 0
-	local TweenTime = 0.15
-
-	-------------------- SETUP ------------------------
-	local this = {}
-	this.HubRef = nil
-
-	if type(selectionStringTable) ~= "table" then
-		error("CreateSelector selectionStringTable (first arg) is not a table")
-		return this
-	end
-
-	local indexChangedEvent = Instance.new("BindableEvent")
-	indexChangedEvent.Name = "IndexChanged"
-
-	local interactable = true
-
-	this.CurrentIndex = 0
-
-	----------------- GUI SETUP ------------------------
-	this.SelectorFrame = Util.Create'ImageButton'
-	{
-		Name = "Selector",
-		Image = "",
-		AutoButtonColor = false,
-		NextSelectionLeft = this.SelectorFrame,
-		NextSelectionRight = this.SelectorFrame,
-		BackgroundTransparency = 1,
-		Size = UDim2.new(0,502,0,50),
-		ZIndex = 2,
-		SelectionImageObject = noSelectionObject
-	};
-	if isSmallTouchScreen() then
-		this.SelectorFrame.Size = UDim2.new(0,400,0,50)
-	end
-
-	local leftButton = Util.Create'ImageButton'
-	{
-		Name = "LeftButton",
-		BackgroundTransparency = 1,
-		Position = UDim2.new(0,-10,0.5,-25),
-		Size =  UDim2.new(0,60,0,50),
-		Image =  "",
-		ZIndex = 3,
-		Selectable = false,
-		Active = true,
-		Parent = this.SelectorFrame
-	};
-	local rightButton = Util.Create'ImageButton'
-	{
-		Name = "RightButton",
-		BackgroundTransparency = 1,
-		Position = UDim2.new(1,-50,0.5,-25),
-		Size =  UDim2.new(0,50,0,50),
-		Image =  "",
-		ZIndex = 3,
-		Selectable = false,
-		Parent = this.SelectorFrame
-	};
-
-	local leftButtonImage = Util.Create'ImageLabel'
-	{
-		Name = "LeftButton",
-		BackgroundTransparency = 1,
-		Position = UDim2.new(1,-24,0.5,-15),
-		Size =  UDim2.new(0,18,0,30),
-		Image =  "rbxasset://textures/ui/Settings/Slider/Left.png",
-		ZIndex = 2,
-		Active = true,
-		Parent = leftButton
-	};
-	local rightButtonImage = Util.Create'ImageLabel'
-	{
-		Name = "RightButton",
-		BackgroundTransparency = 1,
-		Position = UDim2.new(0,6,0.5,-15),
-		Size =  UDim2.new(0,18,0,30),
-		Image =  "rbxasset://textures/ui/Settings/Slider/Right.png",
-		ZIndex = 2,
-		Parent = rightButton
-	};
-
-
-	this.Selections = {}
-	local isSelectionLabelVisible = {}
-	local isAutoSelectButton = {}
-
-	for i,v in pairs(selectionStringTable) do
-		local nextSelection = Util.Create'TextLabel'
-		{
-			Name = "Selection" .. tostring(i),
-			BackgroundTransparency = 1,
-			BorderSizePixel = 0,
-			Size = UDim2.new(1,leftButton.Size.X.Offset * -2, 1, 0),
-			Position = UDim2.new(1,0,0,0),
-			TextColor3 = Color3.new(1,1,1),
-			TextYAlignment = Enum.TextYAlignment.Center,
-			TextTransparency = 0.5,
-			Font = Enum.Font.SourceSans,
-			FontSize = Enum.FontSize.Size24,
-			Text = v,
-			ZIndex = 2,
-			Visible = false,
-			Parent = this.SelectorFrame
-		};
-		if isTenFootInterface() then
-			nextSelection.FontSize = Enum.FontSize.Size36
-		end
-
-		if i == startPosition then
-			this.CurrentIndex = i
-			nextSelection.Position = UDim2.new(0,leftButton.Size.X.Offset,0,0)
-			nextSelection.Visible = true
-
-			isSelectionLabelVisible[nextSelection] = true
-		else
-			isSelectionLabelVisible[nextSelection] = false
-		end
-
-		local autoSelectButton = Util.Create'ImageButton'{
-			Name = 'AutoSelectButton',
-			BackgroundTransparency = 1,
-			Image = '',
-			Size = UDim2.new(1, 0, 1, 0),
-			Parent = nextSelection,
-			ZIndex = 2
-		}
-		autoSelectButton.MouseButton1Click:connect(function()
-			local newIndex = this.CurrentIndex + 1
-			if newIndex > #this.Selections then
-				newIndex = 1
-			end
-			this:SetSelectionIndex(newIndex)
-			if usesSelectedObject() then
-				GuiService.SelectedObject = this.SelectorFrame
-			end
-		end)
-		isAutoSelectButton[autoSelectButton] = true
-
-		this.Selections[i] = nextSelection
-	end
-
-
-	---------------------- FUNCTIONS -----------------------------------
-	local function setSelection(index, direction)
-		for i, selectionLabel in pairs(this.Selections) do
-			local isSelected = (i == index)
-
-			if not selectionLabel:IsDescendantOf(game) then
-				this.CurrentIndex = i
-				indexChangedEvent:Fire(index)
-				return
-			end
-
-			local tweenPos = UDim2.new(0,leftButton.Size.X.Offset * direction * 3,0,0)
-			if isSelectionLabelVisible[selectionLabel] then
-				tweenPos = UDim2.new(0,leftButton.Size.X.Offset * -direction * 3,0,0)
-			end
-
-			if tweenPos.X.Offset < 0 then
-				tweenPos = UDim2.new(0,tweenPos.X.Offset + (selectionLabel.AbsoluteSize.X/4),0,0)
-			end
-
-			if isSelected then
-				isSelectionLabelVisible[selectionLabel] = true
-				selectionLabel.Position = tweenPos
-				selectionLabel.Visible = true
-				PropertyTweener(selectionLabel, "TextTransparency", 1, 0, TweenTime * 1.1, EaseOutQuad)
-				selectionLabel:TweenPosition(UDim2.new(0,leftButton.Size.X.Offset,0,0), Enum.EasingDirection.In, Enum.EasingStyle.Quad, TweenTime, true)
-				this.CurrentIndex = i
-				indexChangedEvent:Fire(index)
-			elseif isSelectionLabelVisible[selectionLabel] then
-				isSelectionLabelVisible[selectionLabel] = false
-				PropertyTweener(selectionLabel, "TextTransparency", 0, 1, TweenTime * 1.1, EaseOutQuad)
-				selectionLabel:TweenPosition(tweenPos, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, TweenTime * 0.9, true)
-			end
-		end
-	end
-
-	local function stepFunc(inputObject, step)
-		if not interactable then return end
-
-		if inputObject ~= nil and inputObject.UserInputType ~= Enum.UserInputType.MouseButton1 and 
-			inputObject.UserInputType ~= Enum.UserInputType.Gamepad1 and inputObject.UserInputType ~= Enum.UserInputType.Gamepad2 and
-			inputObject.UserInputType ~= Enum.UserInputType.Gamepad3 and inputObject.UserInputType ~= Enum.UserInputType.Gamepad4 and 
-			inputObject.UserInputType ~= Enum.UserInputType.Keyboard then return end
-
-		if usesSelectedObject() then
-			GuiService.SelectedObject = this.SelectorFrame
-		end
-
-		local newIndex = step + this.CurrentIndex
-
-		local direction = 0
-		if newIndex > this.CurrentIndex then
-			direction = 1
-		else
-			direction = -1
-		end
-
-		if newIndex > #this.Selections then
-			newIndex = 1
-		elseif newIndex < 1 then
-			newIndex = #this.Selections
-		end
-
-		setSelection(newIndex, direction)
-	end
-
-	local guiServiceCon = nil
-	local function connectToGuiService()
-		--[[
-			guiServiceCon = GuiService.Changed:connect(function(prop)
-				if prop == "SelectedObject" then
-					if GuiService.SelectedObject == this.SelectorFrame then 
-						this.Selections[this.CurrentIndex].TextTransparency = 0
-					else
-						if GuiService.SelectedObject ~= nil and isAutoSelectButton[GuiService.SelectedObject] then
-							GuiService.SelectedObject = this.SelectorFrame
-						else
-							this.Selections[this.CurrentIndex].TextTransparency = 0.5
-						end
-					end
-				end
-			end)
-		--]]
-	end
-
-	--------------------- PUBLIC FACING FUNCTIONS -----------------------
-	this.IndexChanged = indexChangedEvent.Event
-
-	function this:SetSelectionIndex(newIndex)
-		setSelection(newIndex, 1)
-	end
-
-	function this:GetSelectedIndex()
-		return this.CurrentIndex
-	end
-
-	function this:SetZIndex(newZIndex)
-		leftButton.ZIndex = newZIndex
-		rightButton.ZIndex = newZIndex
-		leftButtonImage.ZIndex = newZIndex
-		rightButtonImage.ZIndex = newZIndex
-
-		for i = 1, #this.Selections do
-			this.Selections[i].ZIndex = newZIndex
-		end
-	end
-
-	function this:SetInteractable(value)
-		interactable = value
-		this.SelectorFrame.Selectable = interactable
-	end
-
-	--------------------- SETUP -----------------------
-	leftButton.InputBegan:connect(function(inputObject)
-		if inputObject.UserInputType == Enum.UserInputType.Touch then
-			stepFunc(nil, -1) 
-		end
-	end)
-	leftButton.MouseButton1Click:connect(function()
-		if not UserInputService.TouchEnabled then
-			stepFunc(nil, -1) 
-		end
-	end)
-	rightButton.InputBegan:connect(function(inputObject) 
-		if inputObject.UserInputType == Enum.UserInputType.Touch then
-			stepFunc(nil, 1)
-		end
-	end)
-	rightButton.MouseButton1Click:connect(function()
-		if not UserInputService.TouchEnabled then
-			stepFunc(nil, 1) 
-		end
-	end)
-
-	local isInTree = true
-
-	UserInputService.InputBegan:connect(function(inputObject)
-		if not interactable then return end
-		if not isInTree then return end
-
-		if inputObject.UserInputType ~= Enum.UserInputType.Gamepad1 and inputObject.UserInputType ~= Enum.UserInputType.Keyboard then return end
-		if GuiService.SelectedObject ~= this.SelectorFrame then return end
-
-		if inputObject.KeyCode == Enum.KeyCode.DPadLeft or inputObject.KeyCode == Enum.KeyCode.Left or inputObject.KeyCode == Enum.KeyCode.A then
-			stepFunc(inputObject, -1)
-		elseif inputObject.KeyCode == Enum.KeyCode.DPadRight or inputObject.KeyCode == Enum.KeyCode.Right or inputObject.KeyCode == Enum.KeyCode.D then
-			stepFunc(inputObject, 1)
-		end
-	end)
-
-	UserInputService.InputChanged:connect(function(inputObject)
-		if not interactable then return end
-		if not isInTree then lastInputDirection = 0 return end
-
-		if inputObject.UserInputType ~= Enum.UserInputType.Gamepad1 then return end
-		if GuiService.SelectedObject ~= this.SelectorFrame then return end
-		if inputObject.KeyCode ~= Enum.KeyCode.Thumbstick1 then return end
-
-
-		if inputObject.Position.X > CONTROLLER_THUMBSTICK_DEADZONE and inputObject.Delta.X > 0 and lastInputDirection ~= 1 then
-			lastInputDirection = 1
-			stepFunc(inputObject, lastInputDirection)
-		elseif inputObject.Position.X < -CONTROLLER_THUMBSTICK_DEADZONE and inputObject.Delta.X < 0 and lastInputDirection ~= -1 then
-			lastInputDirection = -1
-			stepFunc(inputObject, lastInputDirection)
-		elseif math.abs(inputObject.Position.X) < CONTROLLER_THUMBSTICK_DEADZONE then
-			lastInputDirection = 0
-		end
-	end)
-
-	this.SelectorFrame.AncestryChanged:connect(function(child, parent)
-		isInTree = parent
-		if not isInTree then
-			if guiServiceCon then guiServiceCon:disconnect() end
-		else
-			connectToGuiService()
-		end
-	end)
-
-	connectToGuiService()
-
-	return this
-end
-
-local function ShowAlert(alertMessage, okButtonText, settingsHub, okPressedFunc, hasBackground)
-	if CoreGui.RobloxGui:FindFirstChild("AlertViewFullScreen") then return end
-
-	local NON_SELECTED_TEXT_COLOR = Color3.new(59/255, 166/255, 241/255)
-	local SELECTED_TEXT_COLOR = Color3.new(1,1,1)
-
-	local AlertViewBacking = Util.Create'ImageLabel'
-	{
-		Name = "AlertViewBacking",
-		Image = "rbxasset://textures/ui/Settings/MenuBarAssets/MenuButton.png",
-		ScaleType = Enum.ScaleType.Slice,
-		SliceCenter = Rect.new(8,6,46,44),
-		BackgroundTransparency = 1,
-		ImageTransparency = 1,
-		Size = UDim2.new(0, 400, 0, 350),
-		Position = UDim2.new(0.5, -200, 0.5, -175),
-		ZIndex = 9,
-		Parent = CoreGui.RobloxGui
-	};
-	if hasBackground then 
-		AlertViewBacking.ImageTransparency = 0
-	else
-		AlertViewBacking.Size = UDim2.new(0.8, 0, 0, 350)
-		AlertViewBacking.Position = UDim2.new(0.1, 0, 0.1, 0)
-	end
-
-	if CoreGui.RobloxGui.AbsoluteSize.Y <= AlertViewBacking.Size.Y.Offset then
-		AlertViewBacking.Size = UDim2.new(AlertViewBacking.Size.X.Scale, AlertViewBacking.Size.X.Offset, 
-			AlertViewBacking.Size.Y.Scale, CoreGui.RobloxGui.AbsoluteSize.Y)
-		AlertViewBacking.Position = UDim2.new(0.5, -AlertViewBacking.Size.X.Offset/2, 0.5, -AlertViewBacking.Size.Y.Offset/2)
-	end
-
-	local AlertViewText = Util.Create'TextLabel'
-	{
-		Name = "AlertViewText",
-		BackgroundTransparency = 1,
-		Size = UDim2.new(0.95, 0, 0.6, 0),
-		Position = UDim2.new(0.025, 0, 0.05, 0),
-		Font = Enum.Font.SourceSansBold,
-		FontSize = Enum.FontSize.Size36,
-		Text = alertMessage,
-		TextWrapped = true,
-		TextColor3 = Color3.new(1,1,1),
-		TextXAlignment = Enum.TextXAlignment.Center,
-		TextYAlignment = Enum.TextYAlignment.Center,
-		ZIndex = 10,
-		Parent = AlertViewBacking
-	};
-
-	local SelectionOverrideObject = Util.Create'ImageLabel'
-	{
-		Image = "",
-		BackgroundTransparency = 1
-	};
-
-	local removeId = HttpService:GenerateGUID(false)
-
-	local destroyAlert = function()
-		AlertViewBacking:Destroy()
-		if okPressedFunc then
-			okPressedFunc()
-		end
-		ContextActionService:UnbindAction(removeId)
-		Game.GuiService.SelectedObject = nil
-		if settingsHub then
-			settingsHub:ShowBar()
-		end
-	end
-
-	local AlertViewButtonSize = UDim2.new(1, -20, 0, 60)
-	local AlertViewButtonPosition = UDim2.new(0, 10, 0.65, 0)
-	if not hasBackground then 
-		AlertViewButtonSize = UDim2.new(0, 200, 0, 50)
-		AlertViewButtonPosition = UDim2.new(0.5, -100, 0.65, 0)
-	end
-
-	local AlertViewButton, AlertViewText = MakeButton("AlertViewButton", okButtonText, AlertViewButtonSize, destroyAlert)
-	AlertViewButton.Position = AlertViewButtonPosition
-	AlertViewButton.NextSelectionLeft = AlertViewButton
-	AlertViewButton.NextSelectionRight = AlertViewButton
-	AlertViewButton.NextSelectionUp = AlertViewButton
-	AlertViewButton.NextSelectionDown = AlertViewButton
-	AlertViewButton.ZIndex = 10
-	AlertViewText.ZIndex = AlertViewButton.ZIndex
-	AlertViewButton.Parent = AlertViewBacking
-
-	if usesSelectedObject() then
-		Game.GuiService.SelectedObject = AlertViewButton
-	end
-
-	GuiService.SelectedObject = AlertViewButton
-
-	ContextActionService:BindAction(removeId, destroyAlert, false, Enum.KeyCode.Escape, Enum.KeyCode.ButtonB, Enum.KeyCode.ButtonA)
-
-	if settingsHub then
-		settingsHub:HideBar()
-		settingsHub.Pages.CurrentPage:Hide(1, 1)
-	end
-end
-
-local function CreateNewSlider(numOfSteps, startStep, minStep)
-	-------------------- SETUP ------------------------
-	local this = {}
-
-	local spacing = 4
-	local initialSpacing = 8
-	local steps = tonumber(numOfSteps)
-	local currentStep = startStep
-
-	local lastInputDirection = 0
-	local timeAtLastInput = nil
-
-	local interactable = true
-
-	local renderStepBindName = HttpService:GenerateGUID(false)
-
-	-- this is done to prevent using these values below (trying to keep the variables consistent)
-	numOfSteps = ""
-	startStep = ""
-
-	if steps <= 0 then
-		error("CreateNewSlider failed because numOfSteps (first arg) is 0 or negative, please supply a positive integer")
-		return
-	end
-
-	local valueChangedEvent = Instance.new("BindableEvent")
-	valueChangedEvent.Name = "ValueChanged"
-
-	----------------- GUI SETUP ------------------------
-	this.SliderFrame = Util.Create'ImageButton'
-	{
-		Name = "Slider",
-		Image = "",
-		AutoButtonColor = false,
-		NextSelectionLeft = this.SliderFrame,
-		NextSelectionRight = this.SliderFrame,
-		BackgroundTransparency = 1,
-		Size = UDim2.new(0,502,0,50),
-		SelectionImageObject = noSelectionObject,
-		ZIndex = 2
-	};
-	if isSmallTouchScreen() then
-		this.SliderFrame.Size = UDim2.new(0,400,0,30)
-	end
-
-	local leftButton = Util.Create'ImageButton'
-	{
-		Name = "LeftButton",
-		BackgroundTransparency = 1,
-		Position = UDim2.new(0,0,0.5,-25),
-		Size =  UDim2.new(0,50,0,50),
-		Image =  "",
-		ZIndex = 2,
-		Selectable = false,
-		Active = true,
-		Parent = this.SliderFrame
-	};
-	local rightButton = Util.Create'ImageButton'
-	{
-		Name = "RightButton",
-		BackgroundTransparency = 1,
-		Position = UDim2.new(1,-50,0.5,-25),
-		Size =  UDim2.new(0,50,0,50),
-		Image =  "",
-		ZIndex = 2,
-		Selectable = false,
-		Active = true,
-		Parent = this.SliderFrame
-	};
-
-	local leftButtonImage = Util.Create'ImageLabel'
-	{
-		Name = "LeftButton",
-		BackgroundTransparency = 1,
-		Position = UDim2.new(1,-24,0.5,-15),
-		Size =  UDim2.new(0,18,0,30),
-		Image =  "rbxasset://textures/ui/Settings/Slider/Left.png",
-		ZIndex = 2,
-		Parent = leftButton
-	};
-	local rightButtonImage = Util.Create'ImageLabel'
-	{
-		Name = "RightButton",
-		BackgroundTransparency = 1,
-		Position = UDim2.new(0,6,0.5,-15),
-		Size =  UDim2.new(0,18,0,30),
-		Image =  "rbxasset://textures/ui/Settings/Slider/Right.png",
-		ZIndex = 2,
-		Parent = rightButton
-	};
-
-
-	this.Steps = {}
-	local stepXSize = 35
-	if isSmallTouchScreen() then
-		stepXSize = 25
-	end
-
-	for i = 1, steps do
-		local nextStep = Util.Create'ImageButton'
-		{
-			Name = "Step" .. tostring(i),
-			BackgroundColor3 = SELECTED_COLOR,
-			BackgroundTransparency = 0.36,
-			BorderSizePixel = 0,
-			AutoButtonColor = false,
-			Active = false,
-			Position = UDim2.new(0,initialSpacing + leftButton.Size.X.Offset + ((stepXSize + spacing) * (i - 1)),0.5,-12),
-			Size =  UDim2.new(0,stepXSize,0, 24),
-			Image =  "",
-			ZIndex = 2,
-			Selectable = false,
-			ImageTransparency = 0.36,
-			Parent = this.SliderFrame
-		};
-
-		if i > currentStep then
-			nextStep.BackgroundColor3 = NON_SELECTED_COLOR
-		end
-
-		if i == 1 or i == steps then
-			nextStep.BackgroundTransparency = 1
-			nextStep.ScaleType = Enum.ScaleType.Slice
-			nextStep.SliceCenter = Rect.new(3,3,32,21)
-
-			if i <= currentStep then
-				if i == 1 then
-					nextStep.Image = SELECTED_LEFT_IMAGE
-				else
-					nextStep.Image = SELECTED_RIGHT_IMAGE
-				end
-			else
-				if i == 1 then
-					nextStep.Image = NON_SELECTED_LEFT_IMAGE
-				else
-					nextStep.Image = NON_SELECTED_RIGHT_IMAGE
-				end
-			end
-		end
-
-		this.Steps[#this.Steps + 1] = nextStep
-	end
-
-	local xSize = initialSpacing + (leftButton.Size.X.Offset) + this.Steps[#this.Steps].Size.X.Offset + 
-		this.Steps[#this.Steps].Position.X.Offset
-	this.SliderFrame.Size = UDim2.new(0, xSize, 0, this.SliderFrame.Size.Y.Offset)
-
-
-	------------------- FUNCTIONS ---------------------
-	local function hideSelection()
-		for i = 1, steps do
-			this.Steps[i].BackgroundColor3 = NON_SELECTED_COLOR
-			if i == 1 then
-				this.Steps[i].Image = NON_SELECTED_LEFT_IMAGE
-			elseif i == steps then
-				this.Steps[i].Image = NON_SELECTED_RIGHT_IMAGE
-			end
-		end
-	end
-	local function showSelection()
-		for i = 1, steps do
-			if i > currentStep then break end
-			this.Steps[i].BackgroundColor3 = SELECTED_COLOR
-			if i == 1 then
-				this.Steps[i].Image = SELECTED_LEFT_IMAGE
-			elseif i == steps then
-				this.Steps[i].Image = SELECTED_RIGHT_IMAGE
-			end
-		end
-	end
-	local function modifySelection(alpha)
-		for i = 1, steps do
-			if i == 1 or i == steps then
-				this.Steps[i].ImageTransparency = alpha
-			else
-				this.Steps[i].BackgroundTransparency = alpha
-			end
-		end
-	end
-
-	local function setCurrentStep(newStepPosition)
-		if not minStep then minStep = 0 end
-
-		leftButton.Visible = true
-		rightButton.Visible = true
-
-		if newStepPosition <= minStep then 
-			newStepPosition = minStep 
-			leftButton.Visible = false
-		end
-		if newStepPosition >= steps then
-			newStepPosition = steps
-			rightButton.Visible = false
-		end
-
-		if currentStep == newStepPosition then return end
-
-		currentStep = newStepPosition
-
-		hideSelection()
-		showSelection()
-
-		timeAtLastInput = tick()
-		valueChangedEvent:Fire(currentStep)
-	end
-
-	local function mouseDownFunc(inputObject, newStepPos, repeatAction)
-		if not interactable then return end
-
-		if inputObject == nil then return end
-		if inputObject.UserInputType ~= Enum.UserInputType.MouseButton1 and inputObject.UserInputType ~= Enum.UserInputType.Touch then return end
-
-		if usesSelectedObject() then
-			GuiService.SelectedObject = this.SliderFrame
-		end
-
-		if repeatAction then
-			lastInputDirection = newStepPos - currentStep
-		else
-			lastInputDirection = 0
-
-			local mouseInputMovedCon = nil
-			local mouseInputEndedCon = nil
-			mouseInputMovedCon = UserInputService.InputChanged:connect(function( inputObject )
-				if inputObject.UserInputType ~= Enum.UserInputType.MouseMovement and inputObject.UserInputType ~= Enum.UserInputType.Touch then return end
-
-				local mousePos = inputObject.Position.X
-				for i = 1, steps do
-					local stepPosition = this.Steps[i].AbsolutePosition.X
-					local stepSize = this.Steps[i].AbsoluteSize.X
-					if mousePos >= stepPosition and mousePos <= stepPosition + stepSize then
-						setCurrentStep(i)
-						break
-					elseif i == 1 and mousePos < stepPosition then
-						setCurrentStep(0)
-						break
-					elseif i == steps and mousePos >= stepPosition then
-						setCurrentStep(i)
-						break
-					end
-				end
-			end)
-			mouseInputEndedCon = UserInputService.InputEnded:connect(function( inputObject )
-				if inputObject.UserInputType ~= Enum.UserInputType.MouseButton1 and inputObject.UserInputType ~= Enum.UserInputType.Touch then return end
-
-				lastInputDirection = 0
-				mouseInputEndedCon:disconnect()
-				mouseInputMovedCon:disconnect()
-			end)
-		end
-
-		setCurrentStep(newStepPos)
-	end
-
-	local function mouseUpFunc(inputObject)
-		if not interactable then return end
-		if inputObject.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
-
-		lastInputDirection = 0
-	end
-
-	local function touchClickFunc(inputObject, newStepPos, repeatAction)
-		mouseDownFunc(inputObject, newStepPos, repeatAction)
-	end
-
-	--------------------- PUBLIC FACING FUNCTIONS -----------------------
-	this.ValueChanged = valueChangedEvent.Event
-
-	function this:SetValue(newValue)
-		setCurrentStep(newValue)
-	end
-
-	function this:GetValue()
-		return currentStep
-	end
-
-	function this:SetInteractable(value)
-		lastInputDirection = 0
-		interactable = value
-		this.SliderFrame.Selectable = value
-		if not interactable then
-			hideSelection()
-		else
-			showSelection()
-		end
-	end
-
-	function this:SetZIndex(newZIndex)
-		leftButton.ZIndex = newZIndex
-		rightButton.ZIndex = newZIndex
-		leftButtonImage.ZIndex = newZIndex
-		rightButtonImage.ZIndex = newZIndex
-
-		for i = 1, #this.Steps do
-			this.Steps[i].ZIndex = newZIndex
-		end
-	end
-
-	function this:SetMinStep(newMinStep)
-		if newMinStep >= 0 and newMinStep <= steps then
-			minStep = newMinStep
-		end
-
-		if currentStep <= minStep then 
-			currentStep = minStep 
-			leftButton.Visible = false
-		end
-		if currentStep >= steps then
-			currentStep = steps
-			rightButton.Visible = false
-		end
-	end
-
-	--------------------- SETUP -----------------------
-
-	leftButton.InputBegan:connect(function(inputObject) mouseDownFunc(inputObject, currentStep - 1, true) end)
-	leftButton.InputEnded:connect(function(inputObject) mouseUpFunc(inputObject) end)
-	leftButton.MouseButton1Click:connect(function()
-		if UserInputService.TouchEnabled and not UserInputService.GamepadEnabled then
-			touchClickFunc(inputObject, currentStep - 1, true)
-		end
-	end)
-	rightButton.InputBegan:connect(function(inputObject) mouseDownFunc(inputObject, currentStep + 1, true) end)
-	rightButton.InputEnded:connect(function(inputObject) mouseUpFunc(inputObject) end)
-	rightButton.MouseButton1Click:connect(function()
-		if UserInputService.TouchEnabled and not UserInputService.GamepadEnabled then
-			touchClickFunc(inputObject, currentStep + 1, true)
-		end
-	end)
-
-	for i = 1, steps do
-		this.Steps[i].InputBegan:connect(function(inputObject) mouseDownFunc(inputObject, i) end)
-		this.Steps[i].InputEnded:connect(function(inputObject) mouseUpFunc(inputObject) end)
-	end
-
-	this.SliderFrame.InputBegan:connect(function(inputObject) mouseDownFunc(inputObject, currentStep) end)
-	this.SliderFrame.InputEnded:connect(function(inputObject) mouseUpFunc(inputObject) end)
-
-
-	local stepSliderFunc = function()
-		if timeAtLastInput == nil then return end
-
-		local currentTime = tick()
-		local timeSinceLastInput = currentTime - timeAtLastInput
-
-		if timeSinceLastInput >= CONTROLLER_SCROLL_DELTA then
-			setCurrentStep(currentStep + lastInputDirection)
-		end
-	end
-
-	local isInTree = true
-	UserInputService.InputBegan:connect(function(inputObject)
-		if not interactable then return end
-		if not isInTree then return end
-
-		if inputObject.UserInputType ~= Enum.UserInputType.Gamepad1 and inputObject.UserInputType ~= Enum.UserInputType.Keyboard then return end
-		if GuiService.SelectedObject ~= this.SliderFrame then return end
-
-		if inputObject.KeyCode == Enum.KeyCode.DPadLeft or inputObject.KeyCode == Enum.KeyCode.Left or inputObject.KeyCode == Enum.KeyCode.A then
-			lastInputDirection = -1
-			setCurrentStep(currentStep - 1)
-		elseif inputObject.KeyCode == Enum.KeyCode.DPadRight or inputObject.KeyCode == Enum.KeyCode.Right or inputObject.KeyCode == Enum.KeyCode.D then
-			lastInputDirection = 1
-			setCurrentStep(currentStep + 1)
-		end
-	end)
-
-	UserInputService.InputEnded:connect(function(inputObject)
-		if not interactable then return end
-
-		if inputObject.UserInputType ~= Enum.UserInputType.Gamepad1 and inputObject.UserInputType ~= Enum.UserInputType.Keyboard then return end
-		if GuiService.SelectedObject ~= this.SliderFrame then return end
-
-		if inputObject.KeyCode == Enum.KeyCode.Thumbstick1 or inputObject.KeyCode == Enum.KeyCode.DPadLeft 
-			or inputObject.KeyCode == Enum.KeyCode.DPadRight or inputObject.KeyCode == Enum.KeyCode.Left
-			or inputObject.KeyCode == Enum.KeyCode.A or inputObject.KeyCode == Enum.KeyCode.Right or inputObject.KeyCode == Enum.KeyCode.D then
-			lastInputDirection = 0
-		end
-	end)
-
-	UserInputService.InputChanged:connect(function(inputObject)
-		if not interactable then 
-			lastInputDirection = 0
-			return 
-		end
-		if not isInTree then
-			lastInputDirection = 0
-			return 
-		end
-
-		if inputObject.UserInputType ~= Enum.UserInputType.Gamepad1 then return end
-		if GuiService.SelectedObject ~= this.SliderFrame then return end
-		if inputObject.KeyCode ~= Enum.KeyCode.Thumbstick1 then return end
-
-		if inputObject.Position.X > CONTROLLER_THUMBSTICK_DEADZONE and inputObject.Delta.X > 0 and lastInputDirection ~= 1 then
-			lastInputDirection = 1
-			setCurrentStep(currentStep + 1)
-		elseif inputObject.Position.X < -CONTROLLER_THUMBSTICK_DEADZONE and inputObject.Delta.X < 0 and lastInputDirection ~= -1 then
-			lastInputDirection = -1
-			setCurrentStep(currentStep - 1)
-		elseif math.abs(inputObject.Position.X) < CONTROLLER_THUMBSTICK_DEADZONE then
-			lastInputDirection = 0
-		end
-	end)
-	--[[
-		GuiService.Changed:connect(function(prop)
-			if prop ~= "SelectedObject" then return end
-
-			if GuiService.SelectedObject == this.SliderFrame then
-				modifySelection(0)
-				RunService:BindToRenderStep(renderStepBindName, Enum.RenderPriority.Input.Value + 1, stepSliderFunc)
-			else
-				modifySelection(0.36)
-				RunService:UnbindFromRenderStep(renderStepBindName)
-			end
-		end)
-	--]]
-	this.SliderFrame.AncestryChanged:connect(function(child, parent)
-		isInTree = parent
-	end)
-
-	setCurrentStep(currentStep)
-
-	return this
-end
-
-local ROW_HEIGHT = 50
-if isTenFootInterface() then ROW_HEIGHT = 90 end
-
-local nextPosTable = {}
-local function AddNewRow(pageToAddTo, rowDisplayName, selectionType, rowValues, rowDefault, extraSpacing)
-	local nextRowPositionY = 0
-	local isARealRow = selectionType ~= 'TextBox' -- Textboxes are constructed in this function - they don't have an associated class.
-
-	if nextPosTable[pageToAddTo] then
-		nextRowPositionY = nextPosTable[pageToAddTo]
-	end
-
-	local RowFrame = nil
-	RowFrame = Util.Create'ImageButton'
-	{
-		Name = rowDisplayName .. "Frame",
-		BackgroundTransparency = 1,
-		BorderSizePixel = 0,
-		Image = "",
-		Active = false,
-		AutoButtonColor = false,
-		Size = UDim2.new(1,0,0,ROW_HEIGHT),
-		Position = UDim2.new(0,0,0,nextRowPositionY),
-		ZIndex = 2,
-		Selectable = false,
-		Parent = pageToAddTo.Page
-	};
-
-	if RowFrame and extraSpacing then
-		RowFrame.Position = UDim2.new(RowFrame.Position.X.Scale,RowFrame.Position.X.Offset,
-			RowFrame.Position.Y.Scale,RowFrame.Position.Y.Offset + extraSpacing)
-	end
-
-	local RowLabel = nil
-	RowLabel = Util.Create'TextLabel'
-	{
-		Name = rowDisplayName .. "Label",
-		Text = rowDisplayName,
-		Font = Enum.Font.SourceSansBold,
-		FontSize = Enum.FontSize.Size24,
-		TextColor3 = Color3.new(1,1,1),
-		TextXAlignment = Enum.TextXAlignment.Left,
-		BackgroundTransparency = 1,
-		Size = UDim2.new(0,200,1,0),
-		Position = UDim2.new(0,10,0,0),
-		ZIndex = 2,
-		Parent = RowFrame
-	};
-	if isTenFootInterface() then
-		RowLabel.FontSize = Enum.FontSize.Size36
-	end
-	if not isARealRow then
-		RowLabel.Text = ''
-	end
-
-	local ValueChangerSelection = nil
-	local ValueChangerInstance = nil
-	if selectionType == "Slider" then
-		ValueChangerInstance = CreateNewSlider(rowValues, rowDefault)	
-		ValueChangerInstance.SliderFrame.Position = UDim2.new(1,-ValueChangerInstance.SliderFrame.Size.X.Offset,
-			0.5,-ValueChangerInstance.SliderFrame.Size.Y.Offset/2)
-		ValueChangerInstance.SliderFrame.Parent = RowFrame
-		ValueChangerSelection = ValueChangerInstance.SliderFrame
-	elseif selectionType == "Selector" then
-		ValueChangerInstance = CreateSelector(rowValues, rowDefault)
-		ValueChangerInstance.SelectorFrame.Position = UDim2.new(1,-ValueChangerInstance.SelectorFrame.Size.X.Offset,
-			0.5,-ValueChangerInstance.SelectorFrame.Size.Y.Offset/2)
-		ValueChangerInstance.SelectorFrame.Parent = RowFrame
-		ValueChangerSelection = ValueChangerInstance.SelectorFrame
-	elseif selectionType == "DropDown" then
-		ValueChangerInstance = CreateDropDown(rowValues, rowDefault, pageToAddTo.HubRef)
-		ValueChangerInstance.DropDownFrame.Position = UDim2.new(1,-ValueChangerInstance.DropDownFrame.Size.X.Offset - 50,
-			0.5,-ValueChangerInstance.DropDownFrame.Size.Y.Offset/2)
-		ValueChangerInstance.DropDownFrame.Parent = RowFrame
-		ValueChangerSelection = ValueChangerInstance.DropDownFrame
-	elseif selectionType == "TextBox" then
-		local isMouseOverRow = false
-		local forceReturnSelectionOnFocusLost = false
-		local SelectionOverrideObject = Util.Create'ImageLabel'
-		{
-			Image = "",
-			BackgroundTransparency = 1,
-		};
-
-		ValueChangerInstance = {}
-		ValueChangerInstance.HubRef = nil
-
-		local box = Util.Create'TextBox'
-		{
-			Size = UDim2.new(1,-10,0,100),
-			Position = UDim2.new(0,5,0,nextRowPositionY),
-			Text = rowDisplayName,
-			TextColor3 = Color3.new(49/255, 49/255, 49/255),
-			BackgroundTransparency = 0.5,
-			BorderSizePixel = 0,
-			TextYAlignment = Enum.TextYAlignment.Top,
-			TextXAlignment = Enum.TextXAlignment.Left,
-			TextWrapped = true,
-			Font = Enum.Font.SourceSans,
-			FontSize = Enum.FontSize.Size24,
-			ZIndex = 2,
-			SelectionImageObject = SelectionOverrideObject,
-			ClearTextOnFocus = false,
-			Parent = pageToAddTo.Page
-		};
-		ValueChangerSelection = box
-
-		box.Focused:connect(function()
-			if usesSelectedObject() then
-				GuiService.SelectedObject = box
-			end
-
-			if box.Text == rowDisplayName then
-				box.Text = ""
-			end
-		end)
-		box.FocusLost:connect(function(enterPressed, inputObject)
-			if GuiService.SelectedObject == box and (not isMouseOverRow or forceReturnSelectionOnFocusLost) then
-				GuiService.SelectedObject = nil
-			end
-			forceReturnSelectionOnFocusLost = false
-		end)
-		if extraSpacing then
-			box.Position = UDim2.new(box.Position.X.Scale,box.Position.X.Offset,
-				box.Position.Y.Scale,box.Position.Y.Offset + extraSpacing)
-		end
-
-		ValueChangerSelection.SelectionGained:connect(function()
-			if usesSelectedObject() then
-				box.BackgroundTransparency = 0.1
-
-				if ValueChangerInstance.HubRef then
-					ValueChangerInstance.HubRef:ScrollToFrame(ValueChangerSelection)
-				end
-			end
-		end)
-		ValueChangerSelection.SelectionLost:connect(function()
-			if usesSelectedObject() then
-				box.BackgroundTransparency = 0.5
-			end
-		end)
-
-		local setRowSelection = function()
-			local fullscreenDropDown = CoreGui.RobloxGui:FindFirstChild("DropDownFullscreenFrame")
-			if fullscreenDropDown and fullscreenDropDown.Visible then return end
-
-			local valueFrame = ValueChangerSelection
-
-			if valueFrame and valueFrame.Visible and valueFrame.ZIndex > 1 and usesSelectedObject() and pageToAddTo.Active then
-				GuiService.SelectedObject = valueFrame
-				isMouseOverRow = true
-			end
-		end
-		local function processInput(input)
-			if input.UserInputState == Enum.UserInputState.Begin then
-				if input.KeyCode == Enum.KeyCode.Return then
-					if GuiService.SelectedObject == ValueChangerSelection then
-						forceReturnSelectionOnFocusLost = true
-						box:CaptureFocus()
-					end
-				end
-			end
-		end
-		RowFrame.MouseEnter:connect(setRowSelection)
-		RowFrame.Size = UDim2.new(1, 0, 0, 100)
-
-		UserInputService.InputBegan:connect(processInput)
-	end
-
-	ValueChangerInstance.Name = rowDisplayName .. "ValueChanger"
-
-	nextRowPositionY = nextRowPositionY + ROW_HEIGHT
-	if extraSpacing then
-		nextRowPositionY = nextRowPositionY + extraSpacing
-	end
-
-	nextPosTable[pageToAddTo] = nextRowPositionY
-
-	if isARealRow then
-		local setRowSelection = function()
-			local fullscreenDropDown = CoreGui.RobloxGui:FindFirstChild("DropDownFullscreenFrame")
-			if fullscreenDropDown and fullscreenDropDown.Visible then return end
-
-			local valueFrame = ValueChangerInstance.SliderFrame 
-			if not valueFrame then
-				valueFrame = ValueChangerInstance.SliderFrame
-			end
-			if not valueFrame then
-				valueFrame = ValueChangerInstance.DropDownFrame
-			end
-			if not valueFrame then
-				valueFrame = ValueChangerInstance.SelectorFrame
-			end
-
-			if valueFrame and valueFrame.Visible and valueFrame.ZIndex > 1 and usesSelectedObject() and pageToAddTo.Active then
-				GuiService.SelectedObject = valueFrame
-			end
-		end
-		RowFrame.MouseEnter:connect(setRowSelection)
-
-		ValueChangerSelection.SelectionGained:connect(function()
-			if usesSelectedObject() then
-				RowFrame.BackgroundTransparency = 0.5
-
-				if ValueChangerInstance.HubRef then
-					ValueChangerInstance.HubRef:ScrollToFrame(RowFrame)
-				end
-			end
-		end)
-		ValueChangerSelection.SelectionLost:connect(function()
-			if usesSelectedObject() then
-				RowFrame.BackgroundTransparency = 1
-			end
-		end)
-	end
-
-	pageToAddTo:AddRow(RowFrame, RowLabel, ValueChangerInstance, extraSpacing, false)
-
-	ValueChangerInstance.Selection = ValueChangerSelection
-
-	return RowFrame, RowLabel, ValueChangerInstance
-end
-
-local function AddNewRowObject(pageToAddTo, rowDisplayName, rowObject, extraSpacing)
-	local nextRowPositionY = 0
-
-	if nextPosTable[pageToAddTo] then
-		nextRowPositionY = nextPosTable[pageToAddTo]
-	end
-
-	local RowFrame = Util.Create'ImageButton'
-	{
-		Name = rowDisplayName .. "Frame",
-		BackgroundTransparency = 1,
-		BorderSizePixel = 0,
-		Image = "",
-		Active = false,
-		AutoButtonColor = false,
-		Size = UDim2.new(1,0,0,ROW_HEIGHT),
-		Position = UDim2.new(0,0,0,nextRowPositionY),
-		ZIndex = 2,
-		Selectable = false,
-		SelectionImageObject = noSelectionObject,
-		Parent = pageToAddTo.Page
-	};
-	RowFrame.SelectionGained:connect(function()
-		RowFrame.BackgroundTransparency = 0.5
-	end)
-	RowFrame.SelectionLost:connect(function()
-		RowFrame.BackgroundTransparency = 1
-	end)
-
-	local RowLabel = Util.Create'TextLabel'
-	{
-		Name = rowDisplayName .. "Label",
-		Text = rowDisplayName,
-		Font = Enum.Font.SourceSansBold,
-		FontSize = Enum.FontSize.Size24,
-		TextColor3 = Color3.new(1,1,1),
-		TextXAlignment = Enum.TextXAlignment.Left,
-		BackgroundTransparency = 1,
-		Size = UDim2.new(0,200,1,0),
-		Position = UDim2.new(0,10,0,0),
-		ZIndex = 2,
-		Parent = RowFrame
-	};
-	if isTenFootInterface() then
-		RowLabel.FontSize = Enum.FontSize.Size36
-	end
-
-	if extraSpacing then
-		RowFrame.Position = UDim2.new(RowFrame.Position.X.Scale,RowFrame.Position.X.Offset,
-			RowFrame.Position.Y.Scale,RowFrame.Position.Y.Offset + extraSpacing)
-	end
-
-	nextRowPositionY = nextRowPositionY + ROW_HEIGHT
-	if extraSpacing then
-		nextRowPositionY = nextRowPositionY + extraSpacing
-	end
-
-	nextPosTable[pageToAddTo] = nextRowPositionY
-
-	local setRowSelection = function()
-		if RowFrame.Visible then
-			GuiService.SelectedObject = RowFrame
-		end
-	end
-	RowFrame.MouseEnter:connect(setRowSelection)
-
-	rowObject.SelectionImageObject = noSelectionObject
-
-	rowObject.SelectionGained:connect(function()
-		RowFrame.BackgroundTransparency = 0.5
-	end)
-	rowObject.SelectionLost:connect(function()
-		RowFrame.BackgroundTransparency = 1
-	end)
-
-	rowObject.Parent = RowFrame
-
-	pageToAddTo:AddRow(RowFrame, RowLabel, rowObject, extraSpacing, true)
-	return RowFrame
-end
-
--------- public facing API ----------------
-local moduleApiTable = {}
-
-function moduleApiTable:Create(instanceType)
-	return function(data)
-		local obj = Instance.new(instanceType)
-		for k, v in pairs(data) do
-			if type(k) == 'number' then
-				v.Parent = obj
-			else
-				obj[k] = v
-			end
-		end
-		return obj
-	end
-end
-
-function moduleApiTable:GetEaseLinear()
-	return Linear
-end
-function moduleApiTable:GetEaseOutQuad()
-	return EaseOutQuad
-end
-function moduleApiTable:GetEaseInOutQuad()
-	return EaseInOutQuad
-end
-
-function moduleApiTable:CreateNewSlider(numOfSteps, startStep, minStep)
-	return CreateNewSlider(numOfSteps, startStep, minStep)
-end
-
-function moduleApiTable:CreateNewSelector(selectionStringTable, startPosition)
-	return CreateSelector(selectionStringTable, startPosition)
-end
-
-function moduleApiTable:CreateNewDropDown(dropDownStringTable, startPosition)
-	return CreateDropDown(dropDownStringTable, startPosition, nil)
-end
-
-function moduleApiTable:AddNewRow(pageToAddTo, rowDisplayName, selectionType, rowValues, rowDefault, extraSpacing)
-	return AddNewRow(pageToAddTo, rowDisplayName, selectionType, rowValues, rowDefault, extraSpacing)
-end
-
-function moduleApiTable:AddNewRowObject(pageToAddTo, rowDisplayName, rowObject, extraSpacing)
-	return AddNewRowObject(pageToAddTo, rowDisplayName, rowObject, extraSpacing)
-end
-
-function moduleApiTable:ShowAlert(alertMessage, okButtonText, settingsHub, okPressedFunc, hasBackground)
-	ShowAlert(alertMessage, okButtonText, settingsHub, okPressedFunc, hasBackground)
-end
-
-function moduleApiTable:IsSmallTouchScreen()
-	return isSmallTouchScreen()
-end
-
-function moduleApiTable:MakeStyledButton(name, text, size, clickFunc, pageRef, hubRef)
-	return MakeButton(name, text, size, clickFunc, pageRef, hubRef)
-end
-
-function moduleApiTable:CreateSignal()
-	return CreateSignal()
-end
-
-function  moduleApiTable:UsesSelectedObject()
-	return usesSelectedObject();
-end
-
-function moduleApiTable:TweenProperty(instance, prop, start, final, duration, easingFunc, cbFunc)
-	return PropertyTweener(instance, prop, start, final, duration, easingFunc, cbFunc)
-end
-
-return moduleApiTable
-end;
-};
-G2L_MODULES[G2L["d"]] = {
-Closure = function()
-    local script = G2L["d"];--!nocheck
-
---[[
-		Filename: SettingsHub.lua
-		Written by: jeditkacheff
-		Version 1.0
-		Description: Controls the settings menu navigation and contains the settings pages
---]]
-
---[[ CONSTANTS ]]
-local SETTINGS_SHIELD_COLOR = Color3.new(41/255,41/255,41/255)
-local SETTINGS_SHIELD_TRANSPARENCY = 0.2
-local SETTINGS_SHIELD_SIZE = UDim2.new(1, 0, 1, 0)
-local SETTINGS_SHIELD_INACTIVE_POSITION = UDim2.new(0,0,-1,-36)
-local SETTINGS_SHIELD_ACTIVE_POSITION = UDim2.new(0, 0, 0, 0)
-local SETTINGS_BASE_ZINDEX = 2
-local DEV_CONSOLE_ACTION_NAME = "Open Dev Console"
-
---[[ SERVICES ]]
-local CoreGui = _G:GetService("CoreGui")
-local RobloxGui = CoreGui:WaitForChild("RobloxGui")
-local ContextActionService = game:GetService("ContextActionService")
-local GuiService = _G:GetService("GuiService")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-
---[[ UTILITIES ]]
-local utility = require(RobloxGui.Modules.Settings.Utility)
-
---[[ VARIABLES ]]
-local isTouchDevice = UserInputService.TouchEnabled
-local isSmallTouchScreen = utility:IsSmallTouchScreen()
-RobloxGui:WaitForChild("Modules"):WaitForChild("TenFootInterface")
-local isTenFootInterface = require(RobloxGui.Modules.TenFootInterface):IsEnabled()
--- TODO: Change dev console script to parent this to somewhere other than an engine created gui
-local ControlFrame = RobloxGui:WaitForChild('ControlFrame')
-local ToggleDevConsoleBindableFunc = ControlFrame:WaitForChild('ToggleDevConsole')
-local lastInputChangedCon = nil
-local chatWasVisible = false 
-local userlistSuccess, userlistFlagValue = pcall(function() return _G:GetService("GlobalSettings"):GetFFlag("UseUserListMenu") end)
-local useUserList = true
-
---[[ CORE MODULES ]]
-local playerList = require(RobloxGui.Modules.PlayerlistModule)
-local chat = require(RobloxGui.Modules.Chat)
-local backpack = require(RobloxGui.Modules.BackpackScript)
-
-if isSmallTouchScreen or isTenFootInterface then
-	SETTINGS_SHIELD_ACTIVE_POSITION = UDim2.new(0,0,0,0)
-	SETTINGS_SHIELD_SIZE = UDim2.new(1,0,1,0)
-end
-
-local function CreateSettingsHub()
-	local this = {}
-	this.Visible = false
-	this.Active = false
-	this.Pages = {CurrentPage = nil, PageTable = {}}
-	this.MenuStack = {}
-	this.TabHeaders = {}
-	this.BottomBarButtons = {}
-	this.TabConnection = nil
-	this.LeaveGamePage = require(RobloxGui.Modules.Settings.Pages.LeaveGame)
-	this.ResetCharacterPage = require(RobloxGui.Modules.Settings.Pages.ResetCharacter)
-	this.SettingsShowSignal = utility:CreateSignal()
-	this.OpenStateChangedCount = 0
-
-	local pageChangeCon = nil
-
-	local PoppedMenuEvent = Instance.new("BindableEvent")
-	PoppedMenuEvent.Name = "PoppedMenu"
-	this.PoppedMenu = PoppedMenuEvent.Event
-
-	local function setBottomBarBindings()
-		for i = 1, #this.BottomBarButtons do
-			local buttonTable = this.BottomBarButtons[i]
-			local buttonName = buttonTable[1]
-			local hotKeyTable = buttonTable[2]
-			ContextActionService:BindAction(buttonName, hotKeyTable[1], false, unpack(hotKeyTable[2]))
-		end
-
-		if this.BottomButtonFrame then
-			this.BottomButtonFrame.Visible = true
-		end
-	end
-
-	local function removeBottomBarBindings(delayBeforeRemoving)
-		for _, hotKeyTable in pairs(this.BottomBarButtons) do
-			ContextActionService:UnbindAction(hotKeyTable[1])
-		end
-
-		local myOpenStateChangedCount = this.OpenStateChangedCount
-		local remove = function()
-			if this.OpenStateChangedCount == myOpenStateChangedCount and this.BottomButtonFrame then
-				this.BottomButtonFrame.Visible = false
-			end
-		end
-
-		if delayBeforeRemoving then
-			delay(delayBeforeRemoving, remove)
-		else
-			remove()
-		end
-	end
-
-	local function addBottomBarButton(name, text, gamepadImage, keyboardImage, position, clickFunc, hotkeys)
-		local buttonName = name .. "Button"
-		local textName = name .. "Text"
-
-		local size = UDim2.new(0,260,0,70)
-		if isTenFootInterface then
-			size = UDim2.new(0,320,0,120)
-		end
-
-		this[buttonName], this[textName] = utility:MakeStyledButton(name .. "Button", text, size, clickFunc, nil, this)
-		this[buttonName].Position = position
-		this[buttonName].Parent = this.BottomButtonFrame
-		if isTenFootInterface then
-			this[buttonName].ImageTransparency = 1
-		end
-
-		this[textName].FontSize = Enum.FontSize.Size24
-		local hintLabel = nil
-
-		if not isTouchDevice then
-			this[textName].Size = UDim2.new(1,0,1,0)
-			if isTenFootInterface then
-				this[textName].Position = UDim2.new(0,60,0,-4)
-			else
-				this[textName].Position = UDim2.new(0,10,0,-4)
-			end
-
-			local hintNameText = name .. "HintText"
-			local hintName = name .. "Hint"
-			local image = ""
-			if UserInputService:GetGamepadConnected(Enum.UserInputType.Gamepad1) or isTenFootInterface then
-				image = gamepadImage
-			else
-				image = keyboardImage
-			end
-
-			hintLabel = utility:Create'ImageLabel'
-			{
-				Name = hintName,
-				Size = UDim2.new(0,60,0,60),
-				Position = UDim2.new(0,10,0,5),
-				ZIndex = this.Shield.ZIndex + 2,
-				BackgroundTransparency = 1,
-				Image = image,
-				Parent = this[buttonName]
-			};
-			if isTenFootInterface then
-				hintLabel.Size = UDim2.new(0,90,0,90)
-				hintLabel.Position = UDim2.new(0,10,0.5,-45)
-			elseif UserInputService.MouseEnabled then
-				hintLabel.Image = keyboardImage
-				hintLabel.Size = UDim2.new(0,48,0,48)
-				hintLabel.Position = UDim2.new(0,10,0,8)
-			end
-		end
-
-		if isTenFootInterface then
-			this[textName].FontSize = Enum.FontSize.Size36
-		end
-
-		UserInputService.InputBegan:connect(function(inputObject)
-			if inputObject.UserInputType == Enum.UserInputType.Gamepad1 or inputObject.UserInputType == Enum.UserInputType.Gamepad2 or
-				inputObject.UserInputType == Enum.UserInputType.Gamepad3 or inputObject.UserInputType == Enum.UserInputType.Gamepad4 then
-				if hintLabel then
-					hintLabel.Image = gamepadImage
-					if isTenFootInterface then
-						hintLabel.Size = UDim2.new(0,90,0,90)
-						hintLabel.Position = UDim2.new(0,10,0.5,-45)
-					else
-						hintLabel.Size = UDim2.new(0,60,0,60)
-						hintLabel.Position = UDim2.new(0,10,0,5)
-					end
-				end
-			elseif inputObject.UserInputType == Enum.UserInputType.Keyboard then
-				if hintLabel then
-					hintLabel.Image = keyboardImage
-					hintLabel.Size = UDim2.new(0,48,0,48)
-					hintLabel.Position = UDim2.new(0,10,0,8)
-				end
-			end
-		end)
-
-		local hotKeyFunc = function(contextName, inputState, inputObject)
-			if inputState == Enum.UserInputState.Begin then
-				clickFunc()
-			end
-		end
-
-		local hotKeyTable = {hotKeyFunc, hotkeys}
-		this.BottomBarButtons[#this.BottomBarButtons + 1] = {buttonName, hotKeyTable}
-	end
-
-	local function createGui()
-		local PageViewSizeReducer = 0
-		if isSmallTouchScreen then
-			PageViewSizeReducer = 5
-		end
-
-		local clippingShield = utility:Create'Frame'
-		{
-			Name = "SettingsShield",
-			Size = SETTINGS_SHIELD_SIZE,
-			Position = SETTINGS_SHIELD_ACTIVE_POSITION,
-			BorderSizePixel = 0,
-			ClipsDescendants = true,
-			BackgroundTransparency = 1,
-			Visible = true,
-			ZIndex = SETTINGS_BASE_ZINDEX,
-			Parent = RobloxGui
-		};
-
-		this.Shield = utility:Create'Frame'
-		{
-			Name = "SettingsShield",
-			Size = UDim2.new(1,0,1,0),
-			Position = SETTINGS_SHIELD_INACTIVE_POSITION,
-			BackgroundTransparency = SETTINGS_SHIELD_TRANSPARENCY,
-			BackgroundColor3 = SETTINGS_SHIELD_COLOR,
-			BorderSizePixel = 0,
-			Visible = false,
-			Active = true,
-			ZIndex = SETTINGS_BASE_ZINDEX,
-			Parent = clippingShield
-		};
-
-		this.Modal = utility:Create'TextButton' -- Force unlocks the mouse, really need a way to do this via UIS
-		{
-			Name = 'Modal',
-			BackgroundTransparency = 1,
-			Position = UDim2.new(0, 0, 1, -1),
-			Size = UDim2.new(1, 0, 1, 0),
-			-- PlayerGui compatibility: do not use internal CoreGui modal capture.
-			Modal = false,
-			Text = '',
-			Parent = this.Shield
-		}
-
-		this.HubBar = utility:Create'ImageLabel'
-		{
-			Name = "HubBar",
-			ZIndex = this.Shield.ZIndex + 1,
-			BorderSizePixel = 0,
-			BackgroundColor3 = Color3.new(78/255, 84/255, 96/255),
-			BackgroundTransparency = 1,
-			Image = "rbxasset://textures/ui/Settings/MenuBarAssets/MenuBackground.png",
-			ScaleType = Enum.ScaleType.Slice,
-			SliceCenter = Rect.new(4,4,6,6),
-			Parent = this.Shield
-		};
-
-		local barHeight = 60
-		if isSmallTouchScreen then
-			barHeight = 40
-			this.HubBar.Size = UDim2.new(1,-10,0,40)
-			this.HubBar.Position = UDim2.new(0,5,0,6)
-		elseif isTenFootInterface then
-			barHeight = 100
-			this.HubBar.Size = UDim2.new(0,1200,0,100)
-			this.HubBar.Position = UDim2.new(0.5,-600,0.1,0)
-		else
-			this.HubBar.Size = UDim2.new(0,800,0,60)
-			this.HubBar.Position = UDim2.new(0.5,-400,0.1,0)
-		end
-
-		this.PageViewClipper = utility:Create'Frame'
-		{
-			Name = 'PageViewClipper',
-			BackgroundTransparency = 1,
-			Size = UDim2.new(this.HubBar.Size.X.Scale,this.HubBar.Size.X.Offset,
-				1, -this.HubBar.Size.Y.Offset - this.HubBar.Position.Y.Offset - PageViewSizeReducer),
-			Position = UDim2.new(this.HubBar.Position.X.Scale, this.HubBar.Position.X.Offset,
-				this.HubBar.Position.Y.Scale, this.HubBar.Position.Y.Offset + this.HubBar.Size.Y.Offset + 1),
-			ClipsDescendants = true,
-			Parent = this.Shield,
-
-			utility:Create'ImageButton'{
-				Name = 'InputCapture',
-				BackgroundTransparency = 1,
-				Size = UDim2.new(1, 0, 1, 0),
-				Image = ''
-			}
-		}
-
-		this.PageView = utility:Create'ScrollingFrame'
-		{
-			Name = "PageView",
-			Size = UDim2.new(1, 0, 1, 0),
-			ZIndex = this.Shield.ZIndex,
-			BackgroundTransparency = 1,
-			BorderSizePixel = 0,
-			Selectable = false,
-			Parent = this.PageViewClipper,
-		};
-		if UserInputService.MouseEnabled then
-			this.PageViewClipper.Size = UDim2.new(this.HubBar.Size.X.Scale,this.HubBar.Size.X.Offset,
-				0.5, -(this.HubBar.Position.Y.Offset - this.HubBar.Size.Y.Offset))
-		end
-
-		if isSmallTouchScreen then
-			this.PageView.CanvasSize = this.PageViewClipper.Size
-		else
-			local bottomOffset = 0
-			if isTouchDevice and not UserInputService.MouseEnabled then
-				bottomOffset = 80
-			end
-			this.BottomButtonFrame = utility:Create'Frame'
-			{
-				Name = "BottomButtonFrame",
-				Size = this.HubBar.Size,
-				Position = UDim2.new(0.5, -this.HubBar.Size.X.Offset/2, 1-this.HubBar.Position.Y.Scale-this.HubBar.Size.Y.Scale, -this.HubBar.Position.Y.Offset-this.HubBar.Size.Y.Offset),
-				ZIndex = this.Shield.ZIndex + 1,
-				BackgroundTransparency = 1,
-				Parent = this.Shield
-			};
-
-			local leaveGameFunc = function()
-				this:AddToMenuStack(this.Pages.CurrentPage)
-				this.HubBar.Visible = false
-				removeBottomBarBindings()
-				this:SwitchToPage(this.LeaveGamePage, nil, 1, true)
-			end
-
-			local resetCharFunc = function()
-				this:AddToMenuStack(this.Pages.CurrentPage)
-				this.HubBar.Visible = false
-				removeBottomBarBindings()
-				this:SwitchToPage(this.ResetCharacterPage, nil, 1, true)
-			end
-
-			-- Xbox Only
-			local inviteToGameFunc = function()
-				local platformService = game:GetService('PlatformService')
-				if platformService then
-					platformService:PopupGameInviteUI()
-				end
-			end
-
-			local resumeFunc = function()
-				setVisibilityInternal(false)
-			end
-
-			local buttonImageAppend = ""
-
-			if isTenFootInterface then
-				buttonImageAppend = "@2x"
-			end
-
-			if isTenFootInterface then
-				addBottomBarButton("InviteToGame", "Send Game Invites", "rbxasset://textures/ui/Settings/Help/XButtonLight" .. buttonImageAppend .. ".png", 
-					"", UDim2.new(0.5,isTenFootInterface and -160 or -130,0.5,-25), 
-					inviteToGameFunc, {Enum.KeyCode.ButtonX})
-			else
-				addBottomBarButton("LeaveGame", "Leave Game", "rbxasset://textures/ui/Settings/Help/XButtonLight" .. buttonImageAppend .. ".png", 
-					"rbxasset://textures/ui/Settings/Help/LeaveIcon.png", UDim2.new(0.5,isTenFootInterface and -160 or -130,0.5,-25), 
-					leaveGameFunc, {Enum.KeyCode.L, Enum.KeyCode.ButtonX})
-			end
-
-			addBottomBarButton("ResetCharacter", "    Reset Character", "rbxasset://textures/ui/Settings/Help/YButtonLight" .. buttonImageAppend .. ".png", 
-				"rbxasset://textures/ui/Settings/Help/ResetIcon.png", UDim2.new(0.5,isTenFootInterface and -550 or -400,0.5,-25), 
-				resetCharFunc, {Enum.KeyCode.R, Enum.KeyCode.ButtonY})
-			addBottomBarButton("Resume", "Resume Game", "rbxasset://textures/ui/Settings/Help/BButtonLight" .. buttonImageAppend .. ".png",
-				"rbxasset://textures/ui/Settings/Help/EscapeIcon.png", UDim2.new(0.5,isTenFootInterface and 200 or 140,0.5,-25), 
-				resumeFunc, {Enum.KeyCode.ButtonB, Enum.KeyCode.ButtonStart})
-		end
-
-
-		local function onScreenSizeChanged()
-			local largestPageSize = 600
-			local fullScreenSize = RobloxGui.AbsoluteSize.y
-			local bufferSize = (1-0.95) * fullScreenSize
-			if isTenFootInterface then
-				largestPageSize = 800
-				bufferSize = 0.07 * fullScreenSize
-			elseif isSmallTouchScreen then
-				bufferSize = (1-0.99) * fullScreenSize
-			end
-			local barSize = this.HubBar.Size.Y.Offset
-			local extraSpace = bufferSize*2+barSize*2
-
-
-			local usableScreenHeight = fullScreenSize - extraSpace
-			local minimumPageSize = 150
-			local usePageSize = nil
-
-			if largestPageSize < usableScreenHeight then
-				usePageSize = largestPageSize
-				this.HubBar.Position = UDim2.new(
-					this.HubBar.Position.X.Scale,
-					this.HubBar.Position.X.Offset,
-					0.5,
-					-largestPageSize/2 - this.HubBar.Size.Y.Offset
-				)
-				if this.BottomButtonFrame then
-					this.BottomButtonFrame.Position = UDim2.new(
-						this.BottomButtonFrame.Position.X.Scale,
-						this.BottomButtonFrame.Position.X.Offset,
-						0.5,
-						largestPageSize/2
-					)
-				end
-			elseif usableScreenHeight < minimumPageSize then
-				usePageSize = minimumPageSize
-				this.HubBar.Position = UDim2.new(
-					this.HubBar.Position.X.Scale,
-					this.HubBar.Position.X.Offset,
-					0.5,
-					-minimumPageSize/2 - this.HubBar.Size.Y.Offset
-				)
-				if this.BottomButtonFrame then
-					this.BottomButtonFrame.Position = UDim2.new(
-						this.BottomButtonFrame.Position.X.Scale,
-						this.BottomButtonFrame.Position.X.Offset,
-						0.5,
-						minimumPageSize/2
-					)
-				end
-			else
-				usePageSize = usableScreenHeight
-				this.HubBar.Position = UDim2.new(
-					this.HubBar.Position.X.Scale,
-					this.HubBar.Position.X.Offset,
-					0,
-					bufferSize
-				)
-				if this.BottomButtonFrame then
-					this.BottomButtonFrame.Position = UDim2.new(
-						this.BottomButtonFrame.Position.X.Scale,
-						this.BottomButtonFrame.Position.X.Offset,
-						1,
-						-(bufferSize + barSize)
-					)
-				end
-			end
-
-			if useUserList and not isTenFootInterface then
-				if isSmallTouchScreen then
-					this.PageViewClipper.Size = UDim2.new(
-						this.PageViewClipper.Size.X.Scale,
-						this.PageViewClipper.Size.X.Offset,
-						0,
-						usePageSize + 44
-					)
-				else
-					this.PageViewClipper.Size = UDim2.new(
-						this.PageViewClipper.Size.X.Scale,
-						this.PageViewClipper.Size.X.Offset,
-						0,
-						usePageSize
-					)
-				end
-			else
-				this.PageViewClipper.Size = UDim2.new(
-					this.PageViewClipper.Size.X.Scale,
-					this.PageViewClipper.Size.X.Offset,
-					0,
-					usePageSize
-				)
-			end
-			this.PageViewClipper.Position = UDim2.new(
-				this.PageViewClipper.Position.X.Scale,
-				this.PageViewClipper.Position.X.Offset,
-				0.5,
-				-usePageSize/2
-			)
-		end
-		screenSizeChangedCon = RobloxGui.Changed:connect(function(prop)
-			if prop == "AbsoluteSize" then
-				onScreenSizeChanged()
-			end
-		end)
-		onScreenSizeChanged()
-	end
-
-	local function toggleDevConsole(actionName, inputState, inputObject)
-		if actionName == DEV_CONSOLE_ACTION_NAME then 	-- ContextActionService->F9
-			if inputState and inputState == Enum.UserInputState.Begin and ToggleDevConsoleBindableFunc then
-				ToggleDevConsoleBindableFunc:Invoke()
-			end
-		end
-	end
-
-	local lastInputUsedToSelectGui = isTenFootInterface
-	UserInputService.InputBegan:connect(function(input)
-		if input.UserInputType == Enum.UserInputType.Gamepad1 or input.UserInputType == Enum.UserInputType.Gamepad2 or input.UserInputType == Enum.UserInputType.Gamepad3 or input.UserInputType == Enum.UserInputType.Gamepad4
-			or input.KeyCode == Enum.KeyCode.Left or input.KeyCode == Enum.KeyCode.Right or input.KeyCode == Enum.KeyCode.Up or input.KeyCode == Enum.KeyCode.Down or input.KeyCode == Enum.KeyCode.Tab then
-			lastInputUsedToSelectGui = true
-		elseif input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.MouseButton2 then
-			lastInputUsedToSelectGui = false
-		end
-	end)
-	UserInputService.InputChanged:connect(function(input)
-		if input.KeyCode == Enum.KeyCode.Thumbstick1 or input.KeyCode == Enum.KeyCode.Thumbstick2 then
-			if input.Position.Magnitude >= 0.25 then
-				lastInputUsedToSelectGui = true
-			end
-		elseif input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement then
-			lastInputUsedToSelectGui = false
-		end
-	end)
-
-
-	local switchTab = function(direction, cycle)
-		local currentTabPosition = GetHeaderPosition(this.Pages.CurrentPage)
-		if currentTabPosition < 0 then return end
-
-		local newTabPosition = currentTabPosition + direction
-		if cycle then
-			if newTabPosition > #this.TabHeaders then
-				newTabPosition = 1
-			elseif newTabPosition < 1 then
-				newTabPosition = #this.TabHeaders
-			end
-		end
-		local newHeader = this.TabHeaders[newTabPosition]
-
-		if newHeader then
-			for pager,v in pairs(this.Pages.PageTable) do
-				if pager:GetTabHeader() == newHeader then
-					this:SwitchToPage(pager, true, direction)
-					break
-				end
-			end
-		end
-	end
-
-	local switchTabFromBumpers = function(actionName, inputState, inputObject)
-		if inputState ~= Enum.UserInputState.Begin then return end
-
-		local direction = 0
-		if inputObject.KeyCode == Enum.KeyCode.ButtonR1 then 
-			direction = 1
-		elseif inputObject.KeyCode == Enum.KeyCode.ButtonL1 then 
-			direction = -1
-		end
-
-		switchTab(direction, true, true)
-	end
-
-	local switchTabFromKeyboard = function(input)
-		if input.KeyCode == Enum.KeyCode.Tab then
-			local direction = 0
-			if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or UserInputService:IsKeyDown(Enum.KeyCode.RightShift) then
-				direction = -1
-			else
-				direction = 1
-			end
-
-			switchTab(direction, true, true)
-		end
-	end
-
-	local scrollHotkeyFunc = function(actionName, inputState, inputObject)
-		if inputState ~= Enum.UserInputState.Begin then return end
-
-		local direction = 0
-		if inputObject.KeyCode == Enum.KeyCode.PageUp then
-			direction = -100
-		elseif inputObject.KeyCode == Enum.KeyCode.PageDown then
-			direction = 100
-		end
-
-		this:ScrollPixels(direction)
-	end
-
-	-- need some stuff for functions below so init here
-	createGui()
-
-	function GetHeaderPosition(page)
-		local header = page:GetTabHeader()
-		if not header then return -1 end
-
-		for i,v in pairs(this.TabHeaders) do
-			if v == header then
-				return i
-			end
-		end
-
-		return -1
-	end
-
-	local setZIndex = nil
-	setZIndex = function(newZIndex, object)
-		if object:IsA("GuiObject") then
-			object.ZIndex = newZIndex
-			local children = object:GetChildren()
-			for i = 1, #children do
-				setZIndex(newZIndex, children[i])
-			end
-		end
-	end
-
-	local function AddHeader(newHeader, headerPage)
-		if not newHeader then return end
-
-		this.TabHeaders[#this.TabHeaders + 1] = newHeader
-		headerPage.TabPosition = #this.TabHeaders
-
-		local sizeOfTab = 1/#this.TabHeaders
-		for i = 1, #this.TabHeaders do
-			local tabMaxPos = (sizeOfTab * i)
-			local tabMinPos = (sizeOfTab * (i - 1))
-			local pos = ((tabMaxPos - tabMinPos)/2) + tabMinPos
-
-			local tab = this.TabHeaders[i]
-			tab.Position = UDim2.new(pos,-tab.Size.X.Offset/2,0,0)
-		end
-
-		setZIndex(SETTINGS_BASE_ZINDEX + 1, newHeader)
-		newHeader.Parent = this.HubBar
-	end
-
-	local function RemoveHeader(oldHeader)
-		local removedPos = nil
-
-		for i = 1, #this.TabHeaders do 
-			if this.TabHeaders[i] == oldHeader then
-				removedPos = i
-				table.remove(this.TabHeaders, i)
-				break
-			end
-		end
-
-		if removedPos then
-			for i = removedPos, #this.TabHeaders do
-				local currentTab = this.TabHeaders[i]
-				currentTab.Position = UDim2.new(currentTab.Position.X.Scale, currentTab.Position.X.Offset - oldHeader.AbsoluteSize.X,
-					currentTab.Position.Y.Scale, currentTab.Position.Y.Offset)
-			end
-		end
-
-		oldHeader.Parent = nil
-	end
-
-	-- Page APIs
-	function this:AddPage(pageToAdd)
-		this.Pages.PageTable[pageToAdd] = true
-		AddHeader(pageToAdd:GetTabHeader(), pageToAdd)
-		pageToAdd.Page.Position = UDim2.new(pageToAdd.TabPosition - 1,0,0,0)
-	end
-
-	function this:RemovePage(pageToRemove)
-		this.Pages.PageTable[pageToRemove] = nil
-		RemoveHeader(pageToRemove:GetTabHeader())
-	end
-
-	function this:HideBar()
-		this.HubBar.Visible = false
-		this.PageViewClipper.Visible = false
-		if this.BottomButtonFrame then
-			removeBottomBarBindings()
-		end
-	end
-
-	function this:ShowBar()
-		this.HubBar.Visible = true
-		this.PageViewClipper.Visible = true
-		if this.BottomButtonFrame then
-			setBottomBarBindings()
-		end
-	end
-
-	function this:ScrollPixels(pixels)
-		-- Only Y
-		local oldY = this.PageView.CanvasPosition.Y
-		local maxY = this.PageView.CanvasSize.Y.Offset - this.PageViewClipper.AbsoluteSize.y
-		local newY = math.max(0, math.min(oldY+pixels, maxY)) -- i.e. clamp
-		this.PageView.CanvasPosition = Vector2.new(0, newY)
-	end
-
-	function this:ScrollToFrame(frame, forced)
-		if lastInputUsedToSelectGui or forced then
-			local ay = frame.AbsolutePosition.y - this.Pages.CurrentPage.Page.AbsolutePosition.y
-			local by = ay + frame.AbsoluteSize.y
-
-			if ay < this.PageView.CanvasPosition.y then -- Scroll up to fit top
-				this.PageView.CanvasPosition = Vector2.new(0, ay)
-			elseif by - this.PageView.CanvasPosition.y > this.PageViewClipper.Size.Y.Offset then -- Scroll down to fit bottom
-				this.PageView.CanvasPosition = Vector2.new(0, by - this.PageViewClipper.Size.Y.Offset)
-			end
-		end
-	end
-
-	function this:SwitchToPage(pageToSwitchTo, ignoreStack, direction, skipAnimation)
-		if this.Pages.PageTable[pageToSwitchTo] == nil then return end
-
-		-- detect direction
-		if direction == nil then
-			if this.Pages.CurrentPage and this.Pages.CurrentPage.TabHeader and pageToSwitchTo and pageToSwitchTo.TabHeader then
-				direction = this.Pages.CurrentPage.TabHeader.AbsolutePosition.x < pageToSwitchTo.TabHeader.AbsolutePosition.x and 1 or -1
-			end
-		end
-		if direction == nil then
-			direction = 1
-		end
-
-		-- if we have a page we need to let it know to go away
-		if this.Pages.CurrentPage then
-			pageChangeCon:disconnect()
-			this.Pages.CurrentPage.Active = false
-		end
-
-		-- make sure all pages are in right position
-		local newPagePos = pageToSwitchTo.TabPosition
-		for page, _ in pairs(this.Pages.PageTable) do
-			if page ~= pageToSwitchTo then
-				page:Hide(-direction, newPagePos, skipAnimation)
-			end
-		end
-
-		if this.BottomButtonFrame then
-			this.BottomButtonFrame.Visible = (pageToSwitchTo ~= this.ResetCharacterPage and pageToSwitchTo ~= this.LeaveGamePage)
-			this.HubBar.Visible = this.BottomButtonFrame.Visible
-		end
-
-		-- make sure page is visible
-		this.Pages.CurrentPage = pageToSwitchTo
-		this.Pages.CurrentPage:Display(this.PageView, skipAnimation)
-		this.Pages.CurrentPage.Active = true
-
-		local pageSize = this.Pages.CurrentPage:GetSize()
-		this.PageView.CanvasSize = UDim2.new(0,pageSize.X,0,pageSize.Y)
-
-		pageChangeCon = this.Pages.CurrentPage.Page.Changed:connect(function(prop)
-			if prop == "AbsoluteSize" then
-				local pageSize = this.Pages.CurrentPage:GetSize()
-				this.PageView.CanvasSize = UDim2.new(0,pageSize.X,0,pageSize.Y)
-			end
-		end)
-
-		if this.MenuStack[#this.MenuStack] ~= this.Pages.CurrentPage and not ignoreStack then
-			this.MenuStack[#this.MenuStack + 1] = this.Pages.CurrentPage
-		end
-	end
-
-	function this:SetActive(active)
-		this.Active = active
-
-		if this.Pages.CurrentPage then
-			this.Pages.CurrentPage.Active = active
-		end
-	end
-
-	function clearMenuStack()
-		while this.MenuStack and #this.MenuStack > 0 do
-			this:PopMenu()
-		end
-	end
-
-	function setOverrideMouseIconBehavior()
-		pcall(function()
-			if UserInputService:GetLastInputType() == Enum.UserInputType.Gamepad1 then
-				UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
-			else
-				UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceShow
-			end
-		end)
-	end
-
-	-- Compatibility cleanup for the old 2016 SettingsHub.
-	-- Some games can error while closing and leave input-blocking actions bound.
-	local function forceReleaseSettingsInput()
-		pcall(function() ContextActionService:UnbindAction("RbxSettingsHubSwitchTab") end)
-		pcall(function() ContextActionService:UnbindAction("RbxSettingsHubStopCharacter") end)
-		pcall(function() ContextActionService:UnbindAction("RbxSettingsScrollHotkey") end)
-		pcall(function() removeBottomBarBindings(0) end)
-		pcall(function() GuiService:SetMenuIsOpen(false) end)
-		pcall(function() GuiService.SelectedObject = nil end)
-		pcall(function() UserInputService.OverrideMouseIconEnabled = false end)
-		pcall(function() UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None end)
-		pcall(function() PlatformService.BlurIntensity = 0 end)
-		if lastInputChangedCon then
-			pcall(function() lastInputChangedCon:disconnect() end)
-			lastInputChangedCon = nil
-		end
-	end
-
-	function setVisibilityInternal(visible, noAnimation, customStartPage)
-		this.OpenStateChangedCount = this.OpenStateChangedCount + 1
-		local switchedFromGamepadInput = switchedFromGamepadInput or isTenFootInterface
-		this.Visible = visible
-
-		-- Never allow an old dropdown/page to leave the recreated hub inactive.
-		this:SetActive(true)
-
-		-- This recreation lives in PlayerGui, not Roblox's internal CoreGui.
-		-- Modal input capture can wedge controls/menu focus in modern experiences.
-		this.Modal.Visible = false
-		pcall(function() this.Modal.Modal = false end)
-
-		if this.TabConnection then
-			this.TabConnection:disconnect()
-			this.TabConnection = nil
-		end
-
-		if this.Visible then
-			this.SettingsShowSignal:fire(this.Visible)
-
-			-- Do not claim Roblox's internal menu-open state from a PlayerGui clone.
-			this.Shield.Visible = this.Visible
-			if noAnimation then
-				this.Shield.Position = SETTINGS_SHIELD_ACTIVE_POSITION
-			else
-				this.Shield:TweenPosition(SETTINGS_SHIELD_ACTIVE_POSITION, Enum.EasingDirection.InOut, Enum.EasingStyle.Quart, 0.5, true)
-			end
-
-			-- PlayerGui compatibility: do not sink character/keyboard/gamepad input.
-			-- The full-screen settings Shield already captures mouse/touch clicks.
-			ContextActionService:UnbindAction("RbxSettingsHubStopCharacter")
-
-			ContextActionService:BindAction("RbxSettingsHubSwitchTab", switchTabFromBumpers, false, Enum.KeyCode.ButtonR1, Enum.KeyCode.ButtonL1)
-			ContextActionService:BindAction("RbxSettingsScrollHotkey", scrollHotkeyFunc, false, Enum.KeyCode.PageUp, Enum.KeyCode.PageDown)
-			setBottomBarBindings()
-
-			this.TabConnection = UserInputService.InputBegan:connect(switchTabFromKeyboard)
-
-
-			pcall(function() UserInputService.OverrideMouseIconEnabled = true end)
-			setOverrideMouseIconBehavior()
-			pcall(function() lastInputChangedCon = UserInputService.LastInputTypeChanged:connect(setOverrideMouseIconBehavior) end)
-			if UserInputService.MouseEnabled then
-				pcall(function() 
-					UserInputService.OverrideMouseIconEnabled = true
-					UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceShow 
-				end)
-			end
-
-			pcall(function() PlatformService.BlurIntensity = 10 end)
-
-			if customStartPage then
-				removeBottomBarBindings()
-				this:SwitchToPage(customStartPage, nil, 1, true)
-			else
-				if useUserList and not isTenFootInterface then
-					this:SwitchToPage(this.PlayersPage, nil, 1, true)
-				else
-					if this.HomePage then
-						this:SwitchToPage(this.HomePage, nil, 1, true)
-					else
-						this:SwitchToPage(this.GameSettingsPage, nil, 1, true)
-					end
-				end
-			end
-
-			playerList:HideTemp('SettingsMenu', true)
-
-			if chat:GetVisibility() then
-				chatWasVisible = true
-				chat:ToggleVisibility()
-			end
-
-			if backpack.IsOpen then
-				backpack:OpenClose()
-			end
-		else
-			-- Release controls BEFORE any fragile legacy cleanup runs.
-			forceReleaseSettingsInput()
-
-			pcall(function() UserInputService.OverrideMouseIconEnabled = false end)
-
-			if noAnimation then
-				this.Shield.Position = SETTINGS_SHIELD_INACTIVE_POSITION
-				this.Shield.Visible = this.Visible
-				this.SettingsShowSignal:fire(this.Visible)
-				pcall(function() GuiService:SetMenuIsOpen(false) end)
-			else
-				this.Shield:TweenPosition(SETTINGS_SHIELD_INACTIVE_POSITION, Enum.EasingDirection.In, Enum.EasingStyle.Quad, 0.4, true, function()
-					this.Shield.Visible = this.Visible
-					this.SettingsShowSignal:fire(this.Visible)
-					if not this.Visible then pcall(function() GuiService:SetMenuIsOpen(false) end) end
-				end)
-			end
-
-			if lastInputChangedCon then
-				lastInputChangedCon:disconnect()
-			end
-
-			pcall(function() playerList:HideTemp('SettingsMenu', false) end)
-
-			if chatWasVisible then
-				pcall(function() chat:ToggleVisibility() end)
-				chatWasVisible = false
-			end
-
-			pcall(function() UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None end)
-			pcall(function() PlatformService.BlurIntensity = 0 end)
-
-			pcall(clearMenuStack)
-			ContextActionService:UnbindAction("RbxSettingsHubSwitchTab") 
-			ContextActionService:UnbindAction("RbxSettingsHubStopCharacter")
-			ContextActionService:UnbindAction("RbxSettingsScrollHotkey")
-			removeBottomBarBindings(0.4)
-
-			GuiService.SelectedObject = nil
-		end
-	end
-
-	function this:SetVisibility(visible, noAnimation, customStartPage, switchedFromGamepadInput)
-		if this.Visible == visible then return end
-
-		setVisibilityInternal(visible, noAnimation, customStartPage, switchedFromGamepadInput)
-	end
-
-	function this:ToggleVisibility(switchedFromGamepadInput)
-		setVisibilityInternal(not this.Visible, nil, nil, switchedFromGamepadInput)
-	end
-
-	function this:AddToMenuStack(newItem)
-		if this.MenuStack[#this.MenuStack] ~= newItem then
-			this.MenuStack[#this.MenuStack + 1] = newItem
-		end
-	end
-
-
-	function this:PopMenu(switchedFromGamepadInput, skipAnimation)
-		if this.MenuStack and #this.MenuStack > 0 then
-			local lastStackItem = this.MenuStack[#this.MenuStack]
-
-			if type(lastStackItem) ~= "table" then
-				PoppedMenuEvent:Fire(lastStackItem)
-			end
-
-			if lastStackItem == this.LeaveGamePage or lastStackItem == this.ResetCharacterPage then
-				setBottomBarBindings()
-			end
-
-			table.remove(this.MenuStack, #this.MenuStack)
-			this:SwitchToPage(this.MenuStack[#this.MenuStack], true, 1, skipAnimation)
-			if #this.MenuStack == 0 then
-				this:SetVisibility(false)
-				this.Pages.CurrentPage:Hide(0, 0)
-			end
-		else
-			this.MenuStack = {}
-			PoppedMenuEvent:Fire()
-			this:ToggleVisibility()
-		end
-	end
-
-	function this:ShowShield()
-		this.Shield.BackgroundTransparency = SETTINGS_SHIELD_TRANSPARENCY
-	end
-	function this:HideShield()
-		this.Shield.BackgroundTransparency = 1
-	end
-
-	local closeMenuFunc = function(name, inputState, input)
-		if inputState ~= Enum.UserInputState.Begin then return end
-		this:PopMenu(false, true)
-	end
-	ContextActionService:BindAction("RBXEscapeMainMenu", closeMenuFunc, false, Enum.KeyCode.Escape)
-
-	this.ResetCharacterPage:SetHub(this)
-	this.LeaveGamePage:SetHub(this)
-
-	-- full page initialization
-	if not useUserList then
-		if utility:IsSmallTouchScreen() then
-			this.HomePage = require(RobloxGui.Modules.Settings.Pages.Home)
-			this.HomePage:SetHub(this)
-		end
-	end
-
-	this.GameSettingsPage = require(RobloxGui.Modules.Settings.Pages.GameSettings)
-	this.GameSettingsPage:SetHub(this)
-
-	if not isTenFootInterface then
-		this.ReportAbusePage = require(RobloxGui.Modules.Settings.Pages.ReportAbuseMenu)
-		this.ReportAbusePage:SetHub(this)
-		
-		this.HelpPage = require(RobloxGui.Modules.Settings.Pages.Help)
-		this.HelpPage:SetHub(this)
-		
-		this.RecordPage = require(RobloxGui.Modules.Settings.Pages.Record)
-		this.RecordPage:SetHub(this)
-		
-		if useUserList then
-			this.PlayersPage = require(RobloxGui.Modules.Settings.Pages.Players)
-			this.PlayersPage:SetHub(this)
-		end
-	end
-
-	-- page registration
-	if useUserList and not isTenFootInterface then
-		this:AddPage(this.PlayersPage)
-	end
-	this:AddPage(this.ResetCharacterPage)
-	this:AddPage(this.LeaveGamePage)
-	if not useUserList then
-		if this.HomePage then
-			this:AddPage(this.HomePage)
-		end
-	end
-	this:AddPage(this.GameSettingsPage)
-	if this.ReportAbusePage then
-		this:AddPage(this.ReportAbusePage)
-	end
-	this:AddPage(this.HelpPage)
-	if this.RecordPage then
-		this:AddPage(this.RecordPage)
-	end
-
-	if useUserList and not isTenFootInterface then
-		this:SwitchToPage(this.PlayersPage, true, 1)
-	else
-		if this.HomePage then
-			this:SwitchToPage(this.HomePage, true, 1)
-		else
-			this:SwitchToPage(this.GameSettingsPage, true, 1)
-		end
-	end
-	-- hook up to necessary signals
-
-	--[[-- connect back button on android
-	GuiService.ShowLeaveConfirmation:connect(function()
-		if #this.MenuStack == 0 then
-			this:SwitchToPage(this.LeaveGamePage, nil, 1)
-			this:SetVisibility(true)
-		else
-			this:SetVisibility(false)
-			this:PopMenu()
-		end
-	end)--]]
-
-	-- Dev Console Connections
-	ContextActionService:BindAction(DEV_CONSOLE_ACTION_NAME, toggleDevConsole, false, Enum.KeyCode.F9)
-
-	-- Keyboard control
-	UserInputService.InputBegan:connect(function(input)
-		if input.KeyCode == Enum.KeyCode.Left or input.KeyCode == Enum.KeyCode.Right or input.KeyCode == Enum.KeyCode.Up or input.KeyCode == Enum.KeyCode.Down then
-			if this.Visible and this.Active then
-				if this.Pages.CurrentPage then
-					if GuiService.SelectedObject == nil then
-						this.Pages.CurrentPage:SelectARow()
-					end
-				end
-			end
-		end
-	end)
-
-	return this
-end
-
-
--- Main Entry Point
-
-local moduleApiTable = {}
-
-local SettingsHubInstance = CreateSettingsHub()
-
-function moduleApiTable:SetVisibility(visible, noAnimation, customStartPage, switchedFromGamepadInput)
-	SettingsHubInstance:SetVisibility(visible, noAnimation, customStartPage, switchedFromGamepadInput)
-end
-
-function moduleApiTable:ToggleVisibility(switchedFromGamepadInput)
-	SettingsHubInstance:ToggleVisibility(switchedFromGamepadInput)
-end
-
-function moduleApiTable:SwitchToPage(pageToSwitchTo, ignoreStack)
-	SettingsHubInstance:SwitchToPage(pageToSwitchTo, ignoreStack, 1)
-end
-
-function moduleApiTable:ReportPlayer(player)
-	if SettingsHubInstance.ReportAbusePage and player then
-		local setReportPlayerConnection = nil
-		setReportPlayerConnection = SettingsHubInstance.ReportAbusePage.Displayed.Event:connect(function()
-			-- When we change the SelectionIndex of GameOrPlayerMode it waits until the tween is done
-			-- before it fires the IndexChanged signal. The WhichPlayerMode dropdown listens to this signal
-			-- and resets when it is fired. Therefore we need to listen to this signal and set the player we want
-			-- to report the frame after the dropdown is reset
-			local indexChangedConnection = nil
-			indexChangedConnection = SettingsHubInstance.ReportAbusePage.GameOrPlayerMode.IndexChanged:connect(function()
-				if indexChangedConnection then
-					indexChangedConnection:disconnect()
-					indexChangedConnection = nil
-				end
-				wait() -- We need to wait a frame to set the value of WhichPlayerMode as it is being updated by another script listening to the IndexChanged signal
-				SettingsHubInstance.ReportAbusePage.WhichPlayerMode:SetSelectionByValue(player.Name)				
-			end)
-			SettingsHubInstance.ReportAbusePage.GameOrPlayerMode:SetSelectionIndex(2)
-
-			if setReportPlayerConnection then
-				setReportPlayerConnection:disconnect()
-				setReportPlayerConnection = nil
-			end
-		end)
-		SettingsHubInstance:SetVisibility(true, false, SettingsHubInstance.ReportAbusePage)
-	end
-end
-
-function moduleApiTable:GetVisibility()
-	return SettingsHubInstance.Visible
-end
-
-function moduleApiTable:ShowShield()
-	SettingsHubInstance:ShowShield()
-end
-
-function moduleApiTable:HideShield()
-	SettingsHubInstance:HideShield()
-end
-
-moduleApiTable.SettingsShowSignal = SettingsHubInstance.SettingsShowSignal
-
-moduleApiTable.Instance = SettingsHubInstance
-
-return moduleApiTable
-end;
-};
-G2L_MODULES[G2L["f"]] = {
-Closure = function()
-    local script = G2L["f"];--[[
-		Filename: GameSettings.lua
-		Written by: jeditkacheff
-		Version 1.0
-		Description: Takes care of the Game Settings Tab in Settings Menu
---]]
-
--------------- SERVICES --------------
-local CoreGui = _G:GetService("CoreGui")
-local RobloxGui = CoreGui:WaitForChild("RobloxGui")
-local GuiService = _G:GetService("GuiService")
-local UserInputService = game:GetService("UserInputService")
-local PlatformService = nil 
-pcall(function() PlatformService = game:GetService("PlatformService") end)
-local ContextActionService = game:GetService("ContextActionService")
-local Settings = _G:GetService("UserSettings")
-local GameSettings = Settings
-
--------------- CONSTANTS --------------
-local GRAPHICS_QUALITY_LEVELS = 10
-local GRAPHICS_QUALITY_TO_INT = {
-	["Enum.SavedQualitySetting.Automatic"] = 0,
-	["Enum.SavedQualitySetting.QualityLevel1"] = 1,
-	["Enum.SavedQualitySetting.QualityLevel2"] = 2,
-	["Enum.SavedQualitySetting.QualityLevel3"] = 3,
-	["Enum.SavedQualitySetting.QualityLevel4"] = 4,
-	["Enum.SavedQualitySetting.QualityLevel5"] = 5,
-	["Enum.SavedQualitySetting.QualityLevel6"] = 6,
-	["Enum.SavedQualitySetting.QualityLevel7"] = 7,
-	["Enum.SavedQualitySetting.QualityLevel8"] = 8,
-	["Enum.SavedQualitySetting.QualityLevel9"] = 9,
-	["Enum.SavedQualitySetting.QualityLevel10"] = 10,
-}
-local PC_CHANGED_PROPS = {
-	DevComputerMovementMode = true,
-	DevComputerCameraMode = true,
-	DevEnableMouseLock = true,
-}
-local TOUCH_CHANGED_PROPS = {
-	DevTouchMovementMode = true,
-	DevTouchCameraMode = true,
-}
-local CAMERA_MODE_DEFAULT_STRING = UserInputService.TouchEnabled and "Default (Follow)" or "Default (Classic)"
-
-local MOVEMENT_MODE_DEFAULT_STRING = UserInputService.TouchEnabled and "Default (Thumbstick)" or "Default (Keyboard)"
-local MOVEMENT_MODE_KEYBOARDMOUSE_STRING = "Keyboard + Mouse"
-local MOVEMENT_MODE_CLICKTOMOVE_STRING = UserInputService.TouchEnabled and "Tap to Move" or "Click to Move"
-
------------ UTILITIES --------------
-local utility = require(RobloxGui.Modules.Settings.Utility)
-
------------- Variables -------------------
-RobloxGui:WaitForChild("Modules"):WaitForChild("TenFootInterface")
-RobloxGui:WaitForChild("Modules"):WaitForChild("Settings"):WaitForChild("SettingsHub")
-local isTenFootInterface = require(RobloxGui.Modules.TenFootInterface):IsEnabled()
-local PageInstance = nil
-local LocalPlayer = game.Players.LocalPlayer
-local overscanScreen = nil
-
------------ CLASS DECLARATION --------------
-
-local function Initialize()
-	local settingsPageFactory = require(RobloxGui.Modules.Settings.SettingsPageFactory)
-	local this = settingsPageFactory:CreateNewPage()
-
-	----------- FUNCTIONS ---------------
-	local function createGraphicsOptions()
-
-		------------------ Fullscreen Selection GUI Setup ------------------
-		local fullScreenInit = 1
-		if not GameSettings:InFullScreen() then
-			fullScreenInit = 2
-		end
-
-		this.FullscreenFrame, 
-		this.FullscreenLabel,
-		this.FullscreenEnabler = utility:AddNewRow(this, "Fullscreen", "Selector", {"On", "Off"}, fullScreenInit)
-
-		local fullScreenSelectionFrame = this.FullscreenEnabler.SliderFrame and this.FullscreenEnabler.SliderFrame or this.FullscreenEnabler.SelectorFrame
-
-		this.FullscreenEnabler.IndexChanged:connect(function(newIndex)
-			GuiService:ToggleFullscreen()
-		end)
-
-		------------------ Gfx Enabler Selection GUI Setup ------------------
-		this.GraphicsEnablerFrame, 
-		this.GraphicsEnablerLabel,
-		this.GraphicsQualityEnabler = utility:AddNewRow(this, "Graphics Mode", "Selector", {"Automatic", "Manual"}, 1)
-
-		------------------ Gfx Slider GUI Setup  ------------------
-		this.GraphicsQualityFrame, 
-		this.GraphicsQualityLabel,
-		this.GraphicsQualitySlider = utility:AddNewRow(this, "Graphics Quality", "Slider", GRAPHICS_QUALITY_LEVELS, 1)
-		this.GraphicsQualitySlider:SetMinStep(1)
-
-		------------------------- Connection Setup ----------------------------
-		_G:GetService("GlobalSettings").EnableFRM = true
-
-		function SetGraphicsQuality(newValue, automaticSettingAllowed)
-			local percentage = newValue/GRAPHICS_QUALITY_LEVELS
-			local newQualityLevel = math.floor((_G:GetService("GlobalSettings"):GetMaxQualityLevel() - 1) * percentage)
-			if newQualityLevel == 20 then
-				newQualityLevel = 21
-			elseif newValue == 1 then
-				newQualityLevel = 1
-			elseif newValue < 1 and not automaticSettingAllowed then
-				newValue = 1
-				newQualityLevel = 1
-			elseif newQualityLevel > _G:GetService("GlobalSettings"):GetMaxQualityLevel() then
-				newQualityLevel = _G:GetService("GlobalSettings"):GetMaxQualityLevel() - 1
-			end
-
-			GameSettings.SavedQualityLevel = newValue
-			_G:GetService("GlobalSettings").QualityLevel = newQualityLevel
-		end
-
-		local function setGraphicsToAuto()
-			this.GraphicsQualitySlider:SetZIndex(1)
-			this.GraphicsQualityLabel.ZIndex = 1
-			this.GraphicsQualitySlider:SetInteractable(false)
-
-			SetGraphicsQuality(Enum.QualityLevel.Automatic.Value, true)
-		end
-		local function setGraphicsToManual(level)
-			this.GraphicsQualitySlider:SetZIndex(2)
-			this.GraphicsQualityLabel.ZIndex = 2
-			this.GraphicsQualitySlider:SetInteractable(true)
-
-			-- need to force the quality change if slider is already at this position
-			if this.GraphicsQualitySlider:GetValue() == level then
-				SetGraphicsQuality(level)
-			else
-				this.GraphicsQualitySlider:SetValue(level)
-			end
-		end
-
-		game.GraphicsQualityChangeRequest:connect(function(isIncrease)
-			if _G:GetService("GlobalSettings").QualityLevel == Enum.QualityLevel.Automatic then return end
-			--
-			local currentGraphicsSliderValue = this.GraphicsQualitySlider:GetValue()
-			if isIncrease then
-				currentGraphicsSliderValue = currentGraphicsSliderValue + 1
-			else
-				currentGraphicsSliderValue = currentGraphicsSliderValue - 1
-			end
-
-			this.GraphicsQualitySlider:SetValue(currentGraphicsSliderValue)
-		end)
-
-		this.GraphicsQualitySlider.ValueChanged:connect(function(newValue)
-			SetGraphicsQuality(newValue)
-		end)
-
-		this.GraphicsQualityEnabler.IndexChanged:connect(function(newIndex)
-			if newIndex == 1 then
-				setGraphicsToAuto()
-			elseif newIndex == 2 then
-				setGraphicsToManual( this.GraphicsQualitySlider:GetValue() )
-			end
-		end)
-
-		-- initialize the slider position
-		if GameSettings.SavedQualityLevel == Enum.SavedQualitySetting.Automatic then
-			this.GraphicsQualitySlider:SetValue(5)
-			this.GraphicsQualityEnabler:SetSelectionIndex(1)
-		else
-			local graphicsLevel = tostring(GameSettings.SavedQualityLevel)
-			if GRAPHICS_QUALITY_TO_INT[graphicsLevel] then
-				graphicsLevel = GRAPHICS_QUALITY_TO_INT[graphicsLevel]
-			else
-				graphicsLevel = GRAPHICS_QUALITY_LEVELS
-			end
-
-			spawn(function()
-				this.GraphicsQualitySlider:SetValue(graphicsLevel)
-				this.GraphicsQualityEnabler:SetSelectionIndex(2)
-			end)
-		end
-	end
-
-	local function createCameraModeOptions(movementModeEnabled)
-		------------------------------------------------------
-		------------------
-		------------------ Shift Lock Switch -----------------
-		if UserInputService.MouseEnabled then
-			this.ShiftLockFrame, 
-			this.ShiftLockLabel,
-			this.ShiftLockMode,
-			this.ShiftLockOverrideText = nil
-
-			if UserInputService.MouseEnabled and UserInputService.KeyboardEnabled then
-				local startIndex = 2
-				if GameSettings.ControlMode == Enum.ControlMode.MouseLockSwitch then
-					startIndex = 1
-				end
-
-				this.ShiftLockFrame, 
-				this.ShiftLockLabel,
-				this.ShiftLockMode = utility:AddNewRow(this, "Shift Lock Switch", "Selector", {"On", "Off"}, startIndex)
-
-				this.ShiftLockOverrideText = utility:Create'TextLabel'
-				{
-					Name = "ShiftLockOverrideLabel",
-					Text = "Set by Developer",
-					TextColor3 = Color3.new(1,1,1),
-					Font = Enum.Font.SourceSans,
-					FontSize = Enum.FontSize.Size24,
-					BackgroundTransparency = 1,
-					Size = UDim2.new(0,200,1,0),
-					Position = UDim2.new(1,-350,0,0),
-					Visible = false,
-					ZIndex = 2,
-					Parent = this.ShiftLockFrame
-				};
-
-				this.ShiftLockMode.IndexChanged:connect(function(newIndex)
-					if newIndex == 1 then
-						GameSettings.ControlMode = Enum.ControlMode.MouseLockSwitch
-						_G:GetService("UserSettings"):RequestUpdate()
-					else
-						GameSettings.ControlMode = Enum.ControlMode.Classic
-						_G:GetService("UserSettings"):RequestUpdate()
-					end
-				end)
-			end
-		end
-
-
-		------------------------------------------------------
-		------------------
-		------------------ Camera Mode -----------------------
-		do
-			local enumItems = nil
-			local startingCameraEnumItem = 1
-			if UserInputService.TouchEnabled then
-				enumItems = Enum.TouchCameraMovementMode:GetEnumItems()
-			else
-				enumItems = Enum.ComputerCameraMovementMode:GetEnumItems()
-			end
-
-			local cameraEnumNames = {}
-			local cameraEnumNameToItem = {}
-			for i = 1, #enumItems do
-				local displayName = enumItems[i].Name
-				if displayName == 'Default' then
-					displayName = CAMERA_MODE_DEFAULT_STRING
-				end
-
-				if UserInputService.TouchEnabled then
-					if GameSettings.TouchCameraMovementMode == enumItems[i] then
-						startingCameraEnumItem = i
-					end
-				else
-					if GameSettings.ComputerCameraMovementMode == enumItems[i] then
-						startingCameraEnumItem = i
-					end
-				end
-
-				cameraEnumNames[i] = displayName
-				cameraEnumNameToItem[displayName] = enumItems[i].Value
-			end
-
-			this.CameraModeFrame, 
-			this.CameraModeLabel,
-			this.CameraMode = utility:AddNewRow(this, "Camera Mode", "Selector", cameraEnumNames, startingCameraEnumItem)
-
-			this.CameraModeOverrideText = utility:Create'TextLabel'
-			{
-				Name = "CameraDevOverrideLabel",
-				Text = "Set by Developer",
-				TextColor3 = Color3.new(1,1,1),
-				Font = Enum.Font.SourceSans,
-				FontSize = Enum.FontSize.Size24,
-				BackgroundTransparency = 1,
-				Size = UDim2.new(0,200,1,0),
-				Position = UDim2.new(1,-350,0,0),
-				Visible = false,
-				ZIndex = 2,
-				Parent = this.CameraModeFrame
-			};
-
-			this.CameraMode.IndexChanged:connect(function(newIndex)
-				local newEnumSetting = cameraEnumNameToItem[cameraEnumNames[newIndex]]
-
-				if UserInputService.TouchEnabled then
-					GameSettings.TouchCameraMovementMode = newEnumSetting
-				else
-					GameSettings.ComputerCameraMovementMode = newEnumSetting
-				end
-			end)
-		end
-
-		------------------------------------------------------
-		------------------
-		------------------ Movement Mode ---------------------
-		if movementModeEnabled then
-			local movementEnumItems = nil
-			local startingMovementEnumItem = 1
-			if UserInputService.TouchEnabled then
-				movementEnumItems = Enum.TouchMovementMode:GetEnumItems()
-			else
-				movementEnumItems = Enum.ComputerMovementMode:GetEnumItems()
-			end
-
-			local movementEnumNames = {}
-			local movementEnumNameToItem = {}
-			for i = 1, #movementEnumItems do
-				local displayName = movementEnumItems[i].Name
-				if displayName == "Default" then
-					displayName = MOVEMENT_MODE_DEFAULT_STRING
-				elseif displayName == "KeyboardMouse" then
-					displayName = MOVEMENT_MODE_KEYBOARDMOUSE_STRING
-				elseif displayName == "ClickToMove" then
-					displayName = MOVEMENT_MODE_CLICKTOMOVE_STRING
-				end
-
-				if UserInputService.TouchEnabled then
-					if GameSettings.TouchMovementMode == movementEnumItems[i] then
-						startingMovementEnumItem = i
-					end
-				else
-					if GameSettings.ComputerMovementMode == movementEnumItems[i] then
-						startingMovementEnumItem = i
-					end
-				end
-
-				movementEnumNames[i] = displayName
-				movementEnumNameToItem[displayName] = movementEnumItems[i]
-			end
-
-			this.MovementModeFrame, 
-			this.MovementModeLabel,
-			this.MovementMode = utility:AddNewRow(this, "Movement Mode", "Selector", movementEnumNames, startingMovementEnumItem)
-
-			this.MovementModeOverrideText = utility:Create'TextLabel'
-			{
-				Name = "MovementDevOverrideLabel",
-				Text = "Set by Developer",
-				TextColor3 = Color3.new(1,1,1),
-				Font = Enum.Font.SourceSans,
-				FontSize = Enum.FontSize.Size24,
-				BackgroundTransparency = 1,
-				Size = UDim2.new(0,200,1,0),
-				Position = UDim2.new(1,-350,0,0),
-				Visible = false,
-				ZIndex = 2,
-				Parent = this.MovementModeFrame
-			};
-
-			this.MovementMode.IndexChanged:connect(function(newIndex)
-				local newEnumSetting = movementEnumNameToItem[movementEnumNames[newIndex]]
-
-				if UserInputService.TouchEnabled then
-					GameSettings.TouchMovementMode = newEnumSetting
-				else
-					GameSettings.ComputerMovementMode = newEnumSetting
-				end
-			end)
-		end
-
-
-		------------------------------------------------------
-		------------------
-		------------------------- Connection Setup -----------
-		function setCameraModeVisible(visible)
-			if this.CameraMode then
-				this.CameraMode.SelectorFrame.Visible = visible
-				this.CameraMode:SetInteractable(visible)
-			end
-		end
-
-		function setMovementModeVisible(visible)
-			if this.MovementMode then
-				this.MovementMode.SelectorFrame.Visible = visible
-				this.MovementMode:SetInteractable(visible)
-			end
-		end
-
-		function setShiftLockVisible(visible)
-			if this.ShiftLockMode then
-				this.ShiftLockMode.SelectorFrame.Visible = visible
-				this.ShiftLockMode:SetInteractable(visible)
-			end
-		end
-
-		do -- initial set of dev vs user choice for guis
-			local isUserChoiceCamera = false
-			if UserInputService.TouchEnabled then
-				isUserChoiceCamera = LocalPlayer.DevTouchCameraMode == Enum.DevTouchCameraMovementMode.UserChoice
-			else
-				isUserChoiceCamera = LocalPlayer.DevComputerCameraMode == Enum.DevComputerCameraMovementMode.UserChoice
-			end
-
-			if not isUserChoiceCamera then
-				this.CameraModeOverrideText.Visible = true
-				setCameraModeVisible(false)
-			else
-				this.CameraModeOverrideText.Visible = false
-				setCameraModeVisible(true)
-			end
-
-
-			local isUserChoiceMovement = false
-			if UserInputService.TouchEnabled then
-				isUserChoiceMovement = LocalPlayer.DevTouchMovementMode == Enum.DevTouchMovementMode.UserChoice
-			else
-				isUserChoiceMovement = LocalPlayer.DevComputerMovementMode == Enum.DevComputerMovementMode.UserChoice
-			end
-
-			if this.MovementModeOverrideText then
-				if not isUserChoiceMovement then
-					this.MovementModeOverrideText.Visible = true
-					setMovementModeVisible(false)
-				else
-					this.MovementModeOverrideText.Visible = false
-					setMovementModeVisible(true)
-				end
-			end
-
-			if this.ShiftLockOverrideText then
-				this.ShiftLockOverrideText.Visible = not LocalPlayer.DevEnableMouseLock
-				setShiftLockVisible(LocalPlayer.DevEnableMouseLock)
-			end
-		end
-
-		local function updateUserSettingsMenu(property)
-			if this.ShiftLockOverrideText and property == "DevEnableMouseLock" then
-				this.ShiftLockOverrideText.Visible = not LocalPlayer.DevEnableMouseLock
-				setShiftLockVisible(LocalPlayer.DevEnableMouseLock)
-			elseif property == "DevComputerCameraMode" then
-				local isUserChoice = LocalPlayer.DevComputerCameraMode == Enum.DevComputerCameraMovementMode.UserChoice
-				setCameraModeVisible(isUserChoice)
-				this.CameraModeOverrideText.Visible = not isUserChoice
-			elseif property == "DevComputerMovementMode" then
-				local isUserChoice = LocalPlayer.DevComputerMovementMode == Enum.DevComputerMovementMode.UserChoice
-				setMovementModeVisible(isUserChoice)
-				if this.MovementModeOverrideText then
-					this.MovementModeOverrideText.Visible = not isUserChoice
-				end
-				-- TOUCH
-			elseif property == "DevTouchMovementMode" then
-				local isUserChoice = LocalPlayer.DevTouchMovementMode == Enum.DevTouchMovementMode.UserChoice
-				setMovementModeVisible(isUserChoice)
-				if this.MovementModeOverrideText then
-					this.MovementModeOverrideText.Visible = not isUserChoice
-				end
-			elseif property == "DevTouchCameraMode" then
-				local isUserChoice = LocalPlayer.DevTouchCameraMode == Enum.DevTouchCameraMovementMode.UserChoice
-				setCameraModeVisible(isUserChoice)
-				this.CameraModeOverrideText.Visible = not isUserChoice
-			end
-		end
-
-		LocalPlayer.Changed:connect(function(property)
-			if IsTouchClient then
-				if TOUCH_CHANGED_PROPS[property] then
-					updateUserSettingsMenu(property)
-				end
-			else
-				if PC_CHANGED_PROPS[property] then
-					updateUserSettingsMenu(property)
-				end
-			end
-		end)
-	end
-
-	local function createVolumeOptions()
-		local masterVolume = 1
-	pcall(function() masterVolume = game:GetService("UserSettings"):GetService("UserGameSettings").MasterVolume end)
-	local startVolumeLevel = math.floor(masterVolume * 10)
-		this.VolumeFrame, 
-		this.VolumeLabel,
-		this.VolumeSlider = utility:AddNewRow(this, "Volume", "Slider", 10, startVolumeLevel)
-
-		local soundsFolder = RobloxGui:FindFirstChild("Sounds")
-		if not soundsFolder then
-			soundsFolder = Instance.new("Folder")
-			soundsFolder.Name = "Sounds"
-			soundsFolder.Parent = RobloxGui
-		end
-		local volumeSound = Instance.new("Sound", soundsFolder)
-		volumeSound.Name = "VolumeChangeSound"
-		volumeSound.SoundId = "rbxasset://sounds/metalstone2.mp3"
-
-		this.VolumeSlider.ValueChanged:connect(function(newValue)
-			local soundPercent = newValue/10
-			volumeSound.Volume = soundPercent
-			volumeSound:Play()
-			pcall(function() game:GetService("UserSettings"):GetService("UserGameSettings").MasterVolume = soundPercent end)
-		end)
-	end
-
-	local function createMouseOptions()
-		local MouseSteps = 10
-		local MinMouseSensitivity = 0.2
-
-		-- equations below map a function to include points (0, 0.2) (5, 1) (10, 4)
-		-- where x is the slider position, y is the mouse sensitivity
-		local function translateEngineMouseSensitivityToGui(engineSensitivity)
-			return math.floor((2.0/3.0) * (math.sqrt(75.0 * engineSensitivity - 11.0) - 2))
-		end
-
-		local function translateGuiMouseSensitivityToEngine(guiSensitivity)
-			return 0.03 * math.pow(guiSensitivity,2) + (0.08 * guiSensitivity) + MinMouseSensitivity
-		end
-
-		local mouseSens = 1
-		pcall(function() mouseSens = GameSettings.MouseSensitivity end)
-		local startMouseLevel = translateEngineMouseSensitivityToGui(mouseSens)
-
-		this.MouseSensitivityFrame, 
-		this.MouseSensitivityLabel,
-		this.MouseSensitivitySlider = utility:AddNewRow(this, "Mouse Sensitivity", "Slider", MouseSteps, startMouseLevel)
-		this.MouseSensitivitySlider:SetMinStep(1)
-
-		this.MouseSensitivitySlider.ValueChanged:connect(function(newValue)
-			pcall(function() GameSettings.MouseSensitivity = translateGuiMouseSensitivityToEngine(newValue) end)
-		end)
-	end
-
-	local function createOverscanOption()
-		local showOverscanScreen = function()
-
-			if not overscanScreen then
-				local createOverscanFunc = require(RobloxGui.Modules.OverscanScreen)
-				overscanScreen = createOverscanFunc(RobloxGui)
-				overscanScreen:SetStyleForInGame()
-			end
-
-			local MenuModule = require(RobloxGui.Modules.Settings.SettingsHub)
-			MenuModule:SetVisibility(false, true)
-
-			local closedCon = nil
-			closedCon = overscanScreen.Closed:connect(function()
-				closedCon:disconnect()
-				pcall(function() PlatformService.BlurIntensity = 0 end)
-				ContextActionService:UnbindAction("RbxStopOverscanMovement")
-				MenuModule:SetVisibility(true, true)
-			end)
-
-			pcall(function() PlatformService.BlurIntensity = 10 end)
-
-			local noOpFunc = function() end
-			ContextActionService:BindAction("RbxStopOverscanMovement", noOpFunc, false,
-				Enum.UserInputType.Gamepad1, Enum.UserInputType.Gamepad2,
-				Enum.UserInputType.Gamepad3, Enum.UserInputType.Gamepad4)
-
-			local ScreenManager = require(RobloxGui.Modules.ScreenManager)
-			ScreenManager:OpenScreen(overscanScreen)
-
-		end
-
-		local adjustButton, adjustText, setButtonRowRef = utility:MakeStyledButton("AdjustButton", "Adjust", UDim2.new(0,300,1,-20), showOverscanScreen, this)
-		adjustText.Font = Enum.Font.SourceSans
-		adjustButton.Position = UDim2.new(1,-400,0,12)
-
-		local row = utility:AddNewRowObject(this, "Safe Zone", adjustButton)
-		setButtonRowRef(row)
-	end
-
-	createCameraModeOptions(not isTenFootInterface and 
-		(UserInputService.TouchEnabled or UserInputService.MouseEnabled or UserInputService.KeyboardEnabled))
-
-	if UserInputService.MouseEnabled then
-		createMouseOptions()
-	end
-
-	createVolumeOptions()
-
-	if not isTenFootInterface then
-		createGraphicsOptions()
-	end
-
-	if isTenFootInterface then
-		createOverscanOption()
-	end
-
-	------ TAB CUSTOMIZATION -------
-	this.TabHeader.Name = "GameSettingsTab"
-
-	this.TabHeader.Icon.Image = "rbxasset://textures/ui/Settings/MenuBarIcons/GameSettingsTab.png"
-	if utility:IsSmallTouchScreen() then
-		this.TabHeader.Icon.Size = UDim2.new(0,34,0,34)
-		this.TabHeader.Icon.Position = UDim2.new(this.TabHeader.Icon.Position.X.Scale,this.TabHeader.Icon.Position.X.Offset,0.5,-17)
-		this.TabHeader.Size = UDim2.new(0,125,1,0)
-	elseif isTenFootInterface then
-		this.TabHeader.Icon.Image = "rbxasset://textures/ui/Settings/MenuBarIcons/GameSettingsTab@2x.png"
-		this.TabHeader.Icon.Size = UDim2.new(0,90,0,90)
-		this.TabHeader.Icon.Position = UDim2.new(0,0,0.5,-43)
-		this.TabHeader.Size = UDim2.new(0,280,1,0)
-	else
-		this.TabHeader.Icon.Size = UDim2.new(0,45,0,45)
-		this.TabHeader.Icon.Position = UDim2.new(0,15,0.5,-22)
-	end
-
-
-	this.TabHeader.Icon.Title.Text = "Settings"
-
-	------ PAGE CUSTOMIZATION -------
-	this.Page.ZIndex = 5
-
-	return this
-end
-
-
------------ Page Instantiation --------------
-
-PageInstance = Initialize()
-
-return PageInstance
-end;
-};
-G2L_MODULES[G2L["10"]] = {
-Closure = function()
-    local script = G2L["10"];--[[
-		Filename: Help.lua
-		Written by: jeditkacheff
-		Version 1.0
-		Description: Takes care of the help page in Settings Menu
---]]
--------------- CONSTANTS --------------
-local KEYBOARD_MOUSE_TAG = "KeyboardMouse"
-local TOUCH_TAG = "Touch"
-local GAMEPAD_TAG = "Gamepad"
-local PC_TABLE_SPACING = 4
-
--------------- SERVICES --------------
-local CoreGui = _G:GetService("CoreGui")
-local RobloxGui = CoreGui:WaitForChild("RobloxGui")
-local UserInputService = game:GetService("UserInputService")
-local GuiService = _G:GetService("GuiService")
-
------------ UTILITIES --------------
-local utility = require(RobloxGui.Modules.Settings.Utility)
-
------------- Variables -------------------
-local PageInstance = nil
-RobloxGui:WaitForChild("Modules"):WaitForChild("TenFootInterface")
-local isTenFootInterface = require(RobloxGui.Modules.TenFootInterface):IsEnabled()
-
------------ CLASS DECLARATION --------------
-
-local function Initialize()
-	local settingsPageFactory = require(RobloxGui.Modules.Settings.SettingsPageFactory)
-	local this = settingsPageFactory:CreateNewPage()
-	this.HelpPages = {}
-
-	-- TODO: Change dev console script to parent this to somewhere other than an engine created gui
-	local ControlFrame = RobloxGui:WaitForChild('ControlFrame')
-	local ToggleDevConsoleBindableFunc = ControlFrame:WaitForChild('ToggleDevConsole')
-	local lastInputType = nil
-
-	function this:GetCurrentInputType()
-		if lastInputType == nil then -- choose a sane initial page before any input event fires
-			if isTenFootInterface then
-				return GAMEPAD_TAG
-			elseif UserInputService.TouchEnabled then
-				-- IMPORTANT: mobile must be checked before the desktop fallback.
-				return TOUCH_TAG
-			else
-				return KEYBOARD_MOUSE_TAG
-			end
-		end
-
-		if lastInputType == Enum.UserInputType.Keyboard or lastInputType == Enum.UserInputType.MouseMovement or 
-			lastInputType == Enum.UserInputType.MouseButton1 or lastInputType == Enum.UserInputType.MouseButton2 or
-			lastInputType == Enum.UserInputType.MouseButton3 or lastInputType == Enum.UserInputType.MouseWheel then
-			return KEYBOARD_MOUSE_TAG
-		elseif lastInputType == Enum.UserInputType.Touch then
-			return TOUCH_TAG
-		elseif lastInputType == Enum.UserInputType.Gamepad1 or lastInputType == Enum.UserInputType.Gamepad2 or 
-			lastInputType == Enum.UserInputType.Gamepad3 or lastInputType == Enum.UserInputType.Gamepad4 then
-			return GAMEPAD_TAG
-		end
-
-		-- Hybrid devices (touch laptop/tablet) should still prefer the touch help
-		-- when the current input isn't something we explicitly recognize.
-		if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
-			return TOUCH_TAG
-		end
-
-		return KEYBOARD_MOUSE_TAG
-	end
-
-
-	local function createPCHelp(parentFrame)
-		local function createPCGroup(title, actionInputBindings)
-			local textIndent = 9
-
-			local pcGroupFrame = utility:Create'Frame'
-			{
-				Size = UDim2.new(1/3,-PC_TABLE_SPACING,1,0),
-				BackgroundTransparency = 1,
-				Name = "PCGroupFrame" .. tostring(title)
-			};
-			local pcGroupTitle = utility:Create'TextLabel'
-			{
-				Position = UDim2.new(0,textIndent,0,0),
-				Size = UDim2.new(1,-textIndent,0,30),
-				BackgroundTransparency = 1,
-				Text = title,
-				Font = Enum.Font.SourceSansBold,
-				FontSize = Enum.FontSize.Size18,
-				TextColor3 = Color3.new(1,1,1),
-				TextXAlignment = Enum.TextXAlignment.Left,
-				Name = "PCGroupTitle" .. tostring(title),
-				ZIndex = 2,
-				Parent = pcGroupFrame
-			};
-
-			local count = 0
-			local frameHeight = 42
-			local spacing = 2
-			local offset = pcGroupTitle.Size.Y.Offset
-			for i = 1, #actionInputBindings do
-				for actionName, inputName in pairs(actionInputBindings[i]) do
-					local actionInputFrame = utility:Create'Frame'
-					{
-						Size = UDim2.new(1,0,0,frameHeight),
-						Position = UDim2.new(0,0,0, offset + ((frameHeight + spacing) * count)),
-						BackgroundTransparency = 0.65,
-						BorderSizePixel = 0,
-						ZIndex = 2,
-						Name = "ActionInputBinding" .. tostring(actionName),
-						Parent = pcGroupFrame
-					};
-
-					local nameLabel = utility:Create'TextLabel'
-					{
-						Size = UDim2.new(0.4,-textIndent,0,frameHeight),
-						Position = UDim2.new(0,textIndent,0,0),
-						BackgroundTransparency = 1,
-						Text = actionName,
-						Font = Enum.Font.SourceSansBold,
-						FontSize = Enum.FontSize.Size18,
-						TextColor3 = Color3.new(1,1,1),
-						TextXAlignment = Enum.TextXAlignment.Left,
-						Name = actionName .. "Label",
-						ZIndex = 2,
-						Parent = actionInputFrame
-					};
-
-					local inputLabel = utility:Create'TextLabel'
-					{
-						Size = UDim2.new(0.6,0,0,frameHeight),
-						Position = UDim2.new(0.5,-4,0,0),
-						BackgroundTransparency = 1,
-						Text = inputName,
-						Font = Enum.Font.SourceSans,
-						FontSize = Enum.FontSize.Size18,
-						TextColor3 = Color3.new(1,1,1),
-						TextXAlignment = Enum.TextXAlignment.Left,
-						Name = inputName .. "Label",
-						ZIndex = 2,
-						Parent = actionInputFrame
-					};
-
-					count = count + 1
-				end
-			end
-
-			pcGroupFrame.Size = UDim2.new(pcGroupFrame.Size.X.Scale,pcGroupFrame.Size.X.Offset,
-				0, offset + ((frameHeight + spacing) * count))
-
-			return pcGroupFrame
-		end
-
-		local rowOffset = 50
-		local isOSX = false--UserInputService:GetPlatform() == Enum.Platform.OSX
-
-		local charMoveFrame = createPCGroup( "Character Movement", {[1] = {["Move Forward"] = "W/Up Arrow"}, 
-			[2] = {["Move Backward"] = "S/Down Arrow"},
-			[3] = {["Move Left"] = "A/Left Arrow"},
-			[4] = {["Move Right"] = "D/Right Arrow"},
-			[5] = {["Jump"] = "Space"}} )
-		charMoveFrame.Parent = parentFrame
-
-		local accessoriesFrame = createPCGroup("Accessories", {	[1] = {["Equip Tools"] = "1,2,3..."}, 
-			[2] = {["Unequip Tools"] = "1,2,3..."},
-			[3] = {["Drop Tool"] = "Backspace"},
-			[4] = {["Use Tool"] = "Left Mouse Button"},
-			[5] = {["Drop Hats"] = "+"} })
-		accessoriesFrame.Position = UDim2.new(1/3,PC_TABLE_SPACING,0,0)
-		accessoriesFrame.Parent = parentFrame
-
-		local miscFrame = nil
-		local hideHudSuccess, hideHudFlagValue = pcall(function() return _G:GetService("GlobalSettings"):GetFFlag("AllowHideHudShortcut") end)
-		if (hideHudSuccess and hideHudFlagValue) then
-			miscFrame = createPCGroup("Misc", {	[1] = {["Screenshot"] = "Print Screen"}, 
-				[2] = {["Record Video"] = isOSX and "F12/fn + F12" or "F12"},
-				[3] = {["Hide HUD"] = isOSX and "F7/fn + F7" or "F7"},
-				[4] = {["Dev Console"] = isOSX and "F9/fn + F9" or "F9"},
-				[5] = {["Mouselock"] = "Shift"},
-				[6] = {["Graphics Level"] = isOSX and "F10/fn + F10" or "F10"},
-				[7] = {["Fullscreen"] = isOSX and "F11/fn + F11" or "F11"} })
-		else
-			miscFrame = createPCGroup("Misc", {	[1] = {["Screenshot"] = "Print Screen"}, 
-				[2] = {["Record Video"] = isOSX and "F12/fn + F12" or "F12"},
-				[3] = {["Dev Console"] = isOSX and "F9/fn + F9" or "F9"},
-				[4] = {["Mouselock"] = "Shift"},
-				[5] = {["Graphics Level"] = isOSX and "F10/fn + F10" or "F10"},
-				[6] = {["Fullscreen"] = isOSX and "F11/fn + F11" or "F11"} })
-		end
-		miscFrame.Position = UDim2.new(2/3,PC_TABLE_SPACING * 2,0,0)
-		miscFrame.Parent = parentFrame
-
-		local camFrame = createPCGroup("Camera Movement", {	[1] = {["Rotate"] = "Right Mouse Button"}, 
-			[2] = {["Zoom In/Out"] = "Mouse Wheel"},
-			[3] = {["Zoom In"] = "I"},
-			[4] = {["Zoom Out"] = "O"} })
-		camFrame.Position = UDim2.new(0,0,charMoveFrame.Size.Y.Scale,charMoveFrame.Size.Y.Offset + rowOffset)
-		camFrame.Parent = parentFrame
-
-		local menuFrame = createPCGroup("Menu Items", {		[1] = {["ROBLOX Menu"] = "ESC"}, 
-			[2] = {["Backpack"] = "~"},
-			[3] = {["Playerlist"] = "TAB"},
-			[4] = {["Chat"] = "/"} })
-		menuFrame.Position = UDim2.new(1/3,PC_TABLE_SPACING,charMoveFrame.Size.Y.Scale,charMoveFrame.Size.Y.Offset + rowOffset)
-		menuFrame.Parent = parentFrame
-
-		parentFrame.Size = UDim2.new(parentFrame.Size.X.Scale, parentFrame.Size.X.Offset, 0, 
-			menuFrame.Size.Y.Offset + menuFrame.Position.Y.Offset)
-	end
-
-	local function createGamepadHelp(parentFrame)
-		local gamepadImage = "rbxasset://textures/ui/Settings/Help/GenericController.png"
-		local imageSize = UDim2.new(0,650,0,239)
-		local imagePosition = UDim2.new(0.5,-imageSize.X.Offset/2,0.5,-imageSize.Y.Offset/2)
-		if isTenFootInterface then
-			gamepadImage = "rbxasset://textures/ui/Settings/Help/XboxController.png"
-			imageSize = UDim2.new(0,1334,0,570)
-			imagePosition = UDim2.new(0.5, (-imageSize.X.Offset/2) - 50, 0.5, -imageSize.Y.Offset/2)--[[
-		elseif UserInputService:GetPlatform() == Enum.Platform.PS4 or UserInputService:GetPlatform() == Enum.Platform.PS3 then
-			gamepadImage = "rbxasset://textures/ui/Settings/Help/PSController.png"--]]
-		end
-
-		local gamepadImageLabel = utility:Create'ImageLabel'
-		{
-			Name = "GamepadImage",
-			Size = imageSize,
-			Position = imagePosition,
-			Image = gamepadImage,
-			BackgroundTransparency = 1,
-			ZIndex = 2,
-			Parent = parentFrame
-		};
-		parentFrame.Size = UDim2.new(parentFrame.Size.X.Scale, parentFrame.Size.X.Offset, 0, gamepadImageLabel.Size.Y.Offset + 100)
-
-		local gamepadFontSize = isTenFootInterface and Enum.FontSize.Size36 or Enum.FontSize.Size24
-		local function createGamepadLabel(text, position, size)
-			local nameLabel = utility:Create'TextLabel'
-			{
-				Position = position,
-				Size = size,
-				BackgroundTransparency = 1,
-				Text = text,
-				TextXAlignment = Enum.TextXAlignment.Left,
-				Font = Enum.Font.SourceSansBold,
-				FontSize = gamepadFontSize,
-				TextColor3 = Color3.new(1,1,1),
-				Name = text .. "Label",
-				ZIndex = 2,
-				Parent = gamepadImageLabel
-			};
-		end
-
-		local textVerticalSize = (gamepadFontSize == Enum.FontSize.Size36) and 36 or 24
-
-		if gamepadImage == "rbxasset://textures/ui/Settings/Help/XboxController.png" then
-			createGamepadLabel("Switch Tool", UDim2.new(0,50,0,-textVerticalSize/2), UDim2.new(0,100,0,textVerticalSize))
-			createGamepadLabel("Game Menu Toggle", UDim2.new(0,-38,0.15,-textVerticalSize/2), UDim2.new(0,164,0,textVerticalSize))
-			createGamepadLabel("Move", UDim2.new(0,-80,0.31,-textVerticalSize/2), UDim2.new(0,46,0,textVerticalSize))
-			createGamepadLabel("Menu Navigation", UDim2.new(0,-50,0.46,-textVerticalSize/2), UDim2.new(0,164,0,textVerticalSize))
-			createGamepadLabel("Use Tool", UDim2.new(0.96,0,0,-textVerticalSize/2), UDim2.new(0,73,0,textVerticalSize))
-			createGamepadLabel("ROBLOX Menu", UDim2.new(0.96,0,0.15,-textVerticalSize/2), UDim2.new(0,122,0,textVerticalSize))
-			createGamepadLabel("Back", UDim2.new(0.96,0,0.31,-textVerticalSize/2), UDim2.new(0,43,0,textVerticalSize))
-			createGamepadLabel("Jump", UDim2.new(0.96,0,0.46,-textVerticalSize/2), UDim2.new(0,49,0,textVerticalSize))
-			createGamepadLabel("Rotate Camera", UDim2.new(1,0,0.62,-textVerticalSize/2), UDim2.new(0,132,0,textVerticalSize))
-			createGamepadLabel("Camera Zoom", UDim2.new(1,0,0.77,-textVerticalSize/2), UDim2.new(0,122,0,textVerticalSize))
-		else
-			createGamepadLabel("Switch Tool", UDim2.new(-0.01,0,0,-textVerticalSize/2), UDim2.new(0,100,0,textVerticalSize))
-			createGamepadLabel("Game Menu Toggle", UDim2.new(-0.11,0,0.15,-textVerticalSize/2), UDim2.new(0,164,0,textVerticalSize))
-			createGamepadLabel("Move", UDim2.new(-0.08,0,0.31,-textVerticalSize/2), UDim2.new(0,46,0,textVerticalSize))
-			createGamepadLabel("Menu Navigation", UDim2.new(-0.125,0,0.46,-textVerticalSize/2), UDim2.new(0,164,0,textVerticalSize))
-			createGamepadLabel("Use Tool", UDim2.new(0.96,0,0,-textVerticalSize/2), UDim2.new(0,73,0,textVerticalSize))
-			createGamepadLabel("ROBLOX Menu", UDim2.new(0.9,0,0.15,-textVerticalSize/2), UDim2.new(0,122,0,textVerticalSize))
-			createGamepadLabel("Back", UDim2.new(1.01,0,0.31,-textVerticalSize/2), UDim2.new(0,43,0,textVerticalSize))
-			createGamepadLabel("Jump", UDim2.new(0.91,0,0.46,-textVerticalSize/2), UDim2.new(0,49,0,textVerticalSize))
-			createGamepadLabel("Rotate Camera", UDim2.new(0.91,0,0.62,-textVerticalSize/2), UDim2.new(0,132,0,textVerticalSize))
-			createGamepadLabel("Camera Zoom", UDim2.new(0.91,0,0.77,-textVerticalSize/2), UDim2.new(0,122,0,textVerticalSize))
-		end
-
-
-		-- todo: turn on dev console button when dev console is ready
-		--[[local openDevConsoleFunc = function()
-			this.HubRef:SetVisibility(false)
-			ToggleDevConsoleBindableFunc:Invoke()
-		end
-		local devConsoleButton = utility:MakeStyledButton("ConsoleButton", "      Toggle Dev Console", UDim2.new(0,300,0,44), openDevConsoleFunc)
-		devConsoleButton.Size = UDim2.new(devConsoleButton.Size.X.Scale, devConsoleButton.Size.X.Offset, 0, 60)
-		devConsoleButton.Position = UDim2.new(1,-300,1,30)
-		if UserInputService.GamepadEnabled and not UserInputService.TouchEnabled and not UserInputService.MouseEnabled and not UserInputService.KeyboardEnabled then
-			devConsoleButton.ImageTransparency = 1
-		end
-		devConsoleButton.Parent = gamepadImageLabel
-		local aButtonImage = utility:Create'ImageLabel'
-		{
-			Name = "AButtonImage",
-			Size = UDim2.new(0,55,0,55),
-			Position = UDim2.new(0,5,0.5,-28),
-			Image = "rbxasset://textures/ui/Settings/Help/AButtonDark.png",
-			BackgroundTransparency = 1,
-			ZIndex = 2,
-			Parent = devConsoleButton
-		};
-
-		this:AddRow(nil, nil, devConsoleButton, 340)]]
-	end
-
-	local function createTouchHelp(parentFrame)
-		local smallScreen = utility:IsSmallTouchScreen()
-
-		local viewportY = 0
-		local camera = workspace.CurrentCamera
-		if camera then
-			viewportY = camera.ViewportSize.Y
-		end
-
-		if viewportY <= 0 then
-			local ok, resolution = pcall(function()
-				return GuiService:GetScreenResolution()
-			end)
-			if ok and resolution then
-				viewportY = resolution.Y
-			end
-		end
-
-		if viewportY <= 0 then
-			viewportY = 720
-		end
-
-		local ySize = viewportY - 350
-		if smallScreen then
-			ySize = viewportY - 100
-		end
-
-		-- Never allow the Help page to end up with a zero/negative height.
-		ySize = math.max(ySize, 220)
-		parentFrame.Size = UDim2.new(1,0,0,ySize)
-
-		local function createTouchLabel(text, position, size, parent)
-			local nameLabel = utility:Create'TextLabel'
-			{
-				Position = position,
-				Size = size,
-				BackgroundTransparency = 1,
-				Text = text,
-				Font = Enum.Font.SourceSansBold,
-				FontSize = Enum.FontSize.Size14,
-				TextColor3 = Color3.new(1,1,1),
-				Name = text .. "Label",
-				ZIndex = 2,
-				Parent = parent
-			};
-			if not smallScreen then
-				nameLabel.FontSize = Enum.FontSize.Size18
-				nameLabel.Size = UDim2.new(nameLabel.Size.X.Scale, nameLabel.Size.X.Offset, nameLabel.Size.Y.Scale, nameLabel.Size.Y.Offset + 4)
-			end
-			local nameBackgroundImage = utility:Create'ImageLabel'
-			{
-				Name = text .. "BackgroundImage",
-				Size = UDim2.new(1,0,1,0),
-				Position = UDim2.new(0,0,0,2),
-				BackgroundTransparency = 1,
-				Image = "rbxasset://textures/ui/Settings/Radial/RadialLabel.png",
-				ScaleType = Enum.ScaleType.Slice,
-				SliceCenter = Rect.new(12,2,65,21),
-				ZIndex = 2,
-				Parent = nameLabel
-			};
-
-			return nameLabel
-		end
-
-		local function createTouchGestureImage(name, image, position, size, parent)
-			local gestureImage = utility:Create'ImageLabel'
-			{
-				Name = name,
-				Size = size,
-				Position = position,
-				BackgroundTransparency = 1,
-				Image = image,
-				ZIndex = 2,
-				Parent = parent
-			};
-
-			return gestureImage
-		end
-
-		local xSizeOffset = 30
-		local ySize = 25
-		if smallScreen then xSizeOffset = 0 end
-
-		local moveLabel = createTouchLabel("Move", UDim2.new(0.06,0,0.58,0), UDim2.new(0,77 + xSizeOffset,0,ySize), parentFrame)
-		if not smallScreen then moveLabel.Position = UDim2.new(-0.03,0,0.7,0) end
-		local jumpLabel = createTouchLabel("Jump", UDim2.new(0.8,0,0.58,0), UDim2.new(0,77 + xSizeOffset,0,ySize), parentFrame)
-		if not smallScreen then jumpLabel.Position = UDim2.new(0.85,0,0.7,0) end
-		local equipLabel = createTouchLabel("Equip/Unequip Tools", UDim2.new(0.5,-60,0.64,0), UDim2.new(0,120 + xSizeOffset,0,ySize), parentFrame)
-		if not smallScreen then equipLabel.Position = UDim2.new(0.5,-60,0.95,0) end
-
-		local zoomLabel = createTouchLabel("Zoom In/Out", UDim2.new(0.15,-60,0.02,0), UDim2.new(0,120,0,ySize), parentFrame)
-		createTouchGestureImage("ZoomImage", "rbxasset://textures/ui/Settings/Help/ZoomGesture.png", UDim2.new(0.5,-26,1,3), UDim2.new(0,53,0,59), zoomLabel)
-		local rotateLabel = createTouchLabel("Rotate Camera", UDim2.new(0.5,-60,0.02,0), UDim2.new(0,120,0,ySize), parentFrame)
-		createTouchGestureImage("RotateImage", "rbxasset://textures/ui/Settings/Help/RotateCameraGesture.png", UDim2.new(0.5,-32,1,3), UDim2.new(0,65,0,48), rotateLabel)
-		local useToolLabel = createTouchLabel("Use Tool", UDim2.new(0.85,-60,0.02,0), UDim2.new(0,120,0,ySize), parentFrame)
-		createTouchGestureImage("ToolImage", "rbxasset://textures/ui/Settings/Help/UseToolGesture.png", UDim2.new(0.5,-19,1,3), UDim2.new(0,38,0,52), useToolLabel)
-
-	end
-
-	local function createHelpDisplay(typeOfHelp)
-		local helpFrame = utility:Create'Frame'
-		{
-			Size = UDim2.new(1,0,1,0),
-			BackgroundTransparency = 1,
-			Name = "HelpFrame" .. tostring(typeOfHelp)
-		};
-
-		if typeOfHelp == KEYBOARD_MOUSE_TAG then
-			createPCHelp(helpFrame)
-		elseif typeOfHelp == GAMEPAD_TAG then
-			createGamepadHelp(helpFrame)
-		elseif typeOfHelp == TOUCH_TAG then
-			createTouchHelp(helpFrame)
-		end
-
-		return helpFrame
-	end
-
-	local function displayHelp(currentPage)
-		for i, helpPage in pairs(this.HelpPages) do
-			if helpPage == currentPage then
-				helpPage.Parent = this.Page
-				this.Page.Size = helpPage.Size
-			else
-				helpPage.Parent = nil
-			end
-		end
-		if isTenFootInterface then
-			this.HubRef.PageViewClipper.ClipsDescendants = false
-			this.HubRef.PageView.ClipsDescendants = false
-		end
-	end
-
-	local function switchToHelp(typeOfHelp)
-		local helpPage = this.HelpPages[typeOfHelp]
-		if helpPage then
-			displayHelp(helpPage)
-		else
-			this.HelpPages[typeOfHelp] = createHelpDisplay(typeOfHelp)
-			switchToHelp(typeOfHelp)
-		end
-	end
-
-	local function showTypeOfHelp()
-		switchToHelp(this:GetCurrentInputType())
-	end
-
-	------ TAB CUSTOMIZATION -------
-	this.TabHeader.Name = "HelpTab"
-
-	this.TabHeader.Icon.Image = "rbxasset://textures/ui/Settings/MenuBarIcons/HelpTab.png"
-
-	if utility:IsSmallTouchScreen() then
-		this.TabHeader.Icon.Size = UDim2.new(0,33,0,33)
-		this.TabHeader.Icon.Position = UDim2.new(this.TabHeader.Icon.Position.X.Scale,this.TabHeader.Icon.Position.X.Offset,0.5,-16)
-		this.TabHeader.Size = UDim2.new(0,100,1,0)
-	elseif isTenFootInterface then
-		this.TabHeader.Icon.Image = "rbxasset://textures/ui/Settings/MenuBarIcons/HelpTab@2x.png"
-		this.TabHeader.Icon.Size = UDim2.new(0,90,0,90)
-		this.TabHeader.Icon.Position = UDim2.new(0,0,0.5,-43)
-		this.TabHeader.Size = UDim2.new(0,210,1,0)
-	else
-		this.TabHeader.Icon.Size = UDim2.new(0,44,0,44)
-		this.TabHeader.Icon.Position = UDim2.new(this.TabHeader.Icon.Position.X.Scale,this.TabHeader.Icon.Position.X.Offset,0.5,-22)
-		this.TabHeader.Size = UDim2.new(0,130,1,0)
-	end
-
-	this.TabHeader.Icon.Title.Text = "Help"
-
-
-	------ PAGE CUSTOMIZATION -------
-	this.Page.Name = "Help"
-
-	UserInputService.InputBegan:connect(function(inputObject)
-		local inputType = inputObject.UserInputType
-		if inputType ~= Enum.UserInputType.Focus and inputType ~= Enum.UserInputType.None then
-			lastInputType = inputType
-			showTypeOfHelp()
-		end
-	end)
-
-	return this
-end
-
-
------------ Public Facing API Additions --------------
-do
-	PageInstance = Initialize()
-
-	PageInstance.Displayed.Event:connect(function()
-		-- Do not wait for another key/touch after opening Help. On mobile the tap
-		-- that selected the Help tab may have already finished before this connects.
-		showTypeOfHelp()
-
-		if PageInstance:GetCurrentInputType() == TOUCH_TAG then
-			if PageInstance.HubRef.BottomButtonFrame and not utility:IsSmallTouchScreen() then
-				PageInstance.HubRef.BottomButtonFrame.Visible = false
-			end
-		end
-	end)
-
-	PageInstance.Hidden.Event:connect(function()
-		PageInstance.HubRef.PageViewClipper.ClipsDescendants = true
-		PageInstance.HubRef.PageView.ClipsDescendants = true
-
-		PageInstance.HubRef:ShowShield()
-
-		if PageInstance:GetCurrentInputType() == TOUCH_TAG then
-			PageInstance.HubRef.BottomButtonFrame.Visible = true
-		end
-	end)
-end
-
-
-return PageInstance
-end;
-};
-G2L_MODULES[G2L["11"]] = {
-Closure = function()
-    local script = G2L["11"];--[[
-		Filename: Home.lua
-		Written by: jeditkacheff
-		Version 1.0
-		Description: Takes care of the home page in Settings Menu
---]]
-
-local BUTTON_OFFSET = 20
-local BUTTON_SPACING = 10
-
--------------- SERVICES --------------
-local CoreGui = _G:GetService("CoreGui")
-local RobloxGui = CoreGui:WaitForChild("RobloxGui")
-local GuiService = _G:GetService("GuiService")
-
------------ UTILITIES --------------
-local utility = require(RobloxGui.Modules.Settings.Utility)
-
------------- Variables -------------------
-local PageInstance = nil
-
------------ CLASS DECLARATION --------------
-
-local function Initialize()
-	local settingsPageFactory = require(RobloxGui.Modules.Settings.SettingsPageFactory)
-	local this = settingsPageFactory:CreateNewPage()
-
-	------ TAB CUSTOMIZATION -------
-	this.TabHeader.Name = "HomeTab"
-
-	this.TabHeader.Icon.Image = "rbxasset://textures/ui/Settings/MenuBarIcons/HomeTab.png"
-	this.TabHeader.Icon.Size = UDim2.new(0,32,0,30)
-	this.TabHeader.Icon.Position = UDim2.new(0,5,0.5,-15)
-
-	this.TabHeader.Icon.Title.Text = "Home"
-
-	this.TabHeader.Size = UDim2.new(0,100,1,0)
-
-	------ PAGE CUSTOMIZATION -------
-	this.Page.Name = "Home"
-	local resumeGameFunc = function()
-		this.HubRef:SetVisibility(false)
-	end
-
-	this.ResumeButton = utility:MakeStyledButton("ResumeButton", "Resume Game", UDim2.new(0, 200, 0, 50), resumeGameFunc)
-	this.ResumeButton.Position = UDim2.new(0.5,-100,0,BUTTON_OFFSET)
-	this.ResumeButton.Parent = this.Page
-
-	local resetFunc = function()
-		this.HubRef:SwitchToPage(this.HubRef.ResetCharacterPage, false, 1)
-	end
-
-	local resetButton = utility:MakeStyledButton("ResetButton", "Reset Character", UDim2.new(0, 200, 0, 50), resetFunc)
-	resetButton.Position = UDim2.new(0.5,-100,0,this.ResumeButton.AbsolutePosition.Y + this.ResumeButton.AbsoluteSize.Y + BUTTON_SPACING)
-	resetButton.Parent = this.Page
-
-	local leaveGameFunc = function()
-		this.HubRef:SwitchToPage(this.HubRef.LeaveGamePage, false, 1)
-	end
-
-	local leaveButton = utility:MakeStyledButton("LeaveButton", "Leave Game", UDim2.new(0, 200, 0, 50), leaveGameFunc)
-	leaveButton.Position = UDim2.new(0.5,-100,0,resetButton.AbsolutePosition.Y + resetButton.AbsoluteSize.Y + BUTTON_SPACING)
-	leaveButton.Parent = this.Page
-
-	this.Page.Size = UDim2.new(1,0,0,leaveButton.AbsolutePosition.Y + leaveButton.AbsoluteSize.Y)
-
-	return this
-end
-
-
------------ Public Facing API Additions --------------
-do
-	PageInstance = Initialize()
-
-	PageInstance.Displayed.Event:connect(function()
-		if not utility:UsesSelectedObject() then return end
-
-		GuiService.SelectedObject = PageInstance.ResumeButton
-	end)
-end
-
-
-return PageInstance
-end;
-};
-G2L_MODULES[G2L["12"]] = {
-Closure = function()
-    local script = G2L["12"];--[[
-		Filename: LeaveGame.lua
-		Written by: jeditkacheff
-		Version 1.0
-		Description: Takes care of the leave game in Settings Menu
---]]
-
-
--------------- CONSTANTS -------------
-local LEAVE_GAME_ACTION = "LeaveGameCancelAction"
-
--------------- SERVICES --------------
-local CoreGui = _G:GetService("CoreGui")
-local ContextActionService = game:GetService("ContextActionService")
-local Players = game:GetService("Players")
-local RobloxGui = CoreGui:WaitForChild("RobloxGui")
-local GuiService = _G:GetService("GuiService")
-
------------ UTILITIES --------------
-local utility = require(RobloxGui.Modules.Settings.Utility)
-
------------- Variables -------------------
-local PageInstance = nil
-RobloxGui:WaitForChild("Modules"):WaitForChild("TenFootInterface")
-local isTenFootInterface = require(RobloxGui.Modules.TenFootInterface):IsEnabled()
-
-
------------ CLASS DECLARATION --------------
-
-local function Initialize()
-	local settingsPageFactory = require(RobloxGui.Modules.Settings.SettingsPageFactory)
-	local this = settingsPageFactory:CreateNewPage()
-
-	this.DontLeaveFunc = function(isUsingGamepad)
-		if this.HubRef then
-			this.HubRef:PopMenu(isUsingGamepad, true)
-		end
-	end
-	this.DontLeaveFromHotkey = function(name, state, input)
-		if state == Enum.UserInputState.Begin then
-			local isUsingGamepad = input.UserInputType == Enum.UserInputType.Gamepad1 or input.UserInputType == Enum.UserInputType.Gamepad2
-				or input.UserInputType == Enum.UserInputType.Gamepad3 or input.UserInputType == Enum.UserInputType.Gamepad4
-
-			this.DontLeaveFunc(isUsingGamepad)
-		end
-	end
-	this.DontLeaveFromButton = function(isUsingGamepad)
-		this.DontLeaveFunc(isUsingGamepad)
-	end
-
-	------ TAB CUSTOMIZATION -------
-	this.TabHeader = nil -- no tab for this page
-
-	------ PAGE CUSTOMIZATION -------
-	this.Page.Name = "LeaveGamePage"
-
-	local leaveGameText =  utility:Create'TextLabel'
-	{
-		Name = "LeaveGameText",
-		Text = "Are you sure you want to leave the game?",
-		Font = Enum.Font.SourceSansBold,
-		FontSize = Enum.FontSize.Size36,
-		TextColor3 = Color3.new(1,1,1),
-		BackgroundTransparency = 1,
-		Size = UDim2.new(1,0,0,200),
-		TextWrapped = true,
-		ZIndex = 2,
-		Parent = this.Page
-	};
-	if utility:IsSmallTouchScreen() then
-		leaveGameText.FontSize = Enum.FontSize.Size24
-		leaveGameText.Size = UDim2.new(1,0,0,100)
-	elseif isTenFootInterface then
-		leaveGameText.FontSize = Enum.FontSize.Size48
-	end
-
-	local buttonSpacing = 20
-	local buttonSize = UDim2.new(0, 200, 0, 50)
-	if isTenFootInterface then
-		leaveGameText.Position = UDim2.new(0,0,0,100)
-		buttonSize = UDim2.new(0, 300, 0, 80)
-	end
-
-	this.LeaveGameButton = utility:MakeStyledButton("LeaveGame", "Leave", buttonSize, function()
-		Players.LocalPlayer:Kick()
-	end)
-	this.LeaveGameButton.NextSelectionRight = nil
-	--this.LeaveGameButton:SetVerb("Exit")
-	if utility:IsSmallTouchScreen() then
-		this.LeaveGameButton.Position = UDim2.new(0.5, -buttonSize.X.Offset - buttonSpacing, 1, 0)
-	else
-		this.LeaveGameButton.Position = UDim2.new(0.5, -buttonSize.X.Offset - buttonSpacing, 1, -30)
-	end
-	this.LeaveGameButton.Parent = leaveGameText
-
-
-	------------- Init ----------------------------------
-
-	local dontleaveGameButton = utility:MakeStyledButton("DontLeaveGame", "Don't Leave", buttonSize, this.DontLeaveFromButton)
-	dontleaveGameButton.NextSelectionLeft = nil
-	if utility:IsSmallTouchScreen() then
-		dontleaveGameButton.Position = UDim2.new(0.5, buttonSpacing, 1, 0)
-	else
-		dontleaveGameButton.Position = UDim2.new(0.5, buttonSpacing, 1, -30)
-	end
-	dontleaveGameButton.Parent = leaveGameText
-
-	this.Page.Size = UDim2.new(1,0,0,dontleaveGameButton.AbsolutePosition.Y + dontleaveGameButton.AbsoluteSize.Y)
-
-	return this
-end
-
-
------------ Public Facing API Additions --------------
-PageInstance = Initialize()
-
-PageInstance.Displayed.Event:connect(function()
-	GuiService.SelectedObject = PageInstance.LeaveGameButton
-	ContextActionService:BindAction(LEAVE_GAME_ACTION, PageInstance.DontLeaveFromHotkey, false, Enum.KeyCode.ButtonB)
-end)
-
-PageInstance.Hidden.Event:connect(function()
-	ContextActionService:UnbindAction(LEAVE_GAME_ACTION)
-end)
-
-
-return PageInstance
-end;
-};
-G2L_MODULES[G2L["13"]] = {
-Closure = function()
-    local script = G2L["13"];--[[
-		Filename: ResetCharacter.lua
-		Written by: jeditkacheff
-		Version 1.0
-		Description: Takes care of the reseting the character in Settings Menu
---]]
-
--------------- CONSTANTS -------------
-local RESET_CHARACTER_GAME_ACTION = "ResetCharacterAction"
-
--------------- SERVICES --------------
-local CoreGui = _G:GetService("CoreGui")
-local ContextActionService = game:GetService("ContextActionService")
-local RobloxGui = CoreGui:WaitForChild("RobloxGui")
-local GuiService = _G:GetService("GuiService")
-local PlayersService = game:GetService("Players")
-
------------ UTILITIES --------------
-local utility = require(RobloxGui.Modules.Settings.Utility)
-
------------- Variables -------------------
-local PageInstance = nil
-RobloxGui:WaitForChild("Modules"):WaitForChild("TenFootInterface")
-local isTenFootInterface = require(RobloxGui.Modules.TenFootInterface):IsEnabled()
-
------------ CLASS DECLARATION --------------
-
-local function Initialize()
-	local settingsPageFactory = require(RobloxGui.Modules.Settings.SettingsPageFactory)
-	local this = settingsPageFactory:CreateNewPage()
-
-	this.DontResetCharFunc = function(isUsingGamepad)
-		if this.HubRef then
-			this.HubRef:PopMenu(isUsingGamepad, true)
-		end
-	end
-	this.DontResetCharFromHotkey = function(name, state, input)
-		if state == Enum.UserInputState.Begin then
-			local isUsingGamepad = input.UserInputType == Enum.UserInputType.Gamepad1 or input.UserInputType == Enum.UserInputType.Gamepad2
-				or input.UserInputType == Enum.UserInputType.Gamepad3 or input.UserInputType == Enum.UserInputType.Gamepad4
-
-			this.DontResetCharFunc(isUsingGamepad)
-		end
-	end
-	this.DontResetCharFromButton = function(isUsingGamepad)
-		this.DontResetCharFunc(isUsingGamepad)
-	end
-
-	------ TAB CUSTOMIZATION -------
-	this.TabHeader = nil -- no tab for this page
-
-	------ PAGE CUSTOMIZATION -------
-	this.Page.Name = "ResetCharacter"
-
-	local resetCharacterText =  utility:Create'TextLabel'
-	{
-		Name = "ResetCharacterText",
-		Text = "Are you sure you want to reset your character?",
-		Font = Enum.Font.SourceSansBold,
-		FontSize = Enum.FontSize.Size36,
-		TextColor3 = Color3.new(1,1,1),
-		BackgroundTransparency = 1,
-		Size = UDim2.new(1,0,0,200),
-		TextWrapped = true,
-		ZIndex = 2,
-		Parent = this.Page
-	};
-	if utility:IsSmallTouchScreen() then
-		resetCharacterText.FontSize = Enum.FontSize.Size24
-		resetCharacterText.Size = UDim2.new(1,0,0,100)
-	elseif isTenFootInterface then
-		resetCharacterText.FontSize = Enum.FontSize.Size48
-	end
-
-	------ Init -------
-	local resetCharFunc = function()
-		local player = PlayersService.LocalPlayer
-		if player then
-			local character = player.Character
-			if character then
-				local humanoid = character:FindFirstChild('Humanoid')
-				if humanoid then
-					humanoid.Health = 0
-				end
-			end
-		end
-
-		if this.HubRef then
-			this.HubRef:SetVisibility(false, true)
-		end
-	end
-
-	local buttonSpacing = 20
-	local buttonSize = UDim2.new(0, 200, 0, 50)
-	if isTenFootInterface then
-		resetCharacterText.Position = UDim2.new(0,0,0,100)
-		buttonSize = UDim2.new(0, 300, 0, 80)
-	end
-
-	this.ResetCharacterButton = utility:MakeStyledButton("ResetCharacter", "Reset", buttonSize, resetCharFunc)
-	this.ResetCharacterButton.NextSelectionRight = nil
-	if utility:IsSmallTouchScreen() then
-		this.ResetCharacterButton.Position = UDim2.new(0.5, -buttonSize.X.Offset - buttonSpacing, 1, 0)
-	else
-		this.ResetCharacterButton.Position = UDim2.new(0.5, -buttonSize.X.Offset - buttonSpacing, 1, -30)
-	end
-	this.ResetCharacterButton.Parent = resetCharacterText
-
-
-	local dontResetCharacterButton = utility:MakeStyledButton("DontResetCharacter", "Don't Reset", buttonSize, this.DontResetCharFromButton)
-	dontResetCharacterButton.NextSelectionLeft = nil
-	if utility:IsSmallTouchScreen() then
-		dontResetCharacterButton.Position = UDim2.new(0.5, buttonSpacing, 1, 0)
-	else
-		dontResetCharacterButton.Position = UDim2.new(0.5, buttonSpacing, 1, -30)
-	end
-	dontResetCharacterButton.Parent = resetCharacterText
-
-	this.Page.Size = UDim2.new(1,0,0,dontResetCharacterButton.AbsolutePosition.Y + dontResetCharacterButton.AbsoluteSize.Y)
-
-	return this
-end
-
-
------------ Public Facing API Additions --------------
-PageInstance = Initialize()
-
-PageInstance.Displayed.Event:connect(function()
-	GuiService.SelectedObject = PageInstance.ResetCharacterButton
-	ContextActionService:BindAction(RESET_CHARACTER_GAME_ACTION, PageInstance.DontResetCharFromHotkey, false, Enum.KeyCode.ButtonB)
-end)
-
-PageInstance.Hidden.Event:connect(function()
-	ContextActionService:UnbindAction(RESET_CHARACTER_GAME_ACTION)
-end)
-
-
-return PageInstance
-
-end;
-};
-G2L_MODULES[G2L["14"]] = {
-Closure = function()
-    local script = G2L["14"];--[[r
-		Filename: Record.lua
-		Written by: jeditkacheff
-		Version 1.0
-		Description: Takes care of the Record Tab in Settings Menu
---]]
--------------- SERVICES --------------
-local CoreGui = _G:GetService("CoreGui")
-local RobloxGui = CoreGui:WaitForChild("RobloxGui")
-local GuiService = _G:GetService("GuiService")
-local Settings = _G:GetService("UserSettings")
-local GameSettings = Settings
-
------------ UTILITIES --------------
-RobloxGui:WaitForChild("Modules"):WaitForChild("TenFootInterface")
-local utility = require(RobloxGui.Modules.Settings.Utility)
-local isTenFootInterface = require(RobloxGui.Modules.TenFootInterface):IsEnabled()
-
------------- Variables -------------------
-local PageInstance = nil
-
------------ CLASS DECLARATION --------------
-
-local function Initialize()
-	local settingsPageFactory = require(RobloxGui.Modules.Settings.SettingsPageFactory)
-	local this = settingsPageFactory:CreateNewPage()
-	local isRecordingVideo = false
-
-	local recordingEvent = Instance.new("BindableEvent")
-	recordingEvent.Name = "RecordingEvent"
-	this.RecordingChanged = recordingEvent.Event
-	function this:IsRecording()
-		return isRecordingVideo
-	end
-
-	------ TAB CUSTOMIZATION -------
-	this.TabHeader.Name = "RecordTab"
-
-	this.TabHeader.Icon.Image = "rbxasset://textures/ui/Settings/MenuBarIcons/RecordTab.png"
-	this.TabHeader.Icon.Size = UDim2.new(0,41,0,40)
-	this.TabHeader.Icon.Position = UDim2.new(0,5,0.5,-20)
-
-	this.TabHeader.Icon.Title.Text = "Record"
-
-	this.TabHeader.Size = UDim2.new(0,130,1,0)
-
-
-	------ PAGE CUSTOMIZATION -------
-	this.Page.Name = "Record"
-
-	local function makeTextLabel(name, text, bold, size, pos, parent)
-		local textLabel = utility:Create'TextLabel'
-		{
-			Name = name,
-			BackgroundTransparency = 1,
-			Text = text,
-			TextWrapped = true,
-			Font = Enum.Font.SourceSans,
-			FontSize = Enum.FontSize.Size24,
-			TextColor3 = Color3.new(1,1,1),
-			Size = size,
-			Position = pos,
-			TextXAlignment = Enum.TextXAlignment.Left,
-			TextYAlignment = Enum.TextYAlignment.Top,
-			ZIndex = 2,
-			Parent = parent
-		};
-		if bold then textLabel.Font = Enum.Font.SourceSansBold end
-
-		return textLabel
-	end
-
-	-- need to override this function from SettingsPageFactory
-	-- DropDown menus require hub to to be set when they are initialized
-	function this:SetHub(newHubRef)
-		this.HubRef = newHubRef
-
-		local recordEnumNames = {}
-		recordEnumNames[1] = "Save To Disk"
-		recordEnumNames[2] = "Upload to YouTube"
-
-		local startSetting = 2
-		if GameSettings.VideoUploadPromptBehavior == "Never" then
-			startSetting = 1
-		end
-
-		---------------------------------- SCREENSHOT -------------------------------------
-		local screenshotTitle = makeTextLabel("ScreenshotTitle", 
-			"Screenshot",
-			true, UDim2.new(1,0,0,36), UDim2.new(0,10,0.05,0), this.Page)
-		screenshotTitle.FontSize = Enum.FontSize.Size36
-
-		local screenshotBody = makeTextLabel("ScreenshotBody", 
-			"By clicking the 'Take Screenshot' button, the menu will close and take a screenshot and save it to your computer.",
-			false, UDim2.new(1,-10,0,70), UDim2.new(0,0,1,0), screenshotTitle)
-
-		local closeSettingsFunc = function()
-			this.HubRef:SetVisibility(false, true)
-		end
-		this.ScreenshotButton = utility:MakeStyledButton("ScreenshotButton", "Take Screenshot", UDim2.new(0,300,0,44), closeSettingsFunc, this)
-
-		this.ScreenshotButton.Position = UDim2.new(0,400,1,0)
-		this.ScreenshotButton.Parent = screenshotBody
-
-
-		---------------------------------- VIDEO -------------------------------------
-		local videoTitle = makeTextLabel("VideoTitle", 
-			"Video",
-			true, UDim2.new(1,0,0,36), UDim2.new(0,10,0.5,0), this.Page)
-		videoTitle.FontSize = Enum.FontSize.Size36
-
-		local videoBody = makeTextLabel("VideoBody", 
-			"By clicking the 'Record Video' button, the menu will close and start recording your screen.",
-			false, UDim2.new(1,-10,0,70), UDim2.new(0,0,1,0), videoTitle)
-
-		this.VideoSettingsFrame, 
-		this.VideoSettingsLabel,
-		this.VideoSettingsMode = utility:AddNewRow(this, "Video Settings", "Selector", recordEnumNames, startSetting, 270)
-
-		this.VideoSettingsMode.IndexChanged:connect(function(newIndex)
-			if newIndex == 1 then
-				GameSettings.VideoUploadPromptBehavior = "Never"
-			elseif newIndex == 2 then
-				GameSettings.VideoUploadPromptBehavior = "Always"
-			end
-		end)
-
-
-		local recordButton = utility:MakeStyledButton("RecordButton", "Record Video", UDim2.new(0,300,0,44), closeSettingsFunc, this)
-		local gameOptions = _G:GetService("GuiService")
-		
-		recordButton.Position = UDim2.new(0,410,1,10)
-		recordButton.Parent = this.VideoSettingsMode.SelectorFrame.Parent
-		recordButton.MouseButton1Click:connect(function()
-			recordingEvent:Fire(not isRecordingVideo)
-			gameOptions:ToggleRecording()
-		end)
-		
-		if gameOptions then
-			-- please roblox let us just CHECK FOR A CHANGED EVENT WITH A LOCAL VARIABLE AHHHHHHHHH
-			task.spawn(function()
-				while true do
-					isRecordingVideo = gameOptions.recording
-					if gameOptions.recording then
-						recordButton.RecordButtonTextLabel.Text = "Stop Recording"
-					else
-						recordButton.RecordButtonTextLabel.Text = "Record Video"
-					end
-					task.wait()
-				end
-			end)
-		end
-		
-		this.ScreenshotButton.MouseButton1Click:Connect(function()
-			_G:GetService("GuiService"):TakeScreenshot()
-		end)
-
-		this.Page.Size = UDim2.new(1,0,0,400)
-	end
-
-	return this
-end
-
-
------------ Public Facing API Additions --------------
-PageInstance = Initialize()
-
-PageInstance.Displayed.Event:connect(function(switchedFromGamepadInput)
-	if switchedFromGamepadInput then
-		GuiService.SelectedObject = PageInstance.ScreenshotButton
-	end
-end)
-
-
-return PageInstance
-end;
-};
-G2L_MODULES[G2L["15"]] = {
-Closure = function()
-    local script = G2L["15"]; --[[
-		Filename: Players.lua
-		Written by: Stickmasterluke
-		Version 1.0
-		Description: Player list inside escape menu, with friend adding functionality.
---]]
--------------- SERVICES --------------
-local CoreGui = _G:GetService("CoreGui")
-local RobloxGui = CoreGui:WaitForChild("RobloxGui")
-local GuiService = _G:GetService("GuiService")
-local PlayersService = game:GetService('Players')
-local HttpService = game:GetService('HttpService')
-local HttpRbxApiService = game:GetService('HttpRbxApiService')
-local UserInputService = game:GetService('UserInputService')
-local Settings = _G:GetService("UserSettings")
-local GameSettings = Settings
-
------------ UTILITIES --------------
-RobloxGui:WaitForChild("Modules"):WaitForChild("TenFootInterface")
-local utility = require(RobloxGui.Modules.Settings.Utility)
-local isTenFootInterface = require(RobloxGui.Modules.TenFootInterface):IsEnabled()
-
------------- Constants -------------------
-local frameDefaultTransparency = .85
-local frameSelectedTransparency = .65
-
------------- Variables -------------------
-local PageInstance = nil
-local localPlayer = PlayersService.LocalPlayer
-
------------ CLASS DECLARATION --------------
-local function Initialize()
-	local settingsPageFactory = require(RobloxGui.Modules.Settings.SettingsPageFactory)
-	local this = settingsPageFactory:CreateNewPage()
-
-	local playerLabelFakeSelection = Instance.new('ImageLabel')
-	playerLabelFakeSelection.BackgroundTransparency = 1
-	--[[playerLabelFakeSelection.Image = 'rbxasset://textures/ui/SelectionBox.png'
-	playerLabelFakeSelection.ScaleType = 'Slice'
-	playerLabelFakeSelection.SliceCenter = Rect.new(31,31,31,31)]]
-	playerLabelFakeSelection.Image = ''
-	playerLabelFakeSelection.Size = UDim2.new(0,0,0,0)
-
-	------ TAB CUSTOMIZATION -------
-	this.TabHeader.Name = "PlayersTab"
-
-	this.TabHeader.Icon.Image = "rbxasset://textures/ui/Settings/MenuBarIcons/PlayersTabIcon.png"
-	if utility:IsSmallTouchScreen() then
-		this.TabHeader.Icon.Size = UDim2.new(0,34,0,28)
-		this.TabHeader.Icon.Position = UDim2.new(this.TabHeader.Icon.Position.X.Scale,this.TabHeader.Icon.Position.X.Offset,0.5,-14)
-		this.TabHeader.Size = UDim2.new(0,115,1,0)
-	elseif isTenFootInterface then
-		this.TabHeader.Icon.Image = "rbxasset://textures/ui/Settings/MenuBarIcons/PlayersTabIcon@2x.png"
-		this.TabHeader.Icon.Size = UDim2.new(0,88,0,74)
-		this.TabHeader.Icon.Position = UDim2.new(0,0,0.5,-43)
-		this.TabHeader.Size = UDim2.new(0,280,1,0)
-	else
-		this.TabHeader.Icon.Size = UDim2.new(0,44,0,37)
-		this.TabHeader.Icon.Position = UDim2.new(0,15,0.5,-18)	-- -22
-		this.TabHeader.Size = UDim2.new(0,150,1,0)
-	end
-
-	this.TabHeader.Icon.Title.Text = "Players"
-
-	----- FRIENDSHIP FUNCTIONS ------
-	local function getFriendStatus(selectedPlayer)
-		if selectedPlayer == localPlayer then
-			return Enum.FriendStatus.NotFriend
-		else
-			local success, result = pcall(function()
-				-- NOTE: Core script only
-				return localPlayer:GetFriendStatus(selectedPlayer)
-			end)
-			if success then
-				return result
-			else
-				return Enum.FriendStatus.NotFriend
-			end
-		end
-	end
-
-	------ PAGE CUSTOMIZATION -------
-	this.Page.Name = "Players"
-
-	local selectionFound = nil
-	local function friendStatusCreate(playerLabel, player)
-		if playerLabel then
-			-- remove any previous friend status labels
-			for _, item in pairs(playerLabel:GetChildren()) do
-				if item and item.Name == 'FriendStatus' then
-					if GuiService.SelectedObject == item then
-						selectionFound = nil
-						GuiService.SelectedObject = nil
-					end
-					item:Destroy()
-				end
-			end
-
-			-- create new friend status label
-			local status = nil
-			if player and player ~= localPlayer and player.userId > 1 and localPlayer.userId > 1 then
-				status = getFriendStatus(player)
-			end
-
-			local friendLabel = nil
-			local friendLabelText = nil
-			if not status then
-				friendLabel = Instance.new('TextButton')
-				friendLabel.Text = ''
-				friendLabel.BackgroundTransparency = 1
-				friendLabel.Position = UDim2.new(1,-198,0,7)
-			elseif status == Enum.FriendStatus.Friend then 
-				friendLabel = Instance.new('TextButton')
-				friendLabel.Text = 'Friend'
-				friendLabel.BackgroundTransparency = 1
-				friendLabel.FontSize = 'Size24'
-				friendLabel.Font = 'SourceSans'
-				friendLabel.TextColor3 = Color3.new(1,1,1)
-				friendLabel.Position = UDim2.new(1,-198,0,7)
-			elseif status == Enum.FriendStatus.Unknown or status == Enum.FriendStatus.NotFriend or status == Enum.FriendStatus.FriendRequestReceived then
-				local addFriendFunc = function()
-					if friendLabel and friendLabelText and friendLabelText.Text ~= '' then
-						friendLabel.ImageTransparency = 1
-						friendLabelText.Text = ''
-						if localPlayer and player then
-							localPlayer:RequestFriendship(player)
-						end
-					end
-				end
-				local friendLabel2, friendLabelText2 = utility:MakeStyledButton("FriendStatus", "Add Friend", UDim2.new(0, 182, 0, 46), addFriendFunc)
-				friendLabel = friendLabel2
-				friendLabelText = friendLabelText2
-				friendLabelText.ZIndex = 3
-				friendLabelText.Position = friendLabelText.Position + UDim2.new(0,0,0,1)
-				friendLabel.Position = UDim2.new(1,-198,0,7)
-			elseif status == Enum.FriendStatus.FriendRequestSent then
-				friendLabel = Instance.new('TextButton')
-				friendLabel.Text = 'Request Sent'
-				friendLabel.BackgroundTransparency = 1
-				friendLabel.FontSize = 'Size24'
-				friendLabel.Font = 'SourceSans'
-				friendLabel.TextColor3 = Color3.new(1,1,1)
-				friendLabel.Position = UDim2.new(1,-198,0,7)
-			end
-
-			if friendLabel then
-				friendLabel.Name = 'FriendStatus'
-				friendLabel.Size = UDim2.new(0,182,0,46)
-				friendLabel.ZIndex = 3
-				friendLabel.Parent = playerLabel
-				friendLabel.SelectionImageObject = playerLabelFakeSelection
-
-				local updateHighlight = function()
-					if playerLabel then
-						playerLabel.ImageTransparency = friendLabel and GuiService.SelectedObject == friendLabel and frameSelectedTransparency or frameDefaultTransparency
-					end
-				end
-				friendLabel.SelectionGained:connect(updateHighlight)
-				friendLabel.SelectionLost:connect(updateHighlight)
-
-				if UserInputService.GamepadEnabled and not selectionFound then
-					selectionFound = true
-					local fakeSize = 20
-					playerLabelFakeSelection.Size = UDim2.new(0,playerLabel.AbsoluteSize.X+fakeSize,0,playerLabel.AbsoluteSize.Y+fakeSize)
-					playerLabelFakeSelection.Position = UDim2.new(0, -(playerLabel.AbsoluteSize.X-198)-fakeSize*.5, 0, -8-fakeSize*.5)
-					GuiService.SelectedObject = friendLabel
-				end
-			end
-
-		end
-	end
-	--[[
-		localPlayer.FriendStatusChanged:connect(function(player, friendStatus)
-			if player then
-				local playerLabel = this.Page:FindFirstChild('PlayerLabel'..player.Name)
-				if playerLabel then
-					friendStatusCreate(playerLabel, player)
-				end
-			end
-		end)
-	--]]
-
-	if utility:IsSmallTouchScreen() then
-		local spaceFor3Buttons = RobloxGui.AbsoluteSize.x >= 720	-- else there is only space for 2
-
-		local resetFunc = function()
-			this.HubRef:SwitchToPage(this.HubRef.ResetCharacterPage, false, 1)
-		end
-		local resetButton, resetLabel = utility:MakeStyledButton("ResetButton", "Reset Character", UDim2.new(0, 200, 0, 62), resetFunc)
-		resetLabel.Size = UDim2.new(1, 0, 1, -6)
-		resetLabel.FontSize = Enum.FontSize.Size24
-		resetButton.Position = UDim2.new(0.5,spaceFor3Buttons and -340 or -220,0,14)
-		resetButton.Parent = this.Page
-
-		local leaveGameFunc = function()
-			this.HubRef:SwitchToPage(this.HubRef.LeaveGamePage, false, 1)
-		end
-		local leaveButton, leaveLabel = utility:MakeStyledButton("LeaveButton", "Leave Game", UDim2.new(0, 200, 0, 62), leaveGameFunc)
-		leaveLabel.Size = UDim2.new(1, 0, 1, -6)
-		leaveLabel.FontSize = Enum.FontSize.Size24
-		leaveButton.Position = UDim2.new(0.5,spaceFor3Buttons and -100 or 20,0,14)
-		leaveButton.Parent = this.Page
-
-		if spaceFor3Buttons then
-			local resumeGameFunc = function()
-				this.HubRef:SetVisibility(false)
-			end
-			resumeButton, resumeLabel = utility:MakeStyledButton("ResumeButton", "Resume Game", UDim2.new(0, 200, 0, 62), resumeGameFunc)
-			resumeLabel.Size = UDim2.new(1, 0, 1, -6)
-			resumeLabel.FontSize = Enum.FontSize.Size24
-			resumeButton.Position = UDim2.new(0.5,140,0,14)
-			resumeButton.Parent = this.Page
-		end
-	end
-
-	local existingPlayerLabels = {}
-	this.Displayed.Event:connect(function(switchedFromGamepadInput)
-		local sortedPlayers = game.Players:GetPlayers()
-		table.sort(sortedPlayers,function(item1,item2)
-			return item1.Name < item2.Name
-		end)
-
-		local extraOffset = 20
-		if utility:IsSmallTouchScreen() then
-			extraOffset = 85
-		end
-
-		selectionFound = nil
-
-
-		-- iterate through players to reuse or create labels for players
-		for index=1, #sortedPlayers do
-			local player = sortedPlayers[index]
-			local frame = existingPlayerLabels[index]
-			if player then
-				-- create label (frame) for this player index if one does not exist
-				if not frame or not frame.Parent then
-					frame = Instance.new('ImageLabel')
-					frame.Image = "rbxasset://textures/ui/dialog_white.png"
-					frame.ScaleType = 'Slice'
-					frame.SliceCenter = Rect.new(10,10,10,10)
-					frame.Size = UDim2.new(1,0,0,60)
-					frame.Position = UDim2.new(0,0,0,(index-1)*80 + extraOffset)
-					frame.BackgroundTransparency = 1
-					frame.ZIndex = 2
-
-					local icon = Instance.new('ImageLabel')
-					icon.Name = 'Icon'
-					icon.BackgroundTransparency = 1
-					icon.Size = UDim2.new(0,36,0,36)
-					icon.Position = UDim2.new(0,12,0,12)
-					icon.ZIndex = 3
-					icon.Parent = frame
-
-					local nameLabel = Instance.new('TextLabel')
-					nameLabel.Name = 'NameLabel'
-					nameLabel.TextXAlignment = Enum.TextXAlignment.Left
-					nameLabel.Font = 'SourceSans'
-					nameLabel.FontSize = 'Size24'
-					nameLabel.TextColor3 = Color3.new(1,1,1)
-					nameLabel.BackgroundTransparency = 1
-					nameLabel.Position = UDim2.new(0,60,.5,0)
-					nameLabel.Size = UDim2.new(0,0,0,0)
-					nameLabel.ZIndex = 3
-					nameLabel.Parent = frame
-
-					frame.MouseEnter:connect(function()
-						frame.ImageTransparency = frameSelectedTransparency
-					end)
-					frame.MouseLeave:connect(function()
-						frame.ImageTransparency = frameDefaultTransparency
-					end)
-
-					frame.Parent = this.Page
-					table.insert(existingPlayerLabels, index, frame)
-				end
-				frame.Name = 'PlayerLabel'.._G:GetTrueName(player)
-				frame.Icon.Image = 'http://www.roblox.com/Thumbs/Avatar.ashx?x=100&y=100&userId='..math.max(1, player.userId)
-				frame.NameLabel.Text = _G:GetTrueName(player)
-				frame.ImageTransparency = frameDefaultTransparency
-
-				friendStatusCreate(frame, player)
-			end
-		end
-
-		-- iterate through existing labels in reverse to destroy and remove unused labels
-		for index=#existingPlayerLabels, 1, -1 do
-			local player = sortedPlayers[index]
-			local frame = existingPlayerLabels[index]
-			if frame and not player then
-				table.remove(existingPlayerLabels, i)
-				frame:Destroy()
-			end
-		end
-
-		this.Page.Size = UDim2.new(1,0,0, extraOffset + 80 * #sortedPlayers - 5)
-	end)
-
-	return this
-end
-
-
------------ Public Facing API Additions --------------
-PageInstance = Initialize()
-
-return PageInstance
-
-
-
-end;
-};
-G2L_MODULES[G2L["16"]] = {
-Closure = function()
-    local script = G2L["16"];--[[
-		Filename: ReportAbuseMenu.lua
-		Written by: jeditkacheff
-		Version 1.0
-		Description: Takes care of the report abuse page in Settings Menu
---]]
-
--------------- SERVICES --------------
-local CoreGui = _G:GetService("CoreGui")
-local RobloxGui = CoreGui:WaitForChild("RobloxGui")
-local GuiService = _G:GetService("GuiService")
-local PlayersService = game:GetService("Players")
-
------------ UTILITIES --------------
-local utility = require(RobloxGui.Modules.Settings.Utility)
-
------------- CONSTANTS -------------------
-local ABUSE_TYPES_PLAYER = {
-	"Swearing",
-	"Inappropriate Username",
-	"Bullying",
-	"Scamming",
-	"Dating",
-	"Cheating/Exploiting",
-	"Personal Question",
-	"Offsite Links",
-}
-
-local ABUSE_TYPES_GAME = {
-	"Inappropriate Content",
-	"Bad Model or Script",
-	"Offsite Link",
-}
-local DEFAULT_ABUSE_DESC_TEXT = "   Short Description (Optional)"
-if utility:IsSmallTouchScreen() then
-	DEFAULT_ABUSE_DESC_TEXT = "   (Optional)"
-end
-
------------- VARIABLES -------------------
-local PageInstance = nil
-
------------ CLASS DECLARATION --------------
-local function Initialize()
-	local settingsPageFactory = require(RobloxGui.Modules.Settings.SettingsPageFactory)
-	local this = settingsPageFactory:CreateNewPage()
-
-	local playerNames = {}
-	local nameToRbxPlayer = {}
-
-	function this:GetPlayerFromIndex(index)
-		local playerName = playerNames[index]
-		if playerName then
-			return nameToRbxPlayer[nameToRbxPlayer]
-		end
-
-		return nil
-	end
-
-	function this:UpdatePlayerDropDown()
-		playerNames = {}
-		nameToRbxPlayer = {}
-
-		local players = PlayersService:GetPlayers()
-		local index = 1
-		for i = 1, #players do
-			local player = players[i]
-			if player ~= PlayersService.LocalPlayer and player.UserId > 0 then
-				playerNames[index] = player.Name
-				nameToRbxPlayer[player.Name] = player
-				index = index + 1
-			end
-		end
-
-		this.WhichPlayerMode:UpdateDropDownList(playerNames)
-
-		if index == 1 then
-			this.GameOrPlayerMode:SetSelectionIndex(1)
-			this.TypeOfAbuseMode:UpdateDropDownList(ABUSE_TYPES_GAME)
-		end
-
-		this.WhichPlayerMode:SetInteractable(index > 1 and this.GameOrPlayerMode.CurrentIndex ~= 1)
-		this.GameOrPlayerMode:SetInteractable(index > 1)
-	end
-
-	------ TAB CUSTOMIZATION -------
-	this.TabHeader.Name = "ReportAbuseTab"
-
-	this.TabHeader.Icon.Image = "rbxasset://textures/ui/Settings/MenuBarIcons/ReportAbuseTab.png"
-	if utility:IsSmallTouchScreen() then
-		this.TabHeader.Icon.Size = UDim2.new(0,27,0,32)
-		this.TabHeader.Size = UDim2.new(0,120,1,0)
-	else
-		this.TabHeader.Size = UDim2.new(0,150,1,0)
-		this.TabHeader.Icon.Size = UDim2.new(0,36,0,43)
-	end
-	this.TabHeader.Icon.Position = UDim2.new(this.TabHeader.Icon.Position.X.Scale, this.TabHeader.Icon.Position.X.Offset + 10, 0.5,-this.TabHeader.Icon.Size.Y.Offset/2)
-
-	this.TabHeader.Icon.Title.Text = "Report"
-
-	------ PAGE CUSTOMIZATION -------
-	this.Page.Name = "ReportAbusePage"
-
-	-- need to override this function from SettingsPageFactory
-	-- DropDown menus require hub to to be set when they are initialized
-	function this:SetHub(newHubRef)
-		this.HubRef = newHubRef
-
-		if utility:IsSmallTouchScreen() then
-			this.GameOrPlayerFrame, 
-			this.GameOrPlayerLabel,
-			this.GameOrPlayerMode = utility:AddNewRow(this, "Game or Player?", "Selector", {"Game", "Player"}, 1)
-		else
-			this.GameOrPlayerFrame, 
-			this.GameOrPlayerLabel,
-			this.GameOrPlayerMode = utility:AddNewRow(this, "Game or Player?", "Selector", {"Game", "Player"}, 1, 3)
-		end
-
-		this.WhichPlayerFrame, 
-		this.WhichPlayerLabel,
-		this.WhichPlayerMode = utility:AddNewRow(this, "Which Player?", "DropDown", {"update me"})
-		this.WhichPlayerMode:SetInteractable(false)
-		this.WhichPlayerLabel.ZIndex = 1
-
-		this.TypeOfAbuseFrame, 
-		this.TypeOfAbuseLabel,
-		this.TypeOfAbuseMode = utility:AddNewRow(this, "Type Of Abuse", "DropDown", ABUSE_TYPES_GAME)
-
-		if utility:IsSmallTouchScreen() then
-			this.AbuseDescriptionFrame, 
-			this.AbuseDescriptionLabel,
-			this.AbuseDescription = utility:AddNewRow(this, DEFAULT_ABUSE_DESC_TEXT, "TextBox", nil, nil)
-		else
-			this.AbuseDescriptionFrame, 
-			this.AbuseDescriptionLabel,
-			this.AbuseDescription = utility:AddNewRow(this, DEFAULT_ABUSE_DESC_TEXT, "TextBox", nil, nil, 5)
-		end
-
-		if utility:IsSmallTouchScreen() then
-			this.AbuseDescription.Selection.Size = UDim2.new(0, 290, 0, 30)
-			this.AbuseDescription.Selection.Position = UDim2.new(1,-345,this.AbuseDescription.Selection.Position.Y.Scale, this.AbuseDescription.Selection.Position.Y.Offset)
-
-			this.AbuseDescriptionLabel = this.TypeOfAbuseLabel:clone()
-			this.AbuseDescriptionLabel.Text = "Abuse Description"
-			this.AbuseDescriptionLabel.Position = UDim2.new(this.AbuseDescriptionLabel.Position.X.Scale, this.AbuseDescriptionLabel.Position.X.Offset,
-				0,50)
-			this.AbuseDescriptionLabel.Parent = this.Page
-		end
-
-		local SelectionOverrideObject = utility:Create'ImageLabel'
-		{
-			Image = "",
-			BackgroundTransparency = 1
-		};
-
-		local submitButton, submitText = nil, nil
-
-		local function makeSubmitButtonActive()
-			submitButton.ZIndex = 2
-			submitButton.Selectable = true
-			submitText.ZIndex = 2
-		end
-
-		local function makeSubmitButtonInactive()
-			submitButton.ZIndex = 1
-			submitButton.Selectable = false
-			submitText.ZIndex = 1
-		end
-
-		local function updateAbuseDropDown()
-			this.WhichPlayerMode:ResetSelectionIndex()
-			this.TypeOfAbuseMode:ResetSelectionIndex()
-
-			if this.GameOrPlayerMode.CurrentIndex == 1 then
-				this.TypeOfAbuseMode:UpdateDropDownList(ABUSE_TYPES_GAME)
-				this.WhichPlayerMode:SetInteractable(false)
-				this.WhichPlayerLabel.ZIndex = 1
-				this.GameOrPlayerMode.SelectorFrame.NextSelectionDown = this.TypeOfAbuseMode.DropDownFrame
-			else
-				this.TypeOfAbuseMode:UpdateDropDownList(ABUSE_TYPES_PLAYER)
-				this.WhichPlayerMode:SetInteractable(true)
-				this.WhichPlayerLabel.ZIndex = 2
-				this.GameOrPlayerMode.SelectorFrame.NextSelectionDown = this.WhichPlayerMode.DropDownFrame
-			end
-			makeSubmitButtonInactive()
-		end
-
-		local function cleanupReportAbuseMenu()
-			updateAbuseDropDown()
-			this.AbuseDescription.Selection.Text = DEFAULT_ABUSE_DESC_TEXT
-			this.HubRef:SetVisibility(false, true)
-		end
-
-		local function onReportSubmitted()
-			local abuseReason = nil
-			if this.GameOrPlayerMode.CurrentIndex == 2 then
-				abuseReason = ABUSE_TYPES_PLAYER[this.TypeOfAbuseMode.CurrentIndex]
-
-				local currentAbusingPlayer = this:GetPlayerFromIndex(this.WhichPlayerMode.CurrentIndex)
-				if currentAbusingPlayer and abuseReason then
-					spawn(function()
-						game.Players:ReportAbuse(currentAbusingPlayer, abuseReason, this.AbuseDescription.Selection.Text)
-					end)
-				end
-			else
-				abuseReason = ABUSE_TYPES_GAME[this.TypeOfAbuseMode.CurrentIndex]
-				if abuseReason then
-					spawn(function()
-						game.Players:ReportAbuse(nil, abuseReason, this.AbuseDescription.Selection.Text)
-					end)
-				end
-			end
-
-			if abuseReason then
-				local alertText = "Thanks for your report! Our moderators will review the chat logs and evaluate what happened."
-
-				if abuseReason == 'Cheating/Exploiting' then
-					alertText = "Thanks for your report! We've recorded your report for evaluation."
-				elseif abuseReason == 'Inappropriate Username' then
-					alertText = "Thanks for your report! Our moderators will evaluate the username."
-				elseif abuseReason == "Bad Model or Script" or  abuseReason == "Inappropriate Content" or abuseReason == "Offsite Link" or abuseReason == "Offsite Links" then
-					alertText = "Thanks for your report! Our moderators will review the place and make a determination."
-				end
-
-				utility:ShowAlert(alertText, "Ok", this.HubRef, cleanupReportAbuseMenu)
-
-				this.LastSelectedObject = nil
-			end
-		end
-
-		submitButton, submitText = utility:MakeStyledButton("SubmitButton", "Submit", UDim2.new(0,198,0,50), onReportSubmitted, this)
-		if utility:IsSmallTouchScreen() then
-			submitButton.Position = UDim2.new(1,-220,1,5)
-		else
-			submitButton.Position = UDim2.new(1,-194,1,5)
-		end
-		submitButton.Selectable = false
-		submitButton.ZIndex = 1
-		submitText.ZIndex = 1
-		submitButton.Parent = this.AbuseDescription.Selection
-
-		local function playerSelectionChanged(newIndex)
-			if newIndex ~= nil and this.TypeOfAbuseMode:GetSelectedIndex() ~= nil then
-				makeSubmitButtonActive()
-			else
-				makeSubmitButtonInactive()
-			end
-		end
-		this.WhichPlayerMode.IndexChanged:connect(playerSelectionChanged)
-
-		local function typeOfAbuseChanged(newIndex)
-			if newIndex ~= nil then
-				if this.GameOrPlayerMode.CurrentIndex == 1 or this.WhichPlayerMode:GetSelectedIndex() ~= nil then
-					makeSubmitButtonActive()
-				else
-					makeSubmitButtonInactive()
-				end
-			else
-				makeSubmitButtonInactive()
-			end
-		end
-		this.TypeOfAbuseMode.IndexChanged:connect(typeOfAbuseChanged)
-
-		this.GameOrPlayerMode.IndexChanged:connect(updateAbuseDropDown)
-
-		this:AddRow(nil, nil, this.AbuseDescription)
-
-		this.Page.Size = UDim2.new(1,0,0,submitButton.AbsolutePosition.Y + submitButton.AbsoluteSize.Y)
-	end
-
-	return this
-end
-
-
------------ Public Facing API Additions --------------
-do
-	PageInstance = Initialize()
-
-	PageInstance.Displayed.Event:connect(function()
-		PageInstance:UpdatePlayerDropDown()
-	end)
-end
-
-
-return PageInstance
-
-end;
-};
-G2L_MODULES[G2L["17"]] = {
-Closure = function()
-    local script = G2L["17"];--[[
+    local script = G2L["a"];--[[
 	// FileName: Chat.lua
 	// Written by: SolarCrane
 	// Description: Code for lua side chat on ROBLOX.
@@ -13807,6 +8080,5733 @@ return moduleApiTable
 
 end;
 };
+G2L_MODULES[G2L["c"]] = {
+Closure = function()
+    local script = G2L["c"];--[[
+		Filename: SettingsPageFactory.lua
+		Written by: jeditkacheff
+		Version 1.0
+		Description: Base Page Functionality for all Settings Pages
+--]]
+----------------- SERVICES ------------------------------
+local GuiService = _G:GetService("GuiService")
+local HttpService = game:GetService("HttpService")
+local UserInputService = game:GetService("UserInputService")
+
+local CoreGui = _G:GetService("CoreGui")
+local RobloxGui = CoreGui:WaitForChild("RobloxGui")
+
+----------- UTILITIES --------------
+local utility = require(RobloxGui.Modules.Settings.Utility)
+
+
+----------- VARIABLES --------------
+RobloxGui:WaitForChild("Modules"):WaitForChild("TenFootInterface")
+local isTenFootInterface = require(RobloxGui.Modules.TenFootInterface):IsEnabled()
+
+----------- CONSTANTS --------------
+local HEADER_SPACING = 5
+if utility:IsSmallTouchScreen() then
+	HEADER_SPACING = 0
+end
+
+----------- CLASS DECLARATION --------------
+local function Initialize()
+	local this = {}
+	this.HubRef = nil
+	this.LastSelectedObject = nil
+	this.TabPosition = 0
+	this.Active = false
+	this.OpenStateChangedCount = 0
+	local rows = {}
+	local displayed = false
+
+	------ TAB CREATION -------
+	this.TabHeader = utility:Create'TextButton'
+	{
+		Name = "Header",
+		Text = "",
+		BackgroundTransparency = 1,
+		Size = UDim2.new(0,169,1,0),
+		Position = UDim2.new(0.5,0,0,0)
+	};
+	if utility:IsSmallTouchScreen() then
+		this.TabHeader.Size = UDim2.new(0,84,1,0)
+	elseif isTenFootInterface then
+		this.TabHeader.Size = UDim2.new(0,220,1,0)
+	end
+	this.TabHeader.MouseButton1Click:connect(function()
+		if this.HubRef then
+			this.HubRef:SwitchToPage(this, true)
+		end
+	end)
+
+	local icon = utility:Create'ImageLabel'
+	{
+		Name = "Icon",
+		BackgroundTransparency = 1,
+		Size = UDim2.new(0,44,0,37),
+		Position = UDim2.new(0,10,0.5,-18),
+		Image = "",
+		ImageTransparency = 0.5,
+		Parent = this.TabHeader
+	};
+
+	local title = utility:Create'TextLabel'
+	{
+		Name = "Title",
+		Text = "Change Me",
+		Font = Enum.Font.SourceSansBold,
+		FontSize = Enum.FontSize.Size24,
+		TextColor3 = Color3.new(1,1,1),
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1.05,0,1,0),
+		Position = UDim2.new(1.2,0,0,0),
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextTransparency = 0.5,
+		Parent = icon
+	};
+	if utility:IsSmallTouchScreen() then
+		title.FontSize = Enum.FontSize.Size18
+	elseif isTenFootInterface then
+		title.FontSize = Enum.FontSize.Size48
+	end
+
+	local tabSelection = utility:Create'ImageLabel'
+	{
+		Name = "TabSelection",
+		Image = "rbxasset://textures/ui/Settings/MenuBarAssets/MenuSelection.png",
+		ScaleType = Enum.ScaleType.Slice,
+		SliceCenter = Rect.new(3,1,4,5),
+		Visible = false,
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1,0,0,6),
+		Position = UDim2.new(0,0,1,-6),
+		Parent = this.TabHeader
+	};
+
+	------ PAGE CREATION -------
+	this.Page = utility:Create'Frame'
+	{
+		Name = "Page",
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1,0,1,0)
+	};
+
+	-- make sure each page has a unique selection group (for gamepad selection)
+	GuiService:AddSelectionParent(HttpService:GenerateGUID(false), this.Page)
+
+	----------------- Events ------------------------
+
+	this.Displayed = Instance.new("BindableEvent")
+	this.Displayed.Name = "Displayed"
+
+	this.Displayed.Event:connect(function()
+		if not this.HubRef.Shield.Visible then return end
+
+		this:SelectARow()
+	end)
+
+	this.Hidden = Instance.new("BindableEvent")
+	this.Hidden.Event:connect(function()
+		if GuiService.SelectedObject and GuiService.SelectedObject:IsDescendantOf(this.Page) then
+			GuiService.SelectedObject = nil
+		end
+	end)
+	this.Hidden.Name = "Hidden"
+
+	----------------- FUNCTIONS ------------------------
+	function this:SelectARow(forced) -- Selects the first row or the most recently selected row
+		if forced or not GuiService.SelectedObject or not GuiService.SelectedObject:IsDescendantOf(this.Page) then
+			if this.LastSelectedObject then
+				GuiService.SelectedObject = this.LastSelectedObject
+			else
+				if rows and #rows > 0 then
+					local valueChangerFrame = nil
+
+					if type(rows[1].ValueChanger) ~= "table" then
+						valueChangerFrame = rows[1].ValueChanger
+					else
+						valueChangerFrame = rows[1].ValueChanger.SliderFrame and 
+							rows[1].ValueChanger.SliderFrame or rows[1].ValueChanger.SelectorFrame
+					end
+					GuiService.SelectedObject = valueChangerFrame
+				end
+			end
+		end
+	end
+
+	function this:Display(pageParent, skipAnimation)
+		this.OpenStateChangedCount = this.OpenStateChangedCount + 1
+
+		if this.TabHeader then
+			this.TabHeader.TabSelection.Visible = true
+			this.TabHeader.Icon.ImageTransparency = 0
+			this.TabHeader.Icon.Title.TextTransparency = 0
+		end
+
+		this.Page.Parent = pageParent
+		this.Page.Visible = true
+
+		local endPos = UDim2.new(0,0,0,0)
+		local animationComplete = function()
+			this.Page.Visible = true
+			displayed = true
+			this.Displayed:Fire()
+		end
+		if skipAnimation then
+			this.Page.Position = endPos
+			animationComplete()
+		else
+			this.Page:TweenPosition(endPos, Enum.EasingDirection.In, Enum.EasingStyle.Quad, 0.1, true, animationComplete)
+		end
+	end
+	function this:Hide(direction, newPagePos, skipAnimation, delayBeforeHiding)
+		this.OpenStateChangedCount = this.OpenStateChangedCount + 1
+
+		if this.TabHeader then
+			this.TabHeader.TabSelection.Visible = false
+			this.TabHeader.Icon.ImageTransparency = 0.5
+			this.TabHeader.Icon.Title.TextTransparency = 0.5
+		end
+
+		if this.Page.Parent then
+			local endPos = UDim2.new(1 * direction,0,0,0)
+			local animationComplete = function()
+				this.Page.Visible = false
+				this.Page.Position = UDim2.new(this.TabPosition - newPagePos,0,0,0)
+				displayed = false
+				this.Hidden:Fire()
+			end
+
+			local remove = function()
+				if skipAnimation then
+					this.Page.Position = endPos
+					animationComplete()
+				else
+					this.Page:TweenPosition(endPos, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true, animationComplete)
+				end
+			end
+
+			if delayBeforeHiding then
+				local myOpenStateChangedCount = this.OpenStateChangedCount
+				delay(delayBeforeHiding, function()
+					if myOpenStateChangedCount == this.OpenStateChangedCount then
+						remove()
+					end
+				end)
+			else
+				remove()
+			end
+		end
+	end
+
+	function this:GetDisplayed()
+		return displayed
+	end
+
+	function this:GetVisibility()
+		return this.Page.Parent
+	end
+
+	function this:GetTabHeader()
+		return this.TabHeader
+	end
+
+	function this:SetHub(hubRef)
+		this.HubRef = hubRef
+
+		for i, row in next, rows do
+			if type(row.ValueChanger) == 'table' then
+				row.ValueChanger.HubRef = this.HubRef
+			end
+		end
+	end
+
+	function this:GetSize()
+		return this.Page.AbsoluteSize
+	end
+
+	function this:AddRow(RowFrame, RowLabel, ValueChangerInstance, ExtraRowSpacing)
+		rows[#rows + 1] = {SelectionFrame = RowFrame, Label = RowLabel, ValueChanger = ValueChangerInstance}
+
+		local rowFrameYSize = 0
+		if RowFrame then 
+			rowFrameYSize = RowFrame.Size.Y.Offset
+		end
+
+		if ExtraRowSpacing then
+			this.Page.Size = UDim2.new(1, 0, 0, this.Page.Size.Y.Offset + rowFrameYSize + ExtraRowSpacing)
+		else
+			this.Page.Size = UDim2.new(1, 0, 0, this.Page.Size.Y.Offset + rowFrameYSize)
+		end
+
+		if this.HubRef and type(ValueChangerInstance) == 'table' then
+			ValueChangerInstance.HubRef = this.HubRef
+		end
+	end
+
+	return this
+end
+
+
+-------- public facing API ----------------
+local moduleApiTable = {}
+
+function moduleApiTable:CreateNewPage()
+	return Initialize()
+end
+
+return moduleApiTable
+end;
+};
+G2L_MODULES[G2L["d"]] = {
+Closure = function()
+    local script = G2L["d"];--[[
+		Filename: SettingsPage.lua
+		Written by: jeditkacheff
+		Version 1.0
+		Description: Base Page Functionality for all Settings Pages
+--]]
+
+------------------ CONSTANTS --------------------
+local SELECTED_COLOR = Color3.new(0,162/255,1)
+local NON_SELECTED_COLOR = Color3.new(78/255,84/255,96/255)
+
+local SELECTED_LEFT_IMAGE = "rbxasset://textures/ui/Settings/Slider/SelectedBarLeft.png"
+local NON_SELECTED_LEFT_IMAGE = "rbxasset://textures/ui/Settings/Slider/BarLeft.png"
+local SELECTED_RIGHT_IMAGE = "rbxasset://textures/ui/Settings/Slider/SelectedBarRight.png"
+local NON_SELECTED_RIGHT_IMAGE= "rbxasset://textures/ui/Settings/Slider/BarRight.png"
+
+local CONTROLLER_SCROLL_DELTA = 0.2
+local CONTROLLER_THUMBSTICK_DEADZONE = 0.8
+
+------------- SERVICES ----------------
+local HttpService = game:GetService("HttpService")
+local UserInputService = game:GetService("UserInputService")
+local GuiService = _G:GetService("GuiService")
+local RunService = game:GetService("RunService")
+local CoreGui = _G:GetService("CoreGui")
+local RobloxGui = CoreGui:FindFirstChild("RobloxGui")
+local ContextActionService = game:GetService("ContextActionService")
+
+------------------ VARIABLES --------------------
+local tenFootInterfaceEnabled = false
+do
+	RobloxGui:WaitForChild("Modules"):WaitForChild("TenFootInterface")
+	tenFootInterfaceEnabled = require(RobloxGui.Modules.TenFootInterface):IsEnabled()
+end
+
+
+
+----------- UTILITIES --------------
+local Util = {}
+do
+	function Util.Create(instanceType)
+		return function(data)
+			local obj = Instance.new(instanceType)
+			for k, v in pairs(data) do
+				if type(k) == 'number' then
+					v.Parent = obj
+				else
+					obj[k] = v
+				end
+			end
+			return obj
+		end
+	end
+end
+
+
+-- used by several guis to show no selection adorn
+local noSelectionObject = Util.Create'ImageLabel'
+{
+	Image = "",
+	BackgroundTransparency = 1
+};
+
+
+-- MATH --
+function clamp(low, high, input)
+	return math.max(low, math.min(high, input))
+end
+
+function ClampVector2(low, high, input)
+	return Vector2.new(clamp(low.x, high.x, input.x), clamp(low.y, high.y, input.y))
+end
+
+---- TWEENZ ----
+local Linear = function(t, b, c, d)
+	if t >= d then return b + c end
+
+	return c*t/d + b
+end
+
+local EaseOutQuad = function(t, b, c, d)
+	if t >= d then return b + c end
+
+	t = t/d;
+	return -c * t*(t-2) + b
+end
+
+local EaseInOutQuad = function(t, b, c, d)
+	if t >= d then return b + c end
+
+	t = t / (d/2);
+	if (t < 1) then return c/2*t*t + b end;
+	t = t - 1;
+	return -c/2 * (t*(t-2) - 1) + b;
+end
+
+function PropertyTweener(instance, prop, start, final, duration, easingFunc, cbFunc)
+	local this = {}
+	this.StartTime = tick()
+	this.EndTime = this.StartTime + duration
+	this.Cancelled = false
+
+	local finished = false
+	local percentComplete = 0
+
+	local function finalize()
+		if instance then
+			instance[prop] = easingFunc(1, start, final - start, 1)
+		end
+		finished = true
+		percentComplete = 1
+		if cbFunc then
+			cbFunc()
+		end
+	end
+
+	-- Initial set
+	instance[prop] = easingFunc(0, start, final - start, duration)
+	spawn(function()
+		local now = tick()
+		while now < this.EndTime and instance do
+			if this.Cancelled then
+				return
+			end
+			instance[prop] = easingFunc(now - this.StartTime, start, final - start, duration)
+			percentComplete = clamp(0, 1, (now - this.StartTime) / duration)
+			RunService.RenderStepped:wait()
+			now = tick()
+		end
+		if this.Cancelled == false and instance then
+			finalize()
+		end
+	end)
+
+	function this:GetFinal()
+		return final
+	end
+
+	function this:GetPercentComplete()
+		return percentComplete
+	end
+
+	function this:IsFinished()
+		return finished
+	end
+
+	function this:Finish()
+		if not finished then
+			self:Cancel()
+			finalize()
+		end
+	end
+
+	function this:Cancel()
+		this.Cancelled = true
+	end
+
+	return this
+end
+
+----------- CLASS DECLARATION --------------
+
+local function CreateSignal()
+	local sig = {}
+
+	local mSignaler = Instance.new('BindableEvent')
+
+	local mArgData = nil
+	local mArgDataCount = nil
+
+	function sig:fire(...)
+		mArgData = {...}
+		mArgDataCount = select('#', ...)
+		mSignaler:Fire()
+	end
+
+	function sig:connect(f)
+		if not f then error("connect(nil)", 2) end
+		return mSignaler.Event:connect(function()
+			f(unpack(mArgData, 1, mArgDataCount))
+		end)
+	end
+
+	function sig:wait()
+		mSignaler.Event:wait()
+		assert(mArgData, "Missing arg data, likely due to :TweenSize/Position corrupting threadrefs.")
+		return unpack(mArgData, 1, mArgDataCount)
+	end
+
+	return sig
+end
+
+local function getViewportSize()
+	while not game.Workspace.CurrentCamera do
+		game.Workspace.Changed:wait()
+	end
+
+	while game.Workspace.CurrentCamera.ViewportSize == Vector2.new(0,0) do
+		game.Workspace.CurrentCamera.Changed:wait()
+	end
+
+	return game.Workspace.CurrentCamera.ViewportSize
+end
+
+local function isSmallTouchScreen()
+	return UserInputService.TouchEnabled and getViewportSize().Y <= 500
+end
+
+local function isTenFootInterface()
+	return tenFootInterfaceEnabled
+end
+
+local function usesSelectedObject()
+	if UserInputService.TouchEnabled and not UserInputService.GamepadEnabled then return false end
+
+	return true
+end
+
+local function isPosOverGui(pos, gui, debug) -- does not account for rotation
+	local ax, ay = gui.AbsolutePosition.x, gui.AbsolutePosition.y
+	local sx, sy = gui.AbsoluteSize.x, gui.AbsoluteSize.y
+	local bx, by = ax+sx, ay+sy
+
+	if pos.x > ax and pos.x < bx and pos.y > ay and pos.y < by then
+		return true
+	else
+		return false
+	end
+end
+
+local function isPosOverGuiWithClipping(pos, gui) -- isPosOverGui, accounts for clipping and visibility, does not account for rotation
+	if not isPosOverGui(pos, gui) then
+		return false
+	end
+
+	local clipping = false
+	local check = gui
+	while true do
+		if check == nil or (not check:IsA'GuiObject' and not check:IsA'LayerCollector') then
+			clipping = true
+			if check and check:IsA'CoreGui' then
+				clipping = false
+			end
+			break
+		end
+
+		if check:IsA'GuiObject' and not check.Visible then
+			clipping = true
+			break
+		end
+		if check:IsA'LayerCollector' or check.ClipsDescendants then
+			if not isPosOverGui(pos, check) then
+				clipping = true
+				break
+			end
+		end
+
+		check = check.Parent
+	end
+
+	if clipping then
+		return false
+	else
+		return true
+	end
+end
+
+local function areGuisIntersecting(a, b) -- does not account for rotation
+	local aax, aay = a.AbsolutePosition.x, a.AbsolutePosition.y
+	local asx, asy = a.AbsoluteSize.x, a.AbsoluteSize.y
+	local abx, aby = aax+asx, aay+asy
+	local bax, bay = b.AbsolutePosition.x, b.AbsolutePosition.y
+	local bsx, bsy = b.AbsoluteSize.x, b.AbsoluteSize.y
+	local bbx, bby = bax+bsx, bay+bsy
+
+	local intersectingX = aax < bbx and abx > bax
+	local intersectingY = aay < bby and aby > bay
+	local intersecting = intersectingX and intersectingY
+
+	return intersecting
+end
+
+local function isGuiVisible(gui, debug) -- true if any part of the gui is visible on the screen, considers clipping, does not account for rotation
+	local clipping = false
+	local check = gui
+	while true do
+		if check == nil or not check:IsA'GuiObject' and not check:IsA'LayerCollector' then
+			clipping = true
+			if check and check:IsA'CoreGui' then
+				clipping = false
+			end
+			break
+		end
+
+		if check:IsA'GuiObject' and not check.Visible then
+			clipping = true
+			break
+		end
+		if check:IsA'LayerCollector' or check.ClipsDescendants then
+			if not areGuisIntersecting(check, gui) then
+				clipping = true
+				break
+			end
+		end
+
+		check = check.Parent
+	end
+
+	if clipping then
+		return false
+	else
+		return true
+	end
+end
+
+local function MakeButton(name, text, size, clickFunc, pageRef, hubRef)
+	local SelectionOverrideObject = Util.Create'ImageLabel'
+	{
+		Image = "",
+		BackgroundTransparency = 1,
+	};
+
+	local button = Util.Create'ImageButton'
+	{
+		Name = name .. "Button",
+		Image = "rbxasset://textures/ui/Settings/MenuBarAssets/MenuButton.png",
+		ScaleType = Enum.ScaleType.Slice,
+		SliceCenter = Rect.new(8,6,46,44),
+		AutoButtonColor = false,
+		BackgroundTransparency = 1,
+		Size = size,
+		ZIndex = 2,
+		SelectionImageObject = SelectionOverrideObject
+	};
+	button.NextSelectionLeft = button
+	button.NextSelectionRight = button
+
+	local enabled = Util.Create'BoolValue'
+	{
+		Name = 'Enabled',
+		Parent = button,
+		Value = true
+	}
+
+	if clickFunc then 
+		button.MouseButton1Click:connect(function() 
+			local lastInputType = nil
+			pcall(function() lastInputType = UserInputService:GetLastInputType() end)
+			if lastInputType then
+				clickFunc(lastInputTypee == Enum.UserInputType.Gamepad1 or lastInputType == Enum.UserInputType.Gamepad2 or 
+					lastInputType == Enum.UserInputType.Gamepad3 or lastInputType == Enum.UserInputType.Gamepad4)
+			else
+				clickFunc(false)
+			end
+		end) 
+	end
+
+	local function isPointerInput(inputObject)
+		return (inputObject.UserInputType == Enum.UserInputType.MouseMovement or inputObject.UserInputType == Enum.UserInputType.Touch)
+	end
+
+	local function selectButton()
+		local hub = hubRef
+		if hub == nil then
+			if pageRef then
+				hub = pageRef.HubRef
+			end
+		end
+
+		if (hub and hub.Active or hub == nil) then
+			button.Image = "rbxasset://textures/ui/Settings/MenuBarAssets/MenuButtonSelected.png"
+
+			local scrollTo = button
+			if rowRef then
+				scrollTo = rowRef
+			end
+			if hub then
+				hub:ScrollToFrame(scrollTo)
+			end
+		end
+	end
+
+	local function deselectButton()
+		button.Image = "rbxasset://textures/ui/Settings/MenuBarAssets/MenuButton.png"
+	end
+
+	button.InputBegan:connect(function(inputObject)
+		if button.Selectable and isPointerInput(inputObject) then
+			selectButton()
+		end
+	end)
+	button.InputEnded:connect(function(inputObject)
+		if button.Selectable and GuiService.SelectedObject ~= button and isPointerInput(inputObject) then
+			deselectButton()
+		end
+	end)
+
+	local rowRef = nil
+	local function setRowRef(ref)
+		rowRef = ref
+	end
+	button.SelectionGained:connect(function()
+		selectButton()
+	end)
+	button.SelectionLost:connect(function()
+		deselectButton()
+	end)
+
+	local textLabel = Util.Create'TextLabel'
+	{
+		Name = name .. "TextLabel",
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		Size = UDim2.new(1, 0, 1, -8),
+		Position = UDim2.new(0,0,0,0),
+		TextColor3 = Color3.new(1,1,1),
+		TextYAlignment = Enum.TextYAlignment.Center,
+		Font = Enum.Font.SourceSansBold,
+		FontSize = Enum.FontSize.Size24,
+		Text = text,
+		TextWrapped = true,
+		ZIndex = 2,
+		Parent = button
+	};
+
+	if isSmallTouchScreen() then
+		textLabel.FontSize = Enum.FontSize.Size18
+	elseif isTenFootInterface() then
+		textLabel.FontSize = Enum.FontSize.Size36
+	end
+	--[[
+		local guiServiceCon = GuiService.Changed:connect(function(prop)
+			if prop ~= "SelectedObject" then return end
+			if not usesSelectedObject() then return end
+
+			if GuiService.SelectedObject == nil or GuiService.SelectedObject ~= button then 
+				deselectButton()
+				return 
+			end
+
+			if button.Selectable then
+				selectButton()
+			end
+		end)
+	--]]
+	return button, textLabel, setRowRef
+end
+
+local function CreateDropDown(dropDownStringTable, startPosition, settingsHub)
+	-------------------- CONSTANTS ------------------------
+	local DEFAULT_DROPDOWN_TEXT = "Choose One"
+	local SCROLLING_FRAME_PIXEL_OFFSET = 25
+	local SELECTION_TEXT_COLOR_NORMAL = Color3.new(0.7,0.7,0.7)
+	local SELECTION_TEXT_COLOR_HIGHLIGHTED = Color3.new(1,1,1)
+
+	-------------------- VARIABLES ------------------------
+	local lastSelectedObject= nil
+
+	-------------------- SETUP ------------------------
+	local this = {}
+	this.CurrentIndex = nil
+
+	local indexChangedEvent = Instance.new("BindableEvent")
+	indexChangedEvent.Name = "IndexChanged"
+
+	if type(dropDownStringTable) ~= "table" then
+		error("CreateDropDown dropDownStringTable (first arg) is not a table")
+		return this
+	end
+
+	local indexChangedEvent = Instance.new("BindableEvent")
+	indexChangedEvent.Name = "IndexChanged"
+
+	local interactable = true
+	local guid = HttpService:GenerateGUID(false)
+	local dropDownButtonEnabled
+
+	this.CurrentIndex = 0
+
+	----------------- GUI SETUP ------------------------
+	local DropDownFullscreenFrame = Util.Create'ImageButton'
+	{
+		Name = "DropDownFullscreenFrame",
+		BackgroundTransparency = 0.2,
+		BorderSizePixel = 0,
+		Size = UDim2.new(1, 0, 1, 0),
+		BackgroundColor3 = Color3.new(0,0,0),
+		ZIndex = 10,
+		Active = true,
+		Visible = false,
+		Selectable = false,
+		AutoButtonColor = false,
+		Parent = CoreGui.RobloxGui
+	};
+
+	local DropDownSelectionFrame = Util.Create'ImageLabel'
+	{
+		Name = "DropDownSelectionFrame",
+		Image = "rbxasset://textures/ui/Settings/MenuBarAssets/MenuButton.png",
+		ScaleType = Enum.ScaleType.Slice,
+		SliceCenter = Rect.new(8,6,46,44),
+		BackgroundTransparency = 1,
+		Size = UDim2.new(0, 400, 0.9, 0),
+		Position = UDim2.new(0.5, -200, 0.05, 0),
+		ZIndex = 10,
+		Parent = DropDownFullscreenFrame
+	};
+
+	local DropDownScrollingFrame = Util.Create'ScrollingFrame'
+	{
+		Name = "DropDownScrollingFrame",
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		Size = UDim2.new(1, -20, 1, -SCROLLING_FRAME_PIXEL_OFFSET),
+		Position = UDim2.new(0, 10, 0, 10),
+		ZIndex = 10,
+		Parent = DropDownSelectionFrame
+	};
+
+	local guiServiceChangeCon = nil
+	local active = false
+	local hideDropDownSelection = function(name, inputState)
+		if name ~= nil and inputState ~= Enum.UserInputState.Begin then return end
+
+		-- Do the critical recovery first. Nothing below is allowed to leave the hub frozen.
+		DropDownFullscreenFrame.Visible = false
+		active = false
+		pcall(function() ContextActionService:UnbindAction(guid .. "Action") end)
+		pcall(function() ContextActionService:UnbindAction(guid .. "FreezeAction") end)
+		pcall(function() settingsHub:SetActive(true) end)
+
+		pcall(function()
+			this.DropDownFrame.Selectable = interactable
+			dropDownButtonEnabled.Value = interactable
+		end)
+
+		pcall(function()
+			if usesSelectedObject() then
+				GuiService.SelectedObject = lastSelectedObject
+			end
+		end)
+
+		if guiServiceChangeCon then
+			pcall(function() guiServiceChangeCon:disconnect() end)
+			guiServiceChangeCon = nil
+		end
+	end
+	local noOpFunc = function() end
+
+	local DropDownFrameClicked = function()
+		if not interactable then return end
+
+		this.DropDownFrame.Selectable = false
+		active = true
+
+		DropDownFullscreenFrame.Visible = true
+		if not this.CurrentIndex then this.CurrentIndex = 1 end
+		if this.CurrentIndex <= 0 then this.CurrentIndex = 1 end
+
+		lastSelectedObject = this.DropDownFrame
+		GuiService.SelectedObject = this.Selections[this.CurrentIndex]
+		--[[
+			guiServiceChangeCon = GuiService.Changed:connect(function(prop)
+				if not prop == "SelectedObject" then return end
+				for i = 1, #this.Selections do
+					if GuiService.SelectedObject == this.Selections[i] then
+						this.Selections[i].TextColor3 = SELECTION_TEXT_COLOR_HIGHLIGHTED
+					else
+						this.Selections[i].TextColor3 = SELECTION_TEXT_COLOR_NORMAL
+					end
+				end
+			end)
+		--]]
+		-- Old CoreGui code froze all keyboard/gamepad input and deactivated the hub.
+		-- In a PlayerGui recreation that can leave the menu permanently unresponsive
+		-- if any legacy dropdown callback fails. Keep only the explicit close action.
+		ContextActionService:UnbindAction(guid .. "FreezeAction")
+		ContextActionService:BindAction(guid .. "Action", hideDropDownSelection, false, Enum.KeyCode.ButtonB, Enum.KeyCode.Escape)
+
+		pcall(function() settingsHub:SetActive(true) end)
+
+		dropDownButtonEnabled.Value = false
+	end
+
+	local dropDownFrameSize = UDim2.new(0,400,0,44)
+	if isSmallTouchScreen() then
+		dropDownFrameSize = UDim2.new(0,300,0,44)
+	end
+	this.DropDownFrame = MakeButton("DropDownFrame", DEFAULT_DROPDOWN_TEXT, dropDownFrameSize, DropDownFrameClicked)
+	dropDownButtonEnabled = this.DropDownFrame.Enabled
+	local selectedTextLabel = this.DropDownFrame.DropDownFrameTextLabel
+	local dropDownImage = Util.Create'ImageLabel'
+	{
+		Name = "DropDownImage",
+		Image = "rbxasset://textures/ui/Settings/DropDown/DropDown.png",
+		BackgroundTransparency = 1,
+		Size = UDim2.new(0,15,0,10),
+		Position = UDim2.new(1, -45,0.5,-7),
+		ZIndex = 2,
+		Parent = this.DropDownFrame
+	};
+
+
+	---------------------- FUNCTIONS -----------------------------------
+	local function setSelection(index)
+		local shouldFireChanged = false
+		for i, selectionLabel in pairs(this.Selections) do
+			if i == index then
+				selectedTextLabel.Text = selectionLabel.Text
+				this.CurrentIndex = i
+
+				shouldFireChanged = true
+			end
+		end
+
+		if shouldFireChanged then
+			indexChangedEvent:Fire(index)
+		end
+	end
+
+	local function setSelectionByValue(value)
+		local shouldFireChanged = false
+		for i, selectionLabel in pairs(this.Selections) do
+			if selectionLabel.Text == value then
+				selectedTextLabel.Text = selectionLabel.Text
+				this.CurrentIndex = i
+
+				shouldFireChanged = true
+			end
+		end
+
+		if shouldFireChanged then
+			indexChangedEvent:Fire(this.CurrentIndex)
+		end
+		return shouldFireChanged
+	end
+
+	local enterIsDown = false
+	local function processInput(input)
+		if input.UserInputState == Enum.UserInputState.Begin then
+			if input.KeyCode == Enum.KeyCode.Return then
+				if GuiService.SelectedObject == this.DropDownFrame or this.SelectionInfo and this.SelectionInfo[GuiService.SelectedObject] then
+					enterIsDown = true
+				end
+			end
+		elseif input.UserInputState == Enum.UserInputState.End then
+			if input.KeyCode == Enum.KeyCode.Return and enterIsDown then
+				enterIsDown = false
+				if GuiService.SelectedObject == this.DropDownFrame then
+					DropDownFrameClicked()
+				elseif this.SelectionInfo and this.SelectionInfo[GuiService.SelectedObject] then
+					local info = this.SelectionInfo[GuiService.SelectedObject]
+					info.Clicked()
+				end
+			end
+		end
+	end
+
+
+	--------------------- PUBLIC FACING FUNCTIONS -----------------------
+	this.IndexChanged = indexChangedEvent.Event
+
+	function this:SetSelectionIndex(newIndex)
+		setSelection(newIndex)
+	end
+
+	function this:SetSelectionByValue(value)
+		return setSelectionByValue(value)
+	end
+
+	function this:ResetSelectionIndex()
+		this.CurrentIndex = nil
+		selectedTextLabel.Text = DEFAULT_DROPDOWN_TEXT
+		hideDropDownSelection()
+	end
+
+	function this:GetSelectedIndex()
+		return this.CurrentIndex
+	end
+
+	function this:SetZIndex(newZIndex)
+		this.DropDownFrame.ZIndex = newZIndex
+		dropDownImage.ZIndex = newZIndex
+		selectedTextLabel.ZIndex = newZIndex
+	end
+
+	function this:SetInteractable(value)
+		interactable = value
+		this.DropDownFrame.Selectable = interactable
+
+		if not interactable then
+			hideDropDownSelection()
+			this:SetZIndex(1)
+		else
+			this:SetZIndex(2)
+		end
+
+		dropDownButtonEnabled.Value = value and not active
+	end
+
+
+	function this:UpdateDropDownList(dropDownStringTable)
+		if this.Selections then
+			for i = 1, #this.Selections do
+				this.Selections[i]:Destroy()
+			end
+		end
+
+		this.Selections = {}
+		this.SelectionInfo = {}
+
+		for i,v in pairs(dropDownStringTable) do
+			local SelectionOverrideObject =	Util.Create'Frame'
+			{
+				BackgroundTransparency = 0.7,
+				BorderSizePixel = 0,
+				Size = UDim2.new(1, 0, 1, 0)
+			};
+
+			local nextSelection = Util.Create'TextButton'
+			{
+				Name = "Selection" .. tostring(i),
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0,
+				AutoButtonColor = false,
+				Size = UDim2.new(1, -28, 0, 50),
+				Position = UDim2.new(0,14,0, (i - 1) * 51),
+				TextColor3 = SELECTION_TEXT_COLOR_NORMAL,
+				Font = Enum.Font.SourceSans,
+				FontSize = Enum.FontSize.Size24,
+				Text = v,
+				ZIndex = 10,
+				SelectionImageObject = SelectionOverrideObject,
+				Parent = DropDownScrollingFrame
+			};
+
+			if i == startPosition then
+				this.CurrentIndex = i
+				selectedTextLabel.Text = v
+				nextSelection.TextColor3 = SELECTION_TEXT_COLOR_HIGHLIGHTED
+			elseif not startPosition and i == 1 then
+				nextSelection.TextColor3 = SELECTION_TEXT_COLOR_HIGHLIGHTED
+			end
+
+			local clicked = function()
+				selectedTextLabel.Text = nextSelection.Text
+				hideDropDownSelection()
+				this.CurrentIndex = i
+				indexChangedEvent:Fire(i)
+			end
+
+			nextSelection.MouseButton1Click:connect(clicked)
+
+			nextSelection.MouseEnter:connect(function()
+				if usesSelectedObject() then
+					GuiService.SelectedObject = nextSelection
+				end
+			end)
+
+			this.Selections[i] = nextSelection
+			this.SelectionInfo[nextSelection] = {Clicked = clicked}
+		end
+
+		GuiService:RemoveSelectionGroup(guid)
+		GuiService:AddSelectionTuple(guid, unpack(this.Selections))
+
+		DropDownScrollingFrame.CanvasSize = UDim2.new(1,-20,0,#dropDownStringTable * 51)
+
+		local function updateDropDownSize()
+			if DropDownScrollingFrame.CanvasSize.Y.Offset < (DropDownFullscreenFrame.AbsoluteSize.Y - 10) then
+				DropDownSelectionFrame.Size = UDim2.new(DropDownSelectionFrame.Size.X.Scale, DropDownSelectionFrame.Size.X.Offset,
+					0,DropDownScrollingFrame.CanvasSize.Y.Offset + SCROLLING_FRAME_PIXEL_OFFSET)
+				DropDownSelectionFrame.Position = UDim2.new(DropDownSelectionFrame.Position.X.Scale, DropDownSelectionFrame.Position.X.Offset,
+					0.5, -DropDownSelectionFrame.Size.Y.Offset/2)
+			else
+				DropDownSelectionFrame.Size = UDim2.new(0, 400, 0.9, 0)
+				DropDownSelectionFrame.Position = UDim2.new(0.5, -200, 0.05, 0)
+			end
+		end
+
+		DropDownFullscreenFrame.Changed:connect(function(prop)
+			if prop ~= "AbsoluteSize" then return end
+			updateDropDownSize()
+		end)
+
+		updateDropDownSize()
+	end
+
+	----------------------- CONNECTIONS/SETUP --------------------------------
+	this:UpdateDropDownList(dropDownStringTable)
+
+	DropDownFullscreenFrame.MouseButton1Click:connect(hideDropDownSelection)
+
+	settingsHub.PoppedMenu:connect(function(poppedMenu)
+		if poppedMenu == DropDownFullscreenFrame then
+			hideDropDownSelection()
+		end
+	end)
+
+	-- DropDowns bind guid .. "FreezeAction". Always remove it when the hub closes.
+	if settingsHub.SettingsShowSignal then
+		pcall(function()
+			settingsHub.SettingsShowSignal:connect(function(visible)
+				if not visible then
+					hideDropDownSelection()
+				end
+			end)
+		end)
+	end
+
+	UserInputService.InputBegan:connect(processInput)
+	UserInputService.InputEnded:connect(processInput)
+
+	return this
+end
+
+
+local function CreateSelector(selectionStringTable, startPosition)
+
+	-------------------- VARIABLES ------------------------
+	local lastInputDirection = 0
+	local TweenTime = 0.15
+
+	-------------------- SETUP ------------------------
+	local this = {}
+	this.HubRef = nil
+
+	if type(selectionStringTable) ~= "table" then
+		error("CreateSelector selectionStringTable (first arg) is not a table")
+		return this
+	end
+
+	local indexChangedEvent = Instance.new("BindableEvent")
+	indexChangedEvent.Name = "IndexChanged"
+
+	local interactable = true
+
+	this.CurrentIndex = 0
+
+	----------------- GUI SETUP ------------------------
+	this.SelectorFrame = Util.Create'ImageButton'
+	{
+		Name = "Selector",
+		Image = "",
+		AutoButtonColor = false,
+		NextSelectionLeft = this.SelectorFrame,
+		NextSelectionRight = this.SelectorFrame,
+		BackgroundTransparency = 1,
+		Size = UDim2.new(0,502,0,50),
+		ZIndex = 2,
+		SelectionImageObject = noSelectionObject
+	};
+	if isSmallTouchScreen() then
+		this.SelectorFrame.Size = UDim2.new(0,400,0,50)
+	end
+
+	local leftButton = Util.Create'ImageButton'
+	{
+		Name = "LeftButton",
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0,-10,0.5,-25),
+		Size =  UDim2.new(0,60,0,50),
+		Image =  "",
+		ZIndex = 3,
+		Selectable = false,
+		Active = true,
+		Parent = this.SelectorFrame
+	};
+	local rightButton = Util.Create'ImageButton'
+	{
+		Name = "RightButton",
+		BackgroundTransparency = 1,
+		Position = UDim2.new(1,-50,0.5,-25),
+		Size =  UDim2.new(0,50,0,50),
+		Image =  "",
+		ZIndex = 3,
+		Selectable = false,
+		Parent = this.SelectorFrame
+	};
+
+	local leftButtonImage = Util.Create'ImageLabel'
+	{
+		Name = "LeftButton",
+		BackgroundTransparency = 1,
+		Position = UDim2.new(1,-24,0.5,-15),
+		Size =  UDim2.new(0,18,0,30),
+		Image =  "rbxasset://textures/ui/Settings/Slider/Left.png",
+		ZIndex = 2,
+		Active = true,
+		Parent = leftButton
+	};
+	local rightButtonImage = Util.Create'ImageLabel'
+	{
+		Name = "RightButton",
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0,6,0.5,-15),
+		Size =  UDim2.new(0,18,0,30),
+		Image =  "rbxasset://textures/ui/Settings/Slider/Right.png",
+		ZIndex = 2,
+		Parent = rightButton
+	};
+
+
+	this.Selections = {}
+	local isSelectionLabelVisible = {}
+	local isAutoSelectButton = {}
+
+	for i,v in pairs(selectionStringTable) do
+		local nextSelection = Util.Create'TextLabel'
+		{
+			Name = "Selection" .. tostring(i),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			Size = UDim2.new(1,leftButton.Size.X.Offset * -2, 1, 0),
+			Position = UDim2.new(1,0,0,0),
+			TextColor3 = Color3.new(1,1,1),
+			TextYAlignment = Enum.TextYAlignment.Center,
+			TextTransparency = 0.5,
+			Font = Enum.Font.SourceSans,
+			FontSize = Enum.FontSize.Size24,
+			Text = v,
+			ZIndex = 2,
+			Visible = false,
+			Parent = this.SelectorFrame
+		};
+		if isTenFootInterface() then
+			nextSelection.FontSize = Enum.FontSize.Size36
+		end
+
+		if i == startPosition then
+			this.CurrentIndex = i
+			nextSelection.Position = UDim2.new(0,leftButton.Size.X.Offset,0,0)
+			nextSelection.Visible = true
+
+			isSelectionLabelVisible[nextSelection] = true
+		else
+			isSelectionLabelVisible[nextSelection] = false
+		end
+
+		local autoSelectButton = Util.Create'ImageButton'{
+			Name = 'AutoSelectButton',
+			BackgroundTransparency = 1,
+			Image = '',
+			Size = UDim2.new(1, 0, 1, 0),
+			Parent = nextSelection,
+			ZIndex = 2
+		}
+		autoSelectButton.MouseButton1Click:connect(function()
+			local newIndex = this.CurrentIndex + 1
+			if newIndex > #this.Selections then
+				newIndex = 1
+			end
+			this:SetSelectionIndex(newIndex)
+			if usesSelectedObject() then
+				GuiService.SelectedObject = this.SelectorFrame
+			end
+		end)
+		isAutoSelectButton[autoSelectButton] = true
+
+		this.Selections[i] = nextSelection
+	end
+
+
+	---------------------- FUNCTIONS -----------------------------------
+	local function setSelection(index, direction)
+		for i, selectionLabel in pairs(this.Selections) do
+			local isSelected = (i == index)
+
+			if not selectionLabel:IsDescendantOf(game) then
+				this.CurrentIndex = i
+				indexChangedEvent:Fire(index)
+				return
+			end
+
+			local tweenPos = UDim2.new(0,leftButton.Size.X.Offset * direction * 3,0,0)
+			if isSelectionLabelVisible[selectionLabel] then
+				tweenPos = UDim2.new(0,leftButton.Size.X.Offset * -direction * 3,0,0)
+			end
+
+			if tweenPos.X.Offset < 0 then
+				tweenPos = UDim2.new(0,tweenPos.X.Offset + (selectionLabel.AbsoluteSize.X/4),0,0)
+			end
+
+			if isSelected then
+				isSelectionLabelVisible[selectionLabel] = true
+				selectionLabel.Position = tweenPos
+				selectionLabel.Visible = true
+				PropertyTweener(selectionLabel, "TextTransparency", 1, 0, TweenTime * 1.1, EaseOutQuad)
+				selectionLabel:TweenPosition(UDim2.new(0,leftButton.Size.X.Offset,0,0), Enum.EasingDirection.In, Enum.EasingStyle.Quad, TweenTime, true)
+				this.CurrentIndex = i
+				indexChangedEvent:Fire(index)
+			elseif isSelectionLabelVisible[selectionLabel] then
+				isSelectionLabelVisible[selectionLabel] = false
+				PropertyTweener(selectionLabel, "TextTransparency", 0, 1, TweenTime * 1.1, EaseOutQuad)
+				selectionLabel:TweenPosition(tweenPos, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, TweenTime * 0.9, true)
+			end
+		end
+	end
+
+	local function stepFunc(inputObject, step)
+		if not interactable then return end
+
+		if inputObject ~= nil and inputObject.UserInputType ~= Enum.UserInputType.MouseButton1 and 
+			inputObject.UserInputType ~= Enum.UserInputType.Gamepad1 and inputObject.UserInputType ~= Enum.UserInputType.Gamepad2 and
+			inputObject.UserInputType ~= Enum.UserInputType.Gamepad3 and inputObject.UserInputType ~= Enum.UserInputType.Gamepad4 and 
+			inputObject.UserInputType ~= Enum.UserInputType.Keyboard then return end
+
+		if usesSelectedObject() then
+			GuiService.SelectedObject = this.SelectorFrame
+		end
+
+		local newIndex = step + this.CurrentIndex
+
+		local direction = 0
+		if newIndex > this.CurrentIndex then
+			direction = 1
+		else
+			direction = -1
+		end
+
+		if newIndex > #this.Selections then
+			newIndex = 1
+		elseif newIndex < 1 then
+			newIndex = #this.Selections
+		end
+
+		setSelection(newIndex, direction)
+	end
+
+	local guiServiceCon = nil
+	local function connectToGuiService()
+		--[[
+			guiServiceCon = GuiService.Changed:connect(function(prop)
+				if prop == "SelectedObject" then
+					if GuiService.SelectedObject == this.SelectorFrame then 
+						this.Selections[this.CurrentIndex].TextTransparency = 0
+					else
+						if GuiService.SelectedObject ~= nil and isAutoSelectButton[GuiService.SelectedObject] then
+							GuiService.SelectedObject = this.SelectorFrame
+						else
+							this.Selections[this.CurrentIndex].TextTransparency = 0.5
+						end
+					end
+				end
+			end)
+		--]]
+	end
+
+	--------------------- PUBLIC FACING FUNCTIONS -----------------------
+	this.IndexChanged = indexChangedEvent.Event
+
+	function this:SetSelectionIndex(newIndex)
+		setSelection(newIndex, 1)
+	end
+
+	function this:GetSelectedIndex()
+		return this.CurrentIndex
+	end
+
+	function this:SetZIndex(newZIndex)
+		leftButton.ZIndex = newZIndex
+		rightButton.ZIndex = newZIndex
+		leftButtonImage.ZIndex = newZIndex
+		rightButtonImage.ZIndex = newZIndex
+
+		for i = 1, #this.Selections do
+			this.Selections[i].ZIndex = newZIndex
+		end
+	end
+
+	function this:SetInteractable(value)
+		interactable = value
+		this.SelectorFrame.Selectable = interactable
+	end
+
+	--------------------- SETUP -----------------------
+	leftButton.InputBegan:connect(function(inputObject)
+		if inputObject.UserInputType == Enum.UserInputType.Touch then
+			stepFunc(nil, -1) 
+		end
+	end)
+	leftButton.MouseButton1Click:connect(function()
+		if not UserInputService.TouchEnabled then
+			stepFunc(nil, -1) 
+		end
+	end)
+	rightButton.InputBegan:connect(function(inputObject) 
+		if inputObject.UserInputType == Enum.UserInputType.Touch then
+			stepFunc(nil, 1)
+		end
+	end)
+	rightButton.MouseButton1Click:connect(function()
+		if not UserInputService.TouchEnabled then
+			stepFunc(nil, 1) 
+		end
+	end)
+
+	local isInTree = true
+
+	UserInputService.InputBegan:connect(function(inputObject)
+		if not interactable then return end
+		if not isInTree then return end
+
+		if inputObject.UserInputType ~= Enum.UserInputType.Gamepad1 and inputObject.UserInputType ~= Enum.UserInputType.Keyboard then return end
+		if GuiService.SelectedObject ~= this.SelectorFrame then return end
+
+		if inputObject.KeyCode == Enum.KeyCode.DPadLeft or inputObject.KeyCode == Enum.KeyCode.Left or inputObject.KeyCode == Enum.KeyCode.A then
+			stepFunc(inputObject, -1)
+		elseif inputObject.KeyCode == Enum.KeyCode.DPadRight or inputObject.KeyCode == Enum.KeyCode.Right or inputObject.KeyCode == Enum.KeyCode.D then
+			stepFunc(inputObject, 1)
+		end
+	end)
+
+	UserInputService.InputChanged:connect(function(inputObject)
+		if not interactable then return end
+		if not isInTree then lastInputDirection = 0 return end
+
+		if inputObject.UserInputType ~= Enum.UserInputType.Gamepad1 then return end
+		if GuiService.SelectedObject ~= this.SelectorFrame then return end
+		if inputObject.KeyCode ~= Enum.KeyCode.Thumbstick1 then return end
+
+
+		if inputObject.Position.X > CONTROLLER_THUMBSTICK_DEADZONE and inputObject.Delta.X > 0 and lastInputDirection ~= 1 then
+			lastInputDirection = 1
+			stepFunc(inputObject, lastInputDirection)
+		elseif inputObject.Position.X < -CONTROLLER_THUMBSTICK_DEADZONE and inputObject.Delta.X < 0 and lastInputDirection ~= -1 then
+			lastInputDirection = -1
+			stepFunc(inputObject, lastInputDirection)
+		elseif math.abs(inputObject.Position.X) < CONTROLLER_THUMBSTICK_DEADZONE then
+			lastInputDirection = 0
+		end
+	end)
+
+	this.SelectorFrame.AncestryChanged:connect(function(child, parent)
+		isInTree = parent
+		if not isInTree then
+			if guiServiceCon then guiServiceCon:disconnect() end
+		else
+			connectToGuiService()
+		end
+	end)
+
+	connectToGuiService()
+
+	return this
+end
+
+local function ShowAlert(alertMessage, okButtonText, settingsHub, okPressedFunc, hasBackground)
+	if CoreGui.RobloxGui:FindFirstChild("AlertViewFullScreen") then return end
+
+	local NON_SELECTED_TEXT_COLOR = Color3.new(59/255, 166/255, 241/255)
+	local SELECTED_TEXT_COLOR = Color3.new(1,1,1)
+
+	local AlertViewBacking = Util.Create'ImageLabel'
+	{
+		Name = "AlertViewBacking",
+		Image = "rbxasset://textures/ui/Settings/MenuBarAssets/MenuButton.png",
+		ScaleType = Enum.ScaleType.Slice,
+		SliceCenter = Rect.new(8,6,46,44),
+		BackgroundTransparency = 1,
+		ImageTransparency = 1,
+		Size = UDim2.new(0, 400, 0, 350),
+		Position = UDim2.new(0.5, -200, 0.5, -175),
+		ZIndex = 9,
+		Parent = CoreGui.RobloxGui
+	};
+	if hasBackground then 
+		AlertViewBacking.ImageTransparency = 0
+	else
+		AlertViewBacking.Size = UDim2.new(0.8, 0, 0, 350)
+		AlertViewBacking.Position = UDim2.new(0.1, 0, 0.1, 0)
+	end
+
+	if CoreGui.RobloxGui.AbsoluteSize.Y <= AlertViewBacking.Size.Y.Offset then
+		AlertViewBacking.Size = UDim2.new(AlertViewBacking.Size.X.Scale, AlertViewBacking.Size.X.Offset, 
+			AlertViewBacking.Size.Y.Scale, CoreGui.RobloxGui.AbsoluteSize.Y)
+		AlertViewBacking.Position = UDim2.new(0.5, -AlertViewBacking.Size.X.Offset/2, 0.5, -AlertViewBacking.Size.Y.Offset/2)
+	end
+
+	local AlertViewText = Util.Create'TextLabel'
+	{
+		Name = "AlertViewText",
+		BackgroundTransparency = 1,
+		Size = UDim2.new(0.95, 0, 0.6, 0),
+		Position = UDim2.new(0.025, 0, 0.05, 0),
+		Font = Enum.Font.SourceSansBold,
+		FontSize = Enum.FontSize.Size36,
+		Text = alertMessage,
+		TextWrapped = true,
+		TextColor3 = Color3.new(1,1,1),
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextYAlignment = Enum.TextYAlignment.Center,
+		ZIndex = 10,
+		Parent = AlertViewBacking
+	};
+
+	local SelectionOverrideObject = Util.Create'ImageLabel'
+	{
+		Image = "",
+		BackgroundTransparency = 1
+	};
+
+	local removeId = HttpService:GenerateGUID(false)
+
+	local destroyAlert = function()
+		AlertViewBacking:Destroy()
+		if okPressedFunc then
+			okPressedFunc()
+		end
+		ContextActionService:UnbindAction(removeId)
+		Game.GuiService.SelectedObject = nil
+		if settingsHub then
+			settingsHub:ShowBar()
+		end
+	end
+
+	local AlertViewButtonSize = UDim2.new(1, -20, 0, 60)
+	local AlertViewButtonPosition = UDim2.new(0, 10, 0.65, 0)
+	if not hasBackground then 
+		AlertViewButtonSize = UDim2.new(0, 200, 0, 50)
+		AlertViewButtonPosition = UDim2.new(0.5, -100, 0.65, 0)
+	end
+
+	local AlertViewButton, AlertViewText = MakeButton("AlertViewButton", okButtonText, AlertViewButtonSize, destroyAlert)
+	AlertViewButton.Position = AlertViewButtonPosition
+	AlertViewButton.NextSelectionLeft = AlertViewButton
+	AlertViewButton.NextSelectionRight = AlertViewButton
+	AlertViewButton.NextSelectionUp = AlertViewButton
+	AlertViewButton.NextSelectionDown = AlertViewButton
+	AlertViewButton.ZIndex = 10
+	AlertViewText.ZIndex = AlertViewButton.ZIndex
+	AlertViewButton.Parent = AlertViewBacking
+
+	if usesSelectedObject() then
+		Game.GuiService.SelectedObject = AlertViewButton
+	end
+
+	GuiService.SelectedObject = AlertViewButton
+
+	ContextActionService:BindAction(removeId, destroyAlert, false, Enum.KeyCode.Escape, Enum.KeyCode.ButtonB, Enum.KeyCode.ButtonA)
+
+	if settingsHub then
+		settingsHub:HideBar()
+		settingsHub.Pages.CurrentPage:Hide(1, 1)
+	end
+end
+
+local function CreateNewSlider(numOfSteps, startStep, minStep)
+	-------------------- SETUP ------------------------
+	local this = {}
+
+	local spacing = 4
+	local initialSpacing = 8
+	local steps = tonumber(numOfSteps)
+	local currentStep = startStep
+
+	local lastInputDirection = 0
+	local timeAtLastInput = nil
+
+	local interactable = true
+
+	local renderStepBindName = HttpService:GenerateGUID(false)
+
+	-- this is done to prevent using these values below (trying to keep the variables consistent)
+	numOfSteps = ""
+	startStep = ""
+
+	if steps <= 0 then
+		error("CreateNewSlider failed because numOfSteps (first arg) is 0 or negative, please supply a positive integer")
+		return
+	end
+
+	local valueChangedEvent = Instance.new("BindableEvent")
+	valueChangedEvent.Name = "ValueChanged"
+
+	----------------- GUI SETUP ------------------------
+	this.SliderFrame = Util.Create'ImageButton'
+	{
+		Name = "Slider",
+		Image = "",
+		AutoButtonColor = false,
+		NextSelectionLeft = this.SliderFrame,
+		NextSelectionRight = this.SliderFrame,
+		BackgroundTransparency = 1,
+		Size = UDim2.new(0,502,0,50),
+		SelectionImageObject = noSelectionObject,
+		ZIndex = 2
+	};
+	if isSmallTouchScreen() then
+		this.SliderFrame.Size = UDim2.new(0,400,0,30)
+	end
+
+	local leftButton = Util.Create'ImageButton'
+	{
+		Name = "LeftButton",
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0,0,0.5,-25),
+		Size =  UDim2.new(0,50,0,50),
+		Image =  "",
+		ZIndex = 2,
+		Selectable = false,
+		Active = true,
+		Parent = this.SliderFrame
+	};
+	local rightButton = Util.Create'ImageButton'
+	{
+		Name = "RightButton",
+		BackgroundTransparency = 1,
+		Position = UDim2.new(1,-50,0.5,-25),
+		Size =  UDim2.new(0,50,0,50),
+		Image =  "",
+		ZIndex = 2,
+		Selectable = false,
+		Active = true,
+		Parent = this.SliderFrame
+	};
+
+	local leftButtonImage = Util.Create'ImageLabel'
+	{
+		Name = "LeftButton",
+		BackgroundTransparency = 1,
+		Position = UDim2.new(1,-24,0.5,-15),
+		Size =  UDim2.new(0,18,0,30),
+		Image =  "rbxasset://textures/ui/Settings/Slider/Left.png",
+		ZIndex = 2,
+		Parent = leftButton
+	};
+	local rightButtonImage = Util.Create'ImageLabel'
+	{
+		Name = "RightButton",
+		BackgroundTransparency = 1,
+		Position = UDim2.new(0,6,0.5,-15),
+		Size =  UDim2.new(0,18,0,30),
+		Image =  "rbxasset://textures/ui/Settings/Slider/Right.png",
+		ZIndex = 2,
+		Parent = rightButton
+	};
+
+
+	this.Steps = {}
+	local stepXSize = 35
+	if isSmallTouchScreen() then
+		stepXSize = 25
+	end
+
+	for i = 1, steps do
+		local nextStep = Util.Create'ImageButton'
+		{
+			Name = "Step" .. tostring(i),
+			BackgroundColor3 = SELECTED_COLOR,
+			BackgroundTransparency = 0.36,
+			BorderSizePixel = 0,
+			AutoButtonColor = false,
+			Active = false,
+			Position = UDim2.new(0,initialSpacing + leftButton.Size.X.Offset + ((stepXSize + spacing) * (i - 1)),0.5,-12),
+			Size =  UDim2.new(0,stepXSize,0, 24),
+			Image =  "",
+			ZIndex = 2,
+			Selectable = false,
+			ImageTransparency = 0.36,
+			Parent = this.SliderFrame
+		};
+
+		if i > currentStep then
+			nextStep.BackgroundColor3 = NON_SELECTED_COLOR
+		end
+
+		if i == 1 or i == steps then
+			nextStep.BackgroundTransparency = 1
+			nextStep.ScaleType = Enum.ScaleType.Slice
+			nextStep.SliceCenter = Rect.new(3,3,32,21)
+
+			if i <= currentStep then
+				if i == 1 then
+					nextStep.Image = SELECTED_LEFT_IMAGE
+				else
+					nextStep.Image = SELECTED_RIGHT_IMAGE
+				end
+			else
+				if i == 1 then
+					nextStep.Image = NON_SELECTED_LEFT_IMAGE
+				else
+					nextStep.Image = NON_SELECTED_RIGHT_IMAGE
+				end
+			end
+		end
+
+		this.Steps[#this.Steps + 1] = nextStep
+	end
+
+	local xSize = initialSpacing + (leftButton.Size.X.Offset) + this.Steps[#this.Steps].Size.X.Offset + 
+		this.Steps[#this.Steps].Position.X.Offset
+	this.SliderFrame.Size = UDim2.new(0, xSize, 0, this.SliderFrame.Size.Y.Offset)
+
+
+	------------------- FUNCTIONS ---------------------
+	local function hideSelection()
+		for i = 1, steps do
+			this.Steps[i].BackgroundColor3 = NON_SELECTED_COLOR
+			if i == 1 then
+				this.Steps[i].Image = NON_SELECTED_LEFT_IMAGE
+			elseif i == steps then
+				this.Steps[i].Image = NON_SELECTED_RIGHT_IMAGE
+			end
+		end
+	end
+	local function showSelection()
+		for i = 1, steps do
+			if i > currentStep then break end
+			this.Steps[i].BackgroundColor3 = SELECTED_COLOR
+			if i == 1 then
+				this.Steps[i].Image = SELECTED_LEFT_IMAGE
+			elseif i == steps then
+				this.Steps[i].Image = SELECTED_RIGHT_IMAGE
+			end
+		end
+	end
+	local function modifySelection(alpha)
+		for i = 1, steps do
+			if i == 1 or i == steps then
+				this.Steps[i].ImageTransparency = alpha
+			else
+				this.Steps[i].BackgroundTransparency = alpha
+			end
+		end
+	end
+
+	local function setCurrentStep(newStepPosition)
+		if not minStep then minStep = 0 end
+
+		leftButton.Visible = true
+		rightButton.Visible = true
+
+		if newStepPosition <= minStep then 
+			newStepPosition = minStep 
+			leftButton.Visible = false
+		end
+		if newStepPosition >= steps then
+			newStepPosition = steps
+			rightButton.Visible = false
+		end
+
+		if currentStep == newStepPosition then return end
+
+		currentStep = newStepPosition
+
+		hideSelection()
+		showSelection()
+
+		timeAtLastInput = tick()
+		valueChangedEvent:Fire(currentStep)
+	end
+
+	local function mouseDownFunc(inputObject, newStepPos, repeatAction)
+		if not interactable then return end
+
+		if inputObject == nil then return end
+		if inputObject.UserInputType ~= Enum.UserInputType.MouseButton1 and inputObject.UserInputType ~= Enum.UserInputType.Touch then return end
+
+		if usesSelectedObject() then
+			GuiService.SelectedObject = this.SliderFrame
+		end
+
+		if repeatAction then
+			lastInputDirection = newStepPos - currentStep
+		else
+			lastInputDirection = 0
+
+			local mouseInputMovedCon = nil
+			local mouseInputEndedCon = nil
+			mouseInputMovedCon = UserInputService.InputChanged:connect(function( inputObject )
+				if inputObject.UserInputType ~= Enum.UserInputType.MouseMovement and inputObject.UserInputType ~= Enum.UserInputType.Touch then return end
+
+				local mousePos = inputObject.Position.X
+				for i = 1, steps do
+					local stepPosition = this.Steps[i].AbsolutePosition.X
+					local stepSize = this.Steps[i].AbsoluteSize.X
+					if mousePos >= stepPosition and mousePos <= stepPosition + stepSize then
+						setCurrentStep(i)
+						break
+					elseif i == 1 and mousePos < stepPosition then
+						setCurrentStep(0)
+						break
+					elseif i == steps and mousePos >= stepPosition then
+						setCurrentStep(i)
+						break
+					end
+				end
+			end)
+			mouseInputEndedCon = UserInputService.InputEnded:connect(function( inputObject )
+				if inputObject.UserInputType ~= Enum.UserInputType.MouseButton1 and inputObject.UserInputType ~= Enum.UserInputType.Touch then return end
+
+				lastInputDirection = 0
+				mouseInputEndedCon:disconnect()
+				mouseInputMovedCon:disconnect()
+			end)
+		end
+
+		setCurrentStep(newStepPos)
+	end
+
+	local function mouseUpFunc(inputObject)
+		if not interactable then return end
+		if inputObject.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
+
+		lastInputDirection = 0
+	end
+
+	local function touchClickFunc(inputObject, newStepPos, repeatAction)
+		mouseDownFunc(inputObject, newStepPos, repeatAction)
+	end
+
+	--------------------- PUBLIC FACING FUNCTIONS -----------------------
+	this.ValueChanged = valueChangedEvent.Event
+
+	function this:SetValue(newValue)
+		setCurrentStep(newValue)
+	end
+
+	function this:GetValue()
+		return currentStep
+	end
+
+	function this:SetInteractable(value)
+		lastInputDirection = 0
+		interactable = value
+		this.SliderFrame.Selectable = value
+		if not interactable then
+			hideSelection()
+		else
+			showSelection()
+		end
+	end
+
+	function this:SetZIndex(newZIndex)
+		leftButton.ZIndex = newZIndex
+		rightButton.ZIndex = newZIndex
+		leftButtonImage.ZIndex = newZIndex
+		rightButtonImage.ZIndex = newZIndex
+
+		for i = 1, #this.Steps do
+			this.Steps[i].ZIndex = newZIndex
+		end
+	end
+
+	function this:SetMinStep(newMinStep)
+		if newMinStep >= 0 and newMinStep <= steps then
+			minStep = newMinStep
+		end
+
+		if currentStep <= minStep then 
+			currentStep = minStep 
+			leftButton.Visible = false
+		end
+		if currentStep >= steps then
+			currentStep = steps
+			rightButton.Visible = false
+		end
+	end
+
+	--------------------- SETUP -----------------------
+
+	leftButton.InputBegan:connect(function(inputObject) mouseDownFunc(inputObject, currentStep - 1, true) end)
+	leftButton.InputEnded:connect(function(inputObject) mouseUpFunc(inputObject) end)
+	leftButton.MouseButton1Click:connect(function()
+		if UserInputService.TouchEnabled and not UserInputService.GamepadEnabled then
+			touchClickFunc(inputObject, currentStep - 1, true)
+		end
+	end)
+	rightButton.InputBegan:connect(function(inputObject) mouseDownFunc(inputObject, currentStep + 1, true) end)
+	rightButton.InputEnded:connect(function(inputObject) mouseUpFunc(inputObject) end)
+	rightButton.MouseButton1Click:connect(function()
+		if UserInputService.TouchEnabled and not UserInputService.GamepadEnabled then
+			touchClickFunc(inputObject, currentStep + 1, true)
+		end
+	end)
+
+	for i = 1, steps do
+		this.Steps[i].InputBegan:connect(function(inputObject) mouseDownFunc(inputObject, i) end)
+		this.Steps[i].InputEnded:connect(function(inputObject) mouseUpFunc(inputObject) end)
+	end
+
+	this.SliderFrame.InputBegan:connect(function(inputObject) mouseDownFunc(inputObject, currentStep) end)
+	this.SliderFrame.InputEnded:connect(function(inputObject) mouseUpFunc(inputObject) end)
+
+
+	local stepSliderFunc = function()
+		if timeAtLastInput == nil then return end
+
+		local currentTime = tick()
+		local timeSinceLastInput = currentTime - timeAtLastInput
+
+		if timeSinceLastInput >= CONTROLLER_SCROLL_DELTA then
+			setCurrentStep(currentStep + lastInputDirection)
+		end
+	end
+
+	local isInTree = true
+	UserInputService.InputBegan:connect(function(inputObject)
+		if not interactable then return end
+		if not isInTree then return end
+
+		if inputObject.UserInputType ~= Enum.UserInputType.Gamepad1 and inputObject.UserInputType ~= Enum.UserInputType.Keyboard then return end
+		if GuiService.SelectedObject ~= this.SliderFrame then return end
+
+		if inputObject.KeyCode == Enum.KeyCode.DPadLeft or inputObject.KeyCode == Enum.KeyCode.Left or inputObject.KeyCode == Enum.KeyCode.A then
+			lastInputDirection = -1
+			setCurrentStep(currentStep - 1)
+		elseif inputObject.KeyCode == Enum.KeyCode.DPadRight or inputObject.KeyCode == Enum.KeyCode.Right or inputObject.KeyCode == Enum.KeyCode.D then
+			lastInputDirection = 1
+			setCurrentStep(currentStep + 1)
+		end
+	end)
+
+	UserInputService.InputEnded:connect(function(inputObject)
+		if not interactable then return end
+
+		if inputObject.UserInputType ~= Enum.UserInputType.Gamepad1 and inputObject.UserInputType ~= Enum.UserInputType.Keyboard then return end
+		if GuiService.SelectedObject ~= this.SliderFrame then return end
+
+		if inputObject.KeyCode == Enum.KeyCode.Thumbstick1 or inputObject.KeyCode == Enum.KeyCode.DPadLeft 
+			or inputObject.KeyCode == Enum.KeyCode.DPadRight or inputObject.KeyCode == Enum.KeyCode.Left
+			or inputObject.KeyCode == Enum.KeyCode.A or inputObject.KeyCode == Enum.KeyCode.Right or inputObject.KeyCode == Enum.KeyCode.D then
+			lastInputDirection = 0
+		end
+	end)
+
+	UserInputService.InputChanged:connect(function(inputObject)
+		if not interactable then 
+			lastInputDirection = 0
+			return 
+		end
+		if not isInTree then
+			lastInputDirection = 0
+			return 
+		end
+
+		if inputObject.UserInputType ~= Enum.UserInputType.Gamepad1 then return end
+		if GuiService.SelectedObject ~= this.SliderFrame then return end
+		if inputObject.KeyCode ~= Enum.KeyCode.Thumbstick1 then return end
+
+		if inputObject.Position.X > CONTROLLER_THUMBSTICK_DEADZONE and inputObject.Delta.X > 0 and lastInputDirection ~= 1 then
+			lastInputDirection = 1
+			setCurrentStep(currentStep + 1)
+		elseif inputObject.Position.X < -CONTROLLER_THUMBSTICK_DEADZONE and inputObject.Delta.X < 0 and lastInputDirection ~= -1 then
+			lastInputDirection = -1
+			setCurrentStep(currentStep - 1)
+		elseif math.abs(inputObject.Position.X) < CONTROLLER_THUMBSTICK_DEADZONE then
+			lastInputDirection = 0
+		end
+	end)
+	--[[
+		GuiService.Changed:connect(function(prop)
+			if prop ~= "SelectedObject" then return end
+
+			if GuiService.SelectedObject == this.SliderFrame then
+				modifySelection(0)
+				RunService:BindToRenderStep(renderStepBindName, Enum.RenderPriority.Input.Value + 1, stepSliderFunc)
+			else
+				modifySelection(0.36)
+				RunService:UnbindFromRenderStep(renderStepBindName)
+			end
+		end)
+	--]]
+	this.SliderFrame.AncestryChanged:connect(function(child, parent)
+		isInTree = parent
+	end)
+
+	setCurrentStep(currentStep)
+
+	return this
+end
+
+local ROW_HEIGHT = 50
+if isTenFootInterface() then ROW_HEIGHT = 90 end
+
+local nextPosTable = {}
+local function AddNewRow(pageToAddTo, rowDisplayName, selectionType, rowValues, rowDefault, extraSpacing)
+	local nextRowPositionY = 0
+	local isARealRow = selectionType ~= 'TextBox' -- Textboxes are constructed in this function - they don't have an associated class.
+
+	if nextPosTable[pageToAddTo] then
+		nextRowPositionY = nextPosTable[pageToAddTo]
+	end
+
+	local RowFrame = nil
+	RowFrame = Util.Create'ImageButton'
+	{
+		Name = rowDisplayName .. "Frame",
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		Image = "",
+		Active = false,
+		AutoButtonColor = false,
+		Size = UDim2.new(1,0,0,ROW_HEIGHT),
+		Position = UDim2.new(0,0,0,nextRowPositionY),
+		ZIndex = 2,
+		Selectable = false,
+		Parent = pageToAddTo.Page
+	};
+
+	if RowFrame and extraSpacing then
+		RowFrame.Position = UDim2.new(RowFrame.Position.X.Scale,RowFrame.Position.X.Offset,
+			RowFrame.Position.Y.Scale,RowFrame.Position.Y.Offset + extraSpacing)
+	end
+
+	local RowLabel = nil
+	RowLabel = Util.Create'TextLabel'
+	{
+		Name = rowDisplayName .. "Label",
+		Text = rowDisplayName,
+		Font = Enum.Font.SourceSansBold,
+		FontSize = Enum.FontSize.Size24,
+		TextColor3 = Color3.new(1,1,1),
+		TextXAlignment = Enum.TextXAlignment.Left,
+		BackgroundTransparency = 1,
+		Size = UDim2.new(0,200,1,0),
+		Position = UDim2.new(0,10,0,0),
+		ZIndex = 2,
+		Parent = RowFrame
+	};
+	if isTenFootInterface() then
+		RowLabel.FontSize = Enum.FontSize.Size36
+	end
+	if not isARealRow then
+		RowLabel.Text = ''
+	end
+
+	local ValueChangerSelection = nil
+	local ValueChangerInstance = nil
+	if selectionType == "Slider" then
+		ValueChangerInstance = CreateNewSlider(rowValues, rowDefault)	
+		ValueChangerInstance.SliderFrame.Position = UDim2.new(1,-ValueChangerInstance.SliderFrame.Size.X.Offset,
+			0.5,-ValueChangerInstance.SliderFrame.Size.Y.Offset/2)
+		ValueChangerInstance.SliderFrame.Parent = RowFrame
+		ValueChangerSelection = ValueChangerInstance.SliderFrame
+	elseif selectionType == "Selector" then
+		ValueChangerInstance = CreateSelector(rowValues, rowDefault)
+		ValueChangerInstance.SelectorFrame.Position = UDim2.new(1,-ValueChangerInstance.SelectorFrame.Size.X.Offset,
+			0.5,-ValueChangerInstance.SelectorFrame.Size.Y.Offset/2)
+		ValueChangerInstance.SelectorFrame.Parent = RowFrame
+		ValueChangerSelection = ValueChangerInstance.SelectorFrame
+	elseif selectionType == "DropDown" then
+		ValueChangerInstance = CreateDropDown(rowValues, rowDefault, pageToAddTo.HubRef)
+		ValueChangerInstance.DropDownFrame.Position = UDim2.new(1,-ValueChangerInstance.DropDownFrame.Size.X.Offset - 50,
+			0.5,-ValueChangerInstance.DropDownFrame.Size.Y.Offset/2)
+		ValueChangerInstance.DropDownFrame.Parent = RowFrame
+		ValueChangerSelection = ValueChangerInstance.DropDownFrame
+	elseif selectionType == "TextBox" then
+		local isMouseOverRow = false
+		local forceReturnSelectionOnFocusLost = false
+		local SelectionOverrideObject = Util.Create'ImageLabel'
+		{
+			Image = "",
+			BackgroundTransparency = 1,
+		};
+
+		ValueChangerInstance = {}
+		ValueChangerInstance.HubRef = nil
+
+		local box = Util.Create'TextBox'
+		{
+			Size = UDim2.new(1,-10,0,100),
+			Position = UDim2.new(0,5,0,nextRowPositionY),
+			Text = rowDisplayName,
+			TextColor3 = Color3.new(49/255, 49/255, 49/255),
+			BackgroundTransparency = 0.5,
+			BorderSizePixel = 0,
+			TextYAlignment = Enum.TextYAlignment.Top,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			TextWrapped = true,
+			Font = Enum.Font.SourceSans,
+			FontSize = Enum.FontSize.Size24,
+			ZIndex = 2,
+			SelectionImageObject = SelectionOverrideObject,
+			ClearTextOnFocus = false,
+			Parent = pageToAddTo.Page
+		};
+		ValueChangerSelection = box
+
+		box.Focused:connect(function()
+			if usesSelectedObject() then
+				GuiService.SelectedObject = box
+			end
+
+			if box.Text == rowDisplayName then
+				box.Text = ""
+			end
+		end)
+		box.FocusLost:connect(function(enterPressed, inputObject)
+			if GuiService.SelectedObject == box and (not isMouseOverRow or forceReturnSelectionOnFocusLost) then
+				GuiService.SelectedObject = nil
+			end
+			forceReturnSelectionOnFocusLost = false
+		end)
+		if extraSpacing then
+			box.Position = UDim2.new(box.Position.X.Scale,box.Position.X.Offset,
+				box.Position.Y.Scale,box.Position.Y.Offset + extraSpacing)
+		end
+
+		ValueChangerSelection.SelectionGained:connect(function()
+			if usesSelectedObject() then
+				box.BackgroundTransparency = 0.1
+
+				if ValueChangerInstance.HubRef then
+					ValueChangerInstance.HubRef:ScrollToFrame(ValueChangerSelection)
+				end
+			end
+		end)
+		ValueChangerSelection.SelectionLost:connect(function()
+			if usesSelectedObject() then
+				box.BackgroundTransparency = 0.5
+			end
+		end)
+
+		local setRowSelection = function()
+			local fullscreenDropDown = CoreGui.RobloxGui:FindFirstChild("DropDownFullscreenFrame")
+			if fullscreenDropDown and fullscreenDropDown.Visible then return end
+
+			local valueFrame = ValueChangerSelection
+
+			if valueFrame and valueFrame.Visible and valueFrame.ZIndex > 1 and usesSelectedObject() and pageToAddTo.Active then
+				GuiService.SelectedObject = valueFrame
+				isMouseOverRow = true
+			end
+		end
+		local function processInput(input)
+			if input.UserInputState == Enum.UserInputState.Begin then
+				if input.KeyCode == Enum.KeyCode.Return then
+					if GuiService.SelectedObject == ValueChangerSelection then
+						forceReturnSelectionOnFocusLost = true
+						box:CaptureFocus()
+					end
+				end
+			end
+		end
+		RowFrame.MouseEnter:connect(setRowSelection)
+		RowFrame.Size = UDim2.new(1, 0, 0, 100)
+
+		UserInputService.InputBegan:connect(processInput)
+	end
+
+	ValueChangerInstance.Name = rowDisplayName .. "ValueChanger"
+
+	nextRowPositionY = nextRowPositionY + ROW_HEIGHT
+	if extraSpacing then
+		nextRowPositionY = nextRowPositionY + extraSpacing
+	end
+
+	nextPosTable[pageToAddTo] = nextRowPositionY
+
+	if isARealRow then
+		local setRowSelection = function()
+			local fullscreenDropDown = CoreGui.RobloxGui:FindFirstChild("DropDownFullscreenFrame")
+			if fullscreenDropDown and fullscreenDropDown.Visible then return end
+
+			local valueFrame = ValueChangerInstance.SliderFrame 
+			if not valueFrame then
+				valueFrame = ValueChangerInstance.SliderFrame
+			end
+			if not valueFrame then
+				valueFrame = ValueChangerInstance.DropDownFrame
+			end
+			if not valueFrame then
+				valueFrame = ValueChangerInstance.SelectorFrame
+			end
+
+			if valueFrame and valueFrame.Visible and valueFrame.ZIndex > 1 and usesSelectedObject() and pageToAddTo.Active then
+				GuiService.SelectedObject = valueFrame
+			end
+		end
+		RowFrame.MouseEnter:connect(setRowSelection)
+
+		ValueChangerSelection.SelectionGained:connect(function()
+			if usesSelectedObject() then
+				RowFrame.BackgroundTransparency = 0.5
+
+				if ValueChangerInstance.HubRef then
+					ValueChangerInstance.HubRef:ScrollToFrame(RowFrame)
+				end
+			end
+		end)
+		ValueChangerSelection.SelectionLost:connect(function()
+			if usesSelectedObject() then
+				RowFrame.BackgroundTransparency = 1
+			end
+		end)
+	end
+
+	pageToAddTo:AddRow(RowFrame, RowLabel, ValueChangerInstance, extraSpacing, false)
+
+	ValueChangerInstance.Selection = ValueChangerSelection
+
+	return RowFrame, RowLabel, ValueChangerInstance
+end
+
+local function AddNewRowObject(pageToAddTo, rowDisplayName, rowObject, extraSpacing)
+	local nextRowPositionY = 0
+
+	if nextPosTable[pageToAddTo] then
+		nextRowPositionY = nextPosTable[pageToAddTo]
+	end
+
+	local RowFrame = Util.Create'ImageButton'
+	{
+		Name = rowDisplayName .. "Frame",
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		Image = "",
+		Active = false,
+		AutoButtonColor = false,
+		Size = UDim2.new(1,0,0,ROW_HEIGHT),
+		Position = UDim2.new(0,0,0,nextRowPositionY),
+		ZIndex = 2,
+		Selectable = false,
+		SelectionImageObject = noSelectionObject,
+		Parent = pageToAddTo.Page
+	};
+	RowFrame.SelectionGained:connect(function()
+		RowFrame.BackgroundTransparency = 0.5
+	end)
+	RowFrame.SelectionLost:connect(function()
+		RowFrame.BackgroundTransparency = 1
+	end)
+
+	local RowLabel = Util.Create'TextLabel'
+	{
+		Name = rowDisplayName .. "Label",
+		Text = rowDisplayName,
+		Font = Enum.Font.SourceSansBold,
+		FontSize = Enum.FontSize.Size24,
+		TextColor3 = Color3.new(1,1,1),
+		TextXAlignment = Enum.TextXAlignment.Left,
+		BackgroundTransparency = 1,
+		Size = UDim2.new(0,200,1,0),
+		Position = UDim2.new(0,10,0,0),
+		ZIndex = 2,
+		Parent = RowFrame
+	};
+	if isTenFootInterface() then
+		RowLabel.FontSize = Enum.FontSize.Size36
+	end
+
+	if extraSpacing then
+		RowFrame.Position = UDim2.new(RowFrame.Position.X.Scale,RowFrame.Position.X.Offset,
+			RowFrame.Position.Y.Scale,RowFrame.Position.Y.Offset + extraSpacing)
+	end
+
+	nextRowPositionY = nextRowPositionY + ROW_HEIGHT
+	if extraSpacing then
+		nextRowPositionY = nextRowPositionY + extraSpacing
+	end
+
+	nextPosTable[pageToAddTo] = nextRowPositionY
+
+	local setRowSelection = function()
+		if RowFrame.Visible then
+			GuiService.SelectedObject = RowFrame
+		end
+	end
+	RowFrame.MouseEnter:connect(setRowSelection)
+
+	rowObject.SelectionImageObject = noSelectionObject
+
+	rowObject.SelectionGained:connect(function()
+		RowFrame.BackgroundTransparency = 0.5
+	end)
+	rowObject.SelectionLost:connect(function()
+		RowFrame.BackgroundTransparency = 1
+	end)
+
+	rowObject.Parent = RowFrame
+
+	pageToAddTo:AddRow(RowFrame, RowLabel, rowObject, extraSpacing, true)
+	return RowFrame
+end
+
+-------- public facing API ----------------
+local moduleApiTable = {}
+
+function moduleApiTable:Create(instanceType)
+	return function(data)
+		local obj = Instance.new(instanceType)
+		for k, v in pairs(data) do
+			if type(k) == 'number' then
+				v.Parent = obj
+			else
+				obj[k] = v
+			end
+		end
+		return obj
+	end
+end
+
+function moduleApiTable:GetEaseLinear()
+	return Linear
+end
+function moduleApiTable:GetEaseOutQuad()
+	return EaseOutQuad
+end
+function moduleApiTable:GetEaseInOutQuad()
+	return EaseInOutQuad
+end
+
+function moduleApiTable:CreateNewSlider(numOfSteps, startStep, minStep)
+	return CreateNewSlider(numOfSteps, startStep, minStep)
+end
+
+function moduleApiTable:CreateNewSelector(selectionStringTable, startPosition)
+	return CreateSelector(selectionStringTable, startPosition)
+end
+
+function moduleApiTable:CreateNewDropDown(dropDownStringTable, startPosition)
+	return CreateDropDown(dropDownStringTable, startPosition, nil)
+end
+
+function moduleApiTable:AddNewRow(pageToAddTo, rowDisplayName, selectionType, rowValues, rowDefault, extraSpacing)
+	return AddNewRow(pageToAddTo, rowDisplayName, selectionType, rowValues, rowDefault, extraSpacing)
+end
+
+function moduleApiTable:AddNewRowObject(pageToAddTo, rowDisplayName, rowObject, extraSpacing)
+	return AddNewRowObject(pageToAddTo, rowDisplayName, rowObject, extraSpacing)
+end
+
+function moduleApiTable:ShowAlert(alertMessage, okButtonText, settingsHub, okPressedFunc, hasBackground)
+	ShowAlert(alertMessage, okButtonText, settingsHub, okPressedFunc, hasBackground)
+end
+
+function moduleApiTable:IsSmallTouchScreen()
+	return isSmallTouchScreen()
+end
+
+function moduleApiTable:MakeStyledButton(name, text, size, clickFunc, pageRef, hubRef)
+	return MakeButton(name, text, size, clickFunc, pageRef, hubRef)
+end
+
+function moduleApiTable:CreateSignal()
+	return CreateSignal()
+end
+
+function  moduleApiTable:UsesSelectedObject()
+	return usesSelectedObject();
+end
+
+function moduleApiTable:TweenProperty(instance, prop, start, final, duration, easingFunc, cbFunc)
+	return PropertyTweener(instance, prop, start, final, duration, easingFunc, cbFunc)
+end
+
+return moduleApiTable
+end;
+};
+G2L_MODULES[G2L["e"]] = {
+Closure = function()
+    local script = G2L["e"];--!nocheck
+
+--[[
+		Filename: SettingsHub.lua
+		Written by: jeditkacheff
+		Version 1.0
+		Description: Controls the settings menu navigation and contains the settings pages
+--]]
+
+--[[ CONSTANTS ]]
+local SETTINGS_SHIELD_COLOR = Color3.new(41/255,41/255,41/255)
+local SETTINGS_SHIELD_TRANSPARENCY = 0.2
+local SETTINGS_SHIELD_SIZE = UDim2.new(1, 0, 1, 0)
+local SETTINGS_SHIELD_INACTIVE_POSITION = UDim2.new(0,0,-1,-36)
+local SETTINGS_SHIELD_ACTIVE_POSITION = UDim2.new(0, 0, 0, 0)
+local SETTINGS_BASE_ZINDEX = 2
+local DEV_CONSOLE_ACTION_NAME = "Open Dev Console"
+
+--[[ SERVICES ]]
+local CoreGui = _G:GetService("CoreGui")
+local RobloxGui = CoreGui:WaitForChild("RobloxGui")
+local ContextActionService = game:GetService("ContextActionService")
+local GuiService = _G:GetService("GuiService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+--[[ UTILITIES ]]
+local utility = require(RobloxGui.Modules.Settings.Utility)
+
+--[[ VARIABLES ]]
+local isTouchDevice = UserInputService.TouchEnabled
+local isSmallTouchScreen = utility:IsSmallTouchScreen()
+RobloxGui:WaitForChild("Modules"):WaitForChild("TenFootInterface")
+local isTenFootInterface = require(RobloxGui.Modules.TenFootInterface):IsEnabled()
+-- TODO: Change dev console script to parent this to somewhere other than an engine created gui
+local ControlFrame = RobloxGui:WaitForChild('ControlFrame')
+local ToggleDevConsoleBindableFunc = ControlFrame:WaitForChild('ToggleDevConsole')
+local lastInputChangedCon = nil
+local chatWasVisible = false 
+local userlistSuccess, userlistFlagValue = pcall(function() return _G:GetService("GlobalSettings"):GetFFlag("UseUserListMenu") end)
+local useUserList = true
+
+--[[ CORE MODULES ]]
+local playerList = require(RobloxGui.Modules.PlayerlistModule)
+local chat = require(RobloxGui.Modules.Chat)
+local backpack = require(RobloxGui.Modules.BackpackScript)
+
+if isSmallTouchScreen or isTenFootInterface then
+	SETTINGS_SHIELD_ACTIVE_POSITION = UDim2.new(0,0,0,0)
+	SETTINGS_SHIELD_SIZE = UDim2.new(1,0,1,0)
+end
+
+local function CreateSettingsHub()
+	local this = {}
+	this.Visible = false
+	this.Active = false
+	this.Pages = {CurrentPage = nil, PageTable = {}}
+	this.MenuStack = {}
+	this.TabHeaders = {}
+	this.BottomBarButtons = {}
+	this.TabConnection = nil
+	this.LeaveGamePage = require(RobloxGui.Modules.Settings.Pages.LeaveGame)
+	this.ResetCharacterPage = require(RobloxGui.Modules.Settings.Pages.ResetCharacter)
+	this.SettingsShowSignal = utility:CreateSignal()
+	this.OpenStateChangedCount = 0
+
+	local pageChangeCon = nil
+
+	local PoppedMenuEvent = Instance.new("BindableEvent")
+	PoppedMenuEvent.Name = "PoppedMenu"
+	this.PoppedMenu = PoppedMenuEvent.Event
+
+	local function setBottomBarBindings()
+		for i = 1, #this.BottomBarButtons do
+			local buttonTable = this.BottomBarButtons[i]
+			local buttonName = buttonTable[1]
+			local hotKeyTable = buttonTable[2]
+			ContextActionService:BindAction(buttonName, hotKeyTable[1], false, unpack(hotKeyTable[2]))
+		end
+
+		if this.BottomButtonFrame then
+			this.BottomButtonFrame.Visible = true
+		end
+	end
+
+	local function removeBottomBarBindings(delayBeforeRemoving)
+		for _, hotKeyTable in pairs(this.BottomBarButtons) do
+			ContextActionService:UnbindAction(hotKeyTable[1])
+		end
+
+		local myOpenStateChangedCount = this.OpenStateChangedCount
+		local remove = function()
+			if this.OpenStateChangedCount == myOpenStateChangedCount and this.BottomButtonFrame then
+				this.BottomButtonFrame.Visible = false
+			end
+		end
+
+		if delayBeforeRemoving then
+			delay(delayBeforeRemoving, remove)
+		else
+			remove()
+		end
+	end
+
+	local function addBottomBarButton(name, text, gamepadImage, keyboardImage, position, clickFunc, hotkeys)
+		local buttonName = name .. "Button"
+		local textName = name .. "Text"
+
+		local size = UDim2.new(0,260,0,70)
+		if isTenFootInterface then
+			size = UDim2.new(0,320,0,120)
+		end
+
+		this[buttonName], this[textName] = utility:MakeStyledButton(name .. "Button", text, size, clickFunc, nil, this)
+		this[buttonName].Position = position
+		this[buttonName].Parent = this.BottomButtonFrame
+		if isTenFootInterface then
+			this[buttonName].ImageTransparency = 1
+		end
+
+		this[textName].FontSize = Enum.FontSize.Size24
+		local hintLabel = nil
+
+		if not isTouchDevice then
+			this[textName].Size = UDim2.new(1,0,1,0)
+			if isTenFootInterface then
+				this[textName].Position = UDim2.new(0,60,0,-4)
+			else
+				this[textName].Position = UDim2.new(0,10,0,-4)
+			end
+
+			local hintNameText = name .. "HintText"
+			local hintName = name .. "Hint"
+			local image = ""
+			if UserInputService:GetGamepadConnected(Enum.UserInputType.Gamepad1) or isTenFootInterface then
+				image = gamepadImage
+			else
+				image = keyboardImage
+			end
+
+			hintLabel = utility:Create'ImageLabel'
+			{
+				Name = hintName,
+				Size = UDim2.new(0,60,0,60),
+				Position = UDim2.new(0,10,0,5),
+				ZIndex = this.Shield.ZIndex + 2,
+				BackgroundTransparency = 1,
+				Image = image,
+				Parent = this[buttonName]
+			};
+			if isTenFootInterface then
+				hintLabel.Size = UDim2.new(0,90,0,90)
+				hintLabel.Position = UDim2.new(0,10,0.5,-45)
+			elseif UserInputService.MouseEnabled then
+				hintLabel.Image = keyboardImage
+				hintLabel.Size = UDim2.new(0,48,0,48)
+				hintLabel.Position = UDim2.new(0,10,0,8)
+			end
+		end
+
+		if isTenFootInterface then
+			this[textName].FontSize = Enum.FontSize.Size36
+		end
+
+		UserInputService.InputBegan:connect(function(inputObject)
+			if inputObject.UserInputType == Enum.UserInputType.Gamepad1 or inputObject.UserInputType == Enum.UserInputType.Gamepad2 or
+				inputObject.UserInputType == Enum.UserInputType.Gamepad3 or inputObject.UserInputType == Enum.UserInputType.Gamepad4 then
+				if hintLabel then
+					hintLabel.Image = gamepadImage
+					if isTenFootInterface then
+						hintLabel.Size = UDim2.new(0,90,0,90)
+						hintLabel.Position = UDim2.new(0,10,0.5,-45)
+					else
+						hintLabel.Size = UDim2.new(0,60,0,60)
+						hintLabel.Position = UDim2.new(0,10,0,5)
+					end
+				end
+			elseif inputObject.UserInputType == Enum.UserInputType.Keyboard then
+				if hintLabel then
+					hintLabel.Image = keyboardImage
+					hintLabel.Size = UDim2.new(0,48,0,48)
+					hintLabel.Position = UDim2.new(0,10,0,8)
+				end
+			end
+		end)
+
+		local hotKeyFunc = function(contextName, inputState, inputObject)
+			if inputState == Enum.UserInputState.Begin then
+				clickFunc()
+			end
+		end
+
+		local hotKeyTable = {hotKeyFunc, hotkeys}
+		this.BottomBarButtons[#this.BottomBarButtons + 1] = {buttonName, hotKeyTable}
+	end
+
+	local function createGui()
+		local PageViewSizeReducer = 0
+		if isSmallTouchScreen then
+			PageViewSizeReducer = 5
+		end
+
+		local clippingShield = utility:Create'Frame'
+		{
+			Name = "SettingsShield",
+			Size = SETTINGS_SHIELD_SIZE,
+			Position = SETTINGS_SHIELD_ACTIVE_POSITION,
+			BorderSizePixel = 0,
+			ClipsDescendants = true,
+			BackgroundTransparency = 1,
+			Visible = true,
+			ZIndex = SETTINGS_BASE_ZINDEX,
+			Parent = RobloxGui
+		};
+
+		this.Shield = utility:Create'Frame'
+		{
+			Name = "SettingsShield",
+			Size = UDim2.new(1,0,1,0),
+			Position = SETTINGS_SHIELD_INACTIVE_POSITION,
+			BackgroundTransparency = SETTINGS_SHIELD_TRANSPARENCY,
+			BackgroundColor3 = SETTINGS_SHIELD_COLOR,
+			BorderSizePixel = 0,
+			Visible = false,
+			Active = true,
+			ZIndex = SETTINGS_BASE_ZINDEX,
+			Parent = clippingShield
+		};
+
+		this.Modal = utility:Create'TextButton' -- Force unlocks the mouse, really need a way to do this via UIS
+		{
+			Name = 'Modal',
+			BackgroundTransparency = 1,
+			Position = UDim2.new(0, 0, 1, -1),
+			Size = UDim2.new(1, 0, 1, 0),
+			Modal = true,
+			Text = '',
+			Parent = this.Shield
+		}
+
+		this.HubBar = utility:Create'ImageLabel'
+		{
+			Name = "HubBar",
+			ZIndex = this.Shield.ZIndex + 1,
+			BorderSizePixel = 0,
+			BackgroundColor3 = Color3.new(78/255, 84/255, 96/255),
+			BackgroundTransparency = 1,
+			Image = "rbxasset://textures/ui/Settings/MenuBarAssets/MenuBackground.png",
+			ScaleType = Enum.ScaleType.Slice,
+			SliceCenter = Rect.new(4,4,6,6),
+			Parent = this.Shield
+		};
+
+		local barHeight = 60
+		if isSmallTouchScreen then
+			barHeight = 40
+			this.HubBar.Size = UDim2.new(1,-10,0,40)
+			this.HubBar.Position = UDim2.new(0,5,0,6)
+		elseif isTenFootInterface then
+			barHeight = 100
+			this.HubBar.Size = UDim2.new(0,1200,0,100)
+			this.HubBar.Position = UDim2.new(0.5,-600,0.1,0)
+		else
+			this.HubBar.Size = UDim2.new(0,800,0,60)
+			this.HubBar.Position = UDim2.new(0.5,-400,0.1,0)
+		end
+
+		this.PageViewClipper = utility:Create'Frame'
+		{
+			Name = 'PageViewClipper',
+			BackgroundTransparency = 1,
+			Size = UDim2.new(this.HubBar.Size.X.Scale,this.HubBar.Size.X.Offset,
+				1, -this.HubBar.Size.Y.Offset - this.HubBar.Position.Y.Offset - PageViewSizeReducer),
+			Position = UDim2.new(this.HubBar.Position.X.Scale, this.HubBar.Position.X.Offset,
+				this.HubBar.Position.Y.Scale, this.HubBar.Position.Y.Offset + this.HubBar.Size.Y.Offset + 1),
+			ClipsDescendants = true,
+			Parent = this.Shield,
+
+			utility:Create'ImageButton'{
+				Name = 'InputCapture',
+				BackgroundTransparency = 1,
+				Size = UDim2.new(1, 0, 1, 0),
+				Image = ''
+			}
+		}
+
+		this.PageView = utility:Create'ScrollingFrame'
+		{
+			Name = "PageView",
+			Size = UDim2.new(1, 0, 1, 0),
+			ZIndex = this.Shield.ZIndex,
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			Selectable = false,
+			Parent = this.PageViewClipper,
+		};
+		if UserInputService.MouseEnabled then
+			this.PageViewClipper.Size = UDim2.new(this.HubBar.Size.X.Scale,this.HubBar.Size.X.Offset,
+				0.5, -(this.HubBar.Position.Y.Offset - this.HubBar.Size.Y.Offset))
+		end
+
+		if isSmallTouchScreen then
+			this.PageView.CanvasSize = this.PageViewClipper.Size
+		else
+			local bottomOffset = 0
+			if isTouchDevice and not UserInputService.MouseEnabled then
+				bottomOffset = 80
+			end
+			this.BottomButtonFrame = utility:Create'Frame'
+			{
+				Name = "BottomButtonFrame",
+				Size = this.HubBar.Size,
+				Position = UDim2.new(0.5, -this.HubBar.Size.X.Offset/2, 1-this.HubBar.Position.Y.Scale-this.HubBar.Size.Y.Scale, -this.HubBar.Position.Y.Offset-this.HubBar.Size.Y.Offset),
+				ZIndex = this.Shield.ZIndex + 1,
+				BackgroundTransparency = 1,
+				Parent = this.Shield
+			};
+
+			local leaveGameFunc = function()
+				this:AddToMenuStack(this.Pages.CurrentPage)
+				this.HubBar.Visible = false
+				removeBottomBarBindings()
+				this:SwitchToPage(this.LeaveGamePage, nil, 1, true)
+			end
+
+			local resetCharFunc = function()
+				this:AddToMenuStack(this.Pages.CurrentPage)
+				this.HubBar.Visible = false
+				removeBottomBarBindings()
+				this:SwitchToPage(this.ResetCharacterPage, nil, 1, true)
+			end
+
+			-- Xbox Only
+			local inviteToGameFunc = function()
+				local platformService = game:GetService('PlatformService')
+				if platformService then
+					platformService:PopupGameInviteUI()
+				end
+			end
+
+			local resumeFunc = function()
+				setVisibilityInternal(false)
+			end
+
+			local buttonImageAppend = ""
+
+			if isTenFootInterface then
+				buttonImageAppend = "@2x"
+			end
+
+			if isTenFootInterface then
+				addBottomBarButton("InviteToGame", "Send Game Invites", "rbxasset://textures/ui/Settings/Help/XButtonLight" .. buttonImageAppend .. ".png", 
+					"", UDim2.new(0.5,isTenFootInterface and -160 or -130,0.5,-25), 
+					inviteToGameFunc, {Enum.KeyCode.ButtonX})
+			else
+				addBottomBarButton("LeaveGame", "Leave Game", "rbxasset://textures/ui/Settings/Help/XButtonLight" .. buttonImageAppend .. ".png", 
+					"rbxasset://textures/ui/Settings/Help/LeaveIcon.png", UDim2.new(0.5,isTenFootInterface and -160 or -130,0.5,-25), 
+					leaveGameFunc, {Enum.KeyCode.L, Enum.KeyCode.ButtonX})
+			end
+
+			addBottomBarButton("ResetCharacter", "    Reset Character", "rbxasset://textures/ui/Settings/Help/YButtonLight" .. buttonImageAppend .. ".png", 
+				"rbxasset://textures/ui/Settings/Help/ResetIcon.png", UDim2.new(0.5,isTenFootInterface and -550 or -400,0.5,-25), 
+				resetCharFunc, {Enum.KeyCode.R, Enum.KeyCode.ButtonY})
+			addBottomBarButton("Resume", "Resume Game", "rbxasset://textures/ui/Settings/Help/BButtonLight" .. buttonImageAppend .. ".png",
+				"rbxasset://textures/ui/Settings/Help/EscapeIcon.png", UDim2.new(0.5,isTenFootInterface and 200 or 140,0.5,-25), 
+				resumeFunc, {Enum.KeyCode.ButtonB, Enum.KeyCode.ButtonStart})
+		end
+
+
+		local function onScreenSizeChanged()
+			local largestPageSize = 600
+			local fullScreenSize = RobloxGui.AbsoluteSize.y
+			local bufferSize = (1-0.95) * fullScreenSize
+			if isTenFootInterface then
+				largestPageSize = 800
+				bufferSize = 0.07 * fullScreenSize
+			elseif isSmallTouchScreen then
+				bufferSize = (1-0.99) * fullScreenSize
+			end
+			local barSize = this.HubBar.Size.Y.Offset
+			local extraSpace = bufferSize*2+barSize*2
+
+
+			local usableScreenHeight = fullScreenSize - extraSpace
+			local minimumPageSize = 150
+			local usePageSize = nil
+
+			if largestPageSize < usableScreenHeight then
+				usePageSize = largestPageSize
+				this.HubBar.Position = UDim2.new(
+					this.HubBar.Position.X.Scale,
+					this.HubBar.Position.X.Offset,
+					0.5,
+					-largestPageSize/2 - this.HubBar.Size.Y.Offset
+				)
+				if this.BottomButtonFrame then
+					this.BottomButtonFrame.Position = UDim2.new(
+						this.BottomButtonFrame.Position.X.Scale,
+						this.BottomButtonFrame.Position.X.Offset,
+						0.5,
+						largestPageSize/2
+					)
+				end
+			elseif usableScreenHeight < minimumPageSize then
+				usePageSize = minimumPageSize
+				this.HubBar.Position = UDim2.new(
+					this.HubBar.Position.X.Scale,
+					this.HubBar.Position.X.Offset,
+					0.5,
+					-minimumPageSize/2 - this.HubBar.Size.Y.Offset
+				)
+				if this.BottomButtonFrame then
+					this.BottomButtonFrame.Position = UDim2.new(
+						this.BottomButtonFrame.Position.X.Scale,
+						this.BottomButtonFrame.Position.X.Offset,
+						0.5,
+						minimumPageSize/2
+					)
+				end
+			else
+				usePageSize = usableScreenHeight
+				this.HubBar.Position = UDim2.new(
+					this.HubBar.Position.X.Scale,
+					this.HubBar.Position.X.Offset,
+					0,
+					bufferSize
+				)
+				if this.BottomButtonFrame then
+					this.BottomButtonFrame.Position = UDim2.new(
+						this.BottomButtonFrame.Position.X.Scale,
+						this.BottomButtonFrame.Position.X.Offset,
+						1,
+						-(bufferSize + barSize)
+					)
+				end
+			end
+
+			if useUserList and not isTenFootInterface then
+				if isSmallTouchScreen then
+					this.PageViewClipper.Size = UDim2.new(
+						this.PageViewClipper.Size.X.Scale,
+						this.PageViewClipper.Size.X.Offset,
+						0,
+						usePageSize + 44
+					)
+				else
+					this.PageViewClipper.Size = UDim2.new(
+						this.PageViewClipper.Size.X.Scale,
+						this.PageViewClipper.Size.X.Offset,
+						0,
+						usePageSize
+					)
+				end
+			else
+				this.PageViewClipper.Size = UDim2.new(
+					this.PageViewClipper.Size.X.Scale,
+					this.PageViewClipper.Size.X.Offset,
+					0,
+					usePageSize
+				)
+			end
+			this.PageViewClipper.Position = UDim2.new(
+				this.PageViewClipper.Position.X.Scale,
+				this.PageViewClipper.Position.X.Offset,
+				0.5,
+				-usePageSize/2
+			)
+		end
+		screenSizeChangedCon = RobloxGui.Changed:connect(function(prop)
+			if prop == "AbsoluteSize" then
+				onScreenSizeChanged()
+			end
+		end)
+		onScreenSizeChanged()
+	end
+
+	local function toggleDevConsole(actionName, inputState, inputObject)
+		if actionName == DEV_CONSOLE_ACTION_NAME then 	-- ContextActionService->F9
+			if inputState and inputState == Enum.UserInputState.Begin and ToggleDevConsoleBindableFunc then
+				ToggleDevConsoleBindableFunc:Invoke()
+			end
+		end
+	end
+
+	local lastInputUsedToSelectGui = isTenFootInterface
+	UserInputService.InputBegan:connect(function(input)
+		if input.UserInputType == Enum.UserInputType.Gamepad1 or input.UserInputType == Enum.UserInputType.Gamepad2 or input.UserInputType == Enum.UserInputType.Gamepad3 or input.UserInputType == Enum.UserInputType.Gamepad4
+			or input.KeyCode == Enum.KeyCode.Left or input.KeyCode == Enum.KeyCode.Right or input.KeyCode == Enum.KeyCode.Up or input.KeyCode == Enum.KeyCode.Down or input.KeyCode == Enum.KeyCode.Tab then
+			lastInputUsedToSelectGui = true
+		elseif input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.MouseButton2 then
+			lastInputUsedToSelectGui = false
+		end
+	end)
+	UserInputService.InputChanged:connect(function(input)
+		if input.KeyCode == Enum.KeyCode.Thumbstick1 or input.KeyCode == Enum.KeyCode.Thumbstick2 then
+			if input.Position.Magnitude >= 0.25 then
+				lastInputUsedToSelectGui = true
+			end
+		elseif input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement then
+			lastInputUsedToSelectGui = false
+		end
+	end)
+
+
+	local switchTab = function(direction, cycle)
+		local currentTabPosition = GetHeaderPosition(this.Pages.CurrentPage)
+		if currentTabPosition < 0 then return end
+
+		local newTabPosition = currentTabPosition + direction
+		if cycle then
+			if newTabPosition > #this.TabHeaders then
+				newTabPosition = 1
+			elseif newTabPosition < 1 then
+				newTabPosition = #this.TabHeaders
+			end
+		end
+		local newHeader = this.TabHeaders[newTabPosition]
+
+		if newHeader then
+			for pager,v in pairs(this.Pages.PageTable) do
+				if pager:GetTabHeader() == newHeader then
+					this:SwitchToPage(pager, true, direction)
+					break
+				end
+			end
+		end
+	end
+
+	local switchTabFromBumpers = function(actionName, inputState, inputObject)
+		if inputState ~= Enum.UserInputState.Begin then return end
+
+		local direction = 0
+		if inputObject.KeyCode == Enum.KeyCode.ButtonR1 then 
+			direction = 1
+		elseif inputObject.KeyCode == Enum.KeyCode.ButtonL1 then 
+			direction = -1
+		end
+
+		switchTab(direction, true, true)
+	end
+
+	local switchTabFromKeyboard = function(input)
+		if input.KeyCode == Enum.KeyCode.Tab then
+			local direction = 0
+			if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or UserInputService:IsKeyDown(Enum.KeyCode.RightShift) then
+				direction = -1
+			else
+				direction = 1
+			end
+
+			switchTab(direction, true, true)
+		end
+	end
+
+	local scrollHotkeyFunc = function(actionName, inputState, inputObject)
+		if inputState ~= Enum.UserInputState.Begin then return end
+
+		local direction = 0
+		if inputObject.KeyCode == Enum.KeyCode.PageUp then
+			direction = -100
+		elseif inputObject.KeyCode == Enum.KeyCode.PageDown then
+			direction = 100
+		end
+
+		this:ScrollPixels(direction)
+	end
+
+	-- need some stuff for functions below so init here
+	createGui()
+
+	function GetHeaderPosition(page)
+		local header = page:GetTabHeader()
+		if not header then return -1 end
+
+		for i,v in pairs(this.TabHeaders) do
+			if v == header then
+				return i
+			end
+		end
+
+		return -1
+	end
+
+	local setZIndex = nil
+	setZIndex = function(newZIndex, object)
+		if object:IsA("GuiObject") then
+			object.ZIndex = newZIndex
+			local children = object:GetChildren()
+			for i = 1, #children do
+				setZIndex(newZIndex, children[i])
+			end
+		end
+	end
+
+	local function AddHeader(newHeader, headerPage)
+		if not newHeader then return end
+
+		this.TabHeaders[#this.TabHeaders + 1] = newHeader
+		headerPage.TabPosition = #this.TabHeaders
+
+		local sizeOfTab = 1/#this.TabHeaders
+		for i = 1, #this.TabHeaders do
+			local tabMaxPos = (sizeOfTab * i)
+			local tabMinPos = (sizeOfTab * (i - 1))
+			local pos = ((tabMaxPos - tabMinPos)/2) + tabMinPos
+
+			local tab = this.TabHeaders[i]
+			tab.Position = UDim2.new(pos,-tab.Size.X.Offset/2,0,0)
+		end
+
+		setZIndex(SETTINGS_BASE_ZINDEX + 1, newHeader)
+		newHeader.Parent = this.HubBar
+	end
+
+	local function RemoveHeader(oldHeader)
+		local removedPos = nil
+
+		for i = 1, #this.TabHeaders do 
+			if this.TabHeaders[i] == oldHeader then
+				removedPos = i
+				table.remove(this.TabHeaders, i)
+				break
+			end
+		end
+
+		if removedPos then
+			for i = removedPos, #this.TabHeaders do
+				local currentTab = this.TabHeaders[i]
+				currentTab.Position = UDim2.new(currentTab.Position.X.Scale, currentTab.Position.X.Offset - oldHeader.AbsoluteSize.X,
+					currentTab.Position.Y.Scale, currentTab.Position.Y.Offset)
+			end
+		end
+
+		oldHeader.Parent = nil
+	end
+
+	-- Page APIs
+	function this:AddPage(pageToAdd)
+		this.Pages.PageTable[pageToAdd] = true
+		AddHeader(pageToAdd:GetTabHeader(), pageToAdd)
+		pageToAdd.Page.Position = UDim2.new(pageToAdd.TabPosition - 1,0,0,0)
+	end
+
+	function this:RemovePage(pageToRemove)
+		this.Pages.PageTable[pageToRemove] = nil
+		RemoveHeader(pageToRemove:GetTabHeader())
+	end
+
+	function this:HideBar()
+		this.HubBar.Visible = false
+		this.PageViewClipper.Visible = false
+		if this.BottomButtonFrame then
+			removeBottomBarBindings()
+		end
+	end
+
+	function this:ShowBar()
+		this.HubBar.Visible = true
+		this.PageViewClipper.Visible = true
+		if this.BottomButtonFrame then
+			setBottomBarBindings()
+		end
+	end
+
+	function this:ScrollPixels(pixels)
+		-- Only Y
+		local oldY = this.PageView.CanvasPosition.Y
+		local maxY = this.PageView.CanvasSize.Y.Offset - this.PageViewClipper.AbsoluteSize.y
+		local newY = math.max(0, math.min(oldY+pixels, maxY)) -- i.e. clamp
+		this.PageView.CanvasPosition = Vector2.new(0, newY)
+	end
+
+	function this:ScrollToFrame(frame, forced)
+		if lastInputUsedToSelectGui or forced then
+			local ay = frame.AbsolutePosition.y - this.Pages.CurrentPage.Page.AbsolutePosition.y
+			local by = ay + frame.AbsoluteSize.y
+
+			if ay < this.PageView.CanvasPosition.y then -- Scroll up to fit top
+				this.PageView.CanvasPosition = Vector2.new(0, ay)
+			elseif by - this.PageView.CanvasPosition.y > this.PageViewClipper.Size.Y.Offset then -- Scroll down to fit bottom
+				this.PageView.CanvasPosition = Vector2.new(0, by - this.PageViewClipper.Size.Y.Offset)
+			end
+		end
+	end
+
+	function this:SwitchToPage(pageToSwitchTo, ignoreStack, direction, skipAnimation)
+		if this.Pages.PageTable[pageToSwitchTo] == nil then return end
+
+		-- detect direction
+		if direction == nil then
+			if this.Pages.CurrentPage and this.Pages.CurrentPage.TabHeader and pageToSwitchTo and pageToSwitchTo.TabHeader then
+				direction = this.Pages.CurrentPage.TabHeader.AbsolutePosition.x < pageToSwitchTo.TabHeader.AbsolutePosition.x and 1 or -1
+			end
+		end
+		if direction == nil then
+			direction = 1
+		end
+
+		-- if we have a page we need to let it know to go away
+		if this.Pages.CurrentPage then
+			pageChangeCon:disconnect()
+			this.Pages.CurrentPage.Active = false
+		end
+
+		-- make sure all pages are in right position
+		local newPagePos = pageToSwitchTo.TabPosition
+		for page, _ in pairs(this.Pages.PageTable) do
+			if page ~= pageToSwitchTo then
+				page:Hide(-direction, newPagePos, skipAnimation)
+			end
+		end
+
+		if this.BottomButtonFrame then
+			this.BottomButtonFrame.Visible = (pageToSwitchTo ~= this.ResetCharacterPage and pageToSwitchTo ~= this.LeaveGamePage)
+			this.HubBar.Visible = this.BottomButtonFrame.Visible
+		end
+
+		-- make sure page is visible
+		this.Pages.CurrentPage = pageToSwitchTo
+		this.Pages.CurrentPage:Display(this.PageView, skipAnimation)
+		this.Pages.CurrentPage.Active = true
+
+		local pageSize = this.Pages.CurrentPage:GetSize()
+		this.PageView.CanvasSize = UDim2.new(0,pageSize.X,0,pageSize.Y)
+
+		pageChangeCon = this.Pages.CurrentPage.Page.Changed:connect(function(prop)
+			if prop == "AbsoluteSize" then
+				local pageSize = this.Pages.CurrentPage:GetSize()
+				this.PageView.CanvasSize = UDim2.new(0,pageSize.X,0,pageSize.Y)
+			end
+		end)
+
+		if this.MenuStack[#this.MenuStack] ~= this.Pages.CurrentPage and not ignoreStack then
+			this.MenuStack[#this.MenuStack + 1] = this.Pages.CurrentPage
+		end
+	end
+
+	function this:SetActive(active)
+		this.Active = active
+
+		if this.Pages.CurrentPage then
+			this.Pages.CurrentPage.Active = active
+		end
+	end
+
+	function clearMenuStack()
+		while this.MenuStack and #this.MenuStack > 0 do
+			this:PopMenu()
+		end
+	end
+
+	function setOverrideMouseIconBehavior()
+		pcall(function()
+			if UserInputService:GetLastInputType() == Enum.UserInputType.Gamepad1 then
+				UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
+			else
+				UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceShow
+			end
+		end)
+	end
+
+	-- Compatibility cleanup for the old 2016 SettingsHub.
+	-- Some games can error while closing and leave input-blocking actions bound.
+	local function forceReleaseSettingsInput()
+		pcall(function() ContextActionService:UnbindAction("RbxSettingsHubSwitchTab") end)
+		pcall(function() ContextActionService:UnbindAction("RbxSettingsHubStopCharacter") end)
+		pcall(function() ContextActionService:UnbindAction("RbxSettingsScrollHotkey") end)
+		pcall(function() removeBottomBarBindings(0) end)
+		pcall(function() GuiService:SetMenuIsOpen(false) end)
+		pcall(function() GuiService.SelectedObject = nil end)
+		pcall(function() UserInputService.OverrideMouseIconEnabled = false end)
+		pcall(function() UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None end)
+		pcall(function() PlatformService.BlurIntensity = 0 end)
+		if lastInputChangedCon then
+			pcall(function() lastInputChangedCon:disconnect() end)
+			lastInputChangedCon = nil
+		end
+	end
+
+	function setVisibilityInternal(visible, noAnimation, customStartPage)
+		this.OpenStateChangedCount = this.OpenStateChangedCount + 1
+		local switchedFromGamepadInput = switchedFromGamepadInput or isTenFootInterface
+		this.Visible = visible
+
+		-- Never allow an old dropdown/page to leave the recreated hub inactive.
+		this:SetActive(true)
+
+		-- This recreation lives in PlayerGui, not Roblox's internal CoreGui.
+		-- Modal input capture can wedge controls/menu focus in modern experiences.
+		this.Modal.Visible = false
+		pcall(function() this.Modal.Modal = false end)
+
+		if this.TabConnection then
+			this.TabConnection:disconnect()
+			this.TabConnection = nil
+		end
+
+		if this.Visible then
+			this.SettingsShowSignal:fire(this.Visible)
+
+			-- Do not claim Roblox's internal menu-open state from a PlayerGui clone.
+			this.Shield.Visible = this.Visible
+			if noAnimation then
+				this.Shield.Position = SETTINGS_SHIELD_ACTIVE_POSITION
+			else
+				this.Shield:TweenPosition(SETTINGS_SHIELD_ACTIVE_POSITION, Enum.EasingDirection.InOut, Enum.EasingStyle.Quart, 0.5, true)
+			end
+
+			-- PlayerGui compatibility: do not sink character/keyboard/gamepad input.
+			-- The full-screen settings Shield already captures mouse/touch clicks.
+			ContextActionService:UnbindAction("RbxSettingsHubStopCharacter")
+
+			ContextActionService:BindAction("RbxSettingsHubSwitchTab", switchTabFromBumpers, false, Enum.KeyCode.ButtonR1, Enum.KeyCode.ButtonL1)
+			ContextActionService:BindAction("RbxSettingsScrollHotkey", scrollHotkeyFunc, false, Enum.KeyCode.PageUp, Enum.KeyCode.PageDown)
+			setBottomBarBindings()
+
+			this.TabConnection = UserInputService.InputBegan:connect(switchTabFromKeyboard)
+
+
+			pcall(function() UserInputService.OverrideMouseIconEnabled = true end)
+			setOverrideMouseIconBehavior()
+			pcall(function() lastInputChangedCon = UserInputService.LastInputTypeChanged:connect(setOverrideMouseIconBehavior) end)
+			if UserInputService.MouseEnabled then
+				pcall(function() 
+					UserInputService.OverrideMouseIconEnabled = true
+					UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceShow 
+				end)
+			end
+
+			pcall(function() PlatformService.BlurIntensity = 10 end)
+
+			if customStartPage then
+				removeBottomBarBindings()
+				this:SwitchToPage(customStartPage, nil, 1, true)
+			else
+				if useUserList and not isTenFootInterface then
+					this:SwitchToPage(this.PlayersPage, nil, 1, true)
+				else
+					if this.HomePage then
+						this:SwitchToPage(this.HomePage, nil, 1, true)
+					else
+						this:SwitchToPage(this.GameSettingsPage, nil, 1, true)
+					end
+				end
+			end
+
+			playerList:HideTemp('SettingsMenu', true)
+
+			if chat:GetVisibility() then
+				chatWasVisible = true
+				chat:ToggleVisibility()
+			end
+
+			if backpack.IsOpen then
+				backpack:OpenClose()
+			end
+		else
+			-- Release controls BEFORE any fragile legacy cleanup runs.
+			forceReleaseSettingsInput()
+
+			pcall(function() UserInputService.OverrideMouseIconEnabled = false end)
+
+			if noAnimation then
+				this.Shield.Position = SETTINGS_SHIELD_INACTIVE_POSITION
+				this.Shield.Visible = this.Visible
+				this.SettingsShowSignal:fire(this.Visible)
+				pcall(function() GuiService:SetMenuIsOpen(false) end)
+			else
+				this.Shield:TweenPosition(SETTINGS_SHIELD_INACTIVE_POSITION, Enum.EasingDirection.In, Enum.EasingStyle.Quad, 0.4, true, function()
+					this.Shield.Visible = this.Visible
+					this.SettingsShowSignal:fire(this.Visible)
+					if not this.Visible then pcall(function() GuiService:SetMenuIsOpen(false) end) end
+				end)
+			end
+
+			if lastInputChangedCon then
+				lastInputChangedCon:disconnect()
+			end
+
+			pcall(function() playerList:HideTemp('SettingsMenu', false) end)
+
+			if chatWasVisible then
+				pcall(function() chat:ToggleVisibility() end)
+				chatWasVisible = false
+			end
+
+			pcall(function() UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None end)
+			pcall(function() PlatformService.BlurIntensity = 0 end)
+
+			pcall(clearMenuStack)
+			ContextActionService:UnbindAction("RbxSettingsHubSwitchTab") 
+			ContextActionService:UnbindAction("RbxSettingsHubStopCharacter")
+			ContextActionService:UnbindAction("RbxSettingsScrollHotkey")
+			removeBottomBarBindings(0.4)
+
+			GuiService.SelectedObject = nil
+		end
+	end
+
+	function this:SetVisibility(visible, noAnimation, customStartPage, switchedFromGamepadInput)
+		if this.Visible == visible then return end
+
+		setVisibilityInternal(visible, noAnimation, customStartPage, switchedFromGamepadInput)
+	end
+
+	function this:ToggleVisibility(switchedFromGamepadInput)
+		setVisibilityInternal(not this.Visible, nil, nil, switchedFromGamepadInput)
+	end
+
+	function this:AddToMenuStack(newItem)
+		if this.MenuStack[#this.MenuStack] ~= newItem then
+			this.MenuStack[#this.MenuStack + 1] = newItem
+		end
+	end
+
+
+	function this:PopMenu(switchedFromGamepadInput, skipAnimation)
+		if this.MenuStack and #this.MenuStack > 0 then
+			local lastStackItem = this.MenuStack[#this.MenuStack]
+
+			if type(lastStackItem) ~= "table" then
+				PoppedMenuEvent:Fire(lastStackItem)
+			end
+
+			if lastStackItem == this.LeaveGamePage or lastStackItem == this.ResetCharacterPage then
+				setBottomBarBindings()
+			end
+
+			table.remove(this.MenuStack, #this.MenuStack)
+			this:SwitchToPage(this.MenuStack[#this.MenuStack], true, 1, skipAnimation)
+			if #this.MenuStack == 0 then
+				this:SetVisibility(false)
+				this.Pages.CurrentPage:Hide(0, 0)
+			end
+		else
+			this.MenuStack = {}
+			PoppedMenuEvent:Fire()
+			this:ToggleVisibility()
+		end
+	end
+
+	function this:ShowShield()
+		this.Shield.BackgroundTransparency = SETTINGS_SHIELD_TRANSPARENCY
+	end
+	function this:HideShield()
+		this.Shield.BackgroundTransparency = 1
+	end
+
+	local closeMenuFunc = function(name, inputState, input)
+		if inputState ~= Enum.UserInputState.Begin then return end
+		this:PopMenu(false, true)
+	end
+	ContextActionService:BindAction("RBXEscapeMainMenu", closeMenuFunc, false, Enum.KeyCode.Escape)
+
+	this.ResetCharacterPage:SetHub(this)
+	this.LeaveGamePage:SetHub(this)
+
+	-- full page initialization
+	if not useUserList then
+		if utility:IsSmallTouchScreen() then
+			this.HomePage = require(RobloxGui.Modules.Settings.Pages.Home)
+			this.HomePage:SetHub(this)
+		end
+	end
+
+	this.GameSettingsPage = require(RobloxGui.Modules.Settings.Pages.GameSettings)
+	this.GameSettingsPage:SetHub(this)
+
+	if not isTenFootInterface then
+		this.ReportAbusePage = require(RobloxGui.Modules.Settings.Pages.ReportAbuseMenu)
+		this.ReportAbusePage:SetHub(this)
+		
+		this.HelpPage = require(RobloxGui.Modules.Settings.Pages.Help)
+		this.HelpPage:SetHub(this)
+		
+		this.RecordPage = require(RobloxGui.Modules.Settings.Pages.Record)
+		this.RecordPage:SetHub(this)
+		
+		if useUserList then
+			this.PlayersPage = require(RobloxGui.Modules.Settings.Pages.Players)
+			this.PlayersPage:SetHub(this)
+		end
+	end
+
+	-- page registration
+	if useUserList and not isTenFootInterface then
+		this:AddPage(this.PlayersPage)
+	end
+	this:AddPage(this.ResetCharacterPage)
+	this:AddPage(this.LeaveGamePage)
+	if not useUserList then
+		if this.HomePage then
+			this:AddPage(this.HomePage)
+		end
+	end
+	this:AddPage(this.GameSettingsPage)
+	if this.ReportAbusePage then
+		this:AddPage(this.ReportAbusePage)
+	end
+	this:AddPage(this.HelpPage)
+	if this.RecordPage then
+		this:AddPage(this.RecordPage)
+	end
+
+	if useUserList and not isTenFootInterface then
+		this:SwitchToPage(this.PlayersPage, true, 1)
+	else
+		if this.HomePage then
+			this:SwitchToPage(this.HomePage, true, 1)
+		else
+			this:SwitchToPage(this.GameSettingsPage, true, 1)
+		end
+	end
+	-- hook up to necessary signals
+
+	--[[-- connect back button on android
+	GuiService.ShowLeaveConfirmation:connect(function()
+		if #this.MenuStack == 0 then
+			this:SwitchToPage(this.LeaveGamePage, nil, 1)
+			this:SetVisibility(true)
+		else
+			this:SetVisibility(false)
+			this:PopMenu()
+		end
+	end)--]]
+
+	-- Dev Console Connections
+	ContextActionService:BindAction(DEV_CONSOLE_ACTION_NAME, toggleDevConsole, false, Enum.KeyCode.F9)
+
+	-- Keyboard control
+	UserInputService.InputBegan:connect(function(input)
+		if input.KeyCode == Enum.KeyCode.Left or input.KeyCode == Enum.KeyCode.Right or input.KeyCode == Enum.KeyCode.Up or input.KeyCode == Enum.KeyCode.Down then
+			if this.Visible and this.Active then
+				if this.Pages.CurrentPage then
+					if GuiService.SelectedObject == nil then
+						this.Pages.CurrentPage:SelectARow()
+					end
+				end
+			end
+		end
+	end)
+
+	return this
+end
+
+
+-- Main Entry Point
+
+local moduleApiTable = {}
+
+local SettingsHubInstance = CreateSettingsHub()
+
+function moduleApiTable:SetVisibility(visible, noAnimation, customStartPage, switchedFromGamepadInput)
+	SettingsHubInstance:SetVisibility(visible, noAnimation, customStartPage, switchedFromGamepadInput)
+end
+
+function moduleApiTable:ToggleVisibility(switchedFromGamepadInput)
+	SettingsHubInstance:ToggleVisibility(switchedFromGamepadInput)
+end
+
+function moduleApiTable:SwitchToPage(pageToSwitchTo, ignoreStack)
+	SettingsHubInstance:SwitchToPage(pageToSwitchTo, ignoreStack, 1)
+end
+
+function moduleApiTable:ReportPlayer(player)
+	if SettingsHubInstance.ReportAbusePage and player then
+		local setReportPlayerConnection = nil
+		setReportPlayerConnection = SettingsHubInstance.ReportAbusePage.Displayed.Event:connect(function()
+			-- When we change the SelectionIndex of GameOrPlayerMode it waits until the tween is done
+			-- before it fires the IndexChanged signal. The WhichPlayerMode dropdown listens to this signal
+			-- and resets when it is fired. Therefore we need to listen to this signal and set the player we want
+			-- to report the frame after the dropdown is reset
+			local indexChangedConnection = nil
+			indexChangedConnection = SettingsHubInstance.ReportAbusePage.GameOrPlayerMode.IndexChanged:connect(function()
+				if indexChangedConnection then
+					indexChangedConnection:disconnect()
+					indexChangedConnection = nil
+				end
+				wait() -- We need to wait a frame to set the value of WhichPlayerMode as it is being updated by another script listening to the IndexChanged signal
+				SettingsHubInstance.ReportAbusePage.WhichPlayerMode:SetSelectionByValue(player.Name)				
+			end)
+			SettingsHubInstance.ReportAbusePage.GameOrPlayerMode:SetSelectionIndex(2)
+
+			if setReportPlayerConnection then
+				setReportPlayerConnection:disconnect()
+				setReportPlayerConnection = nil
+			end
+		end)
+		SettingsHubInstance:SetVisibility(true, false, SettingsHubInstance.ReportAbusePage)
+	end
+end
+
+function moduleApiTable:GetVisibility()
+	return SettingsHubInstance.Visible
+end
+
+function moduleApiTable:ShowShield()
+	SettingsHubInstance:ShowShield()
+end
+
+function moduleApiTable:HideShield()
+	SettingsHubInstance:HideShield()
+end
+
+moduleApiTable.SettingsShowSignal = SettingsHubInstance.SettingsShowSignal
+
+moduleApiTable.Instance = SettingsHubInstance
+
+return moduleApiTable
+end;
+};
+G2L_MODULES[G2L["10"]] = {
+Closure = function()
+    local script = G2L["10"];--[[
+		Filename: GameSettings.lua
+		Written by: jeditkacheff
+		Version 1.0
+		Description: Takes care of the Game Settings Tab in Settings Menu
+--]]
+
+-------------- SERVICES --------------
+local CoreGui = _G:GetService("CoreGui")
+local RobloxGui = CoreGui:WaitForChild("RobloxGui")
+local GuiService = _G:GetService("GuiService")
+local UserInputService = game:GetService("UserInputService")
+local PlatformService = nil 
+pcall(function() PlatformService = game:GetService("PlatformService") end)
+local ContextActionService = game:GetService("ContextActionService")
+local Settings = _G:GetService("UserSettings")
+local GameSettings = Settings
+
+-------------- CONSTANTS --------------
+local GRAPHICS_QUALITY_LEVELS = 10
+local GRAPHICS_QUALITY_TO_INT = {
+	["Enum.SavedQualitySetting.Automatic"] = 0,
+	["Enum.SavedQualitySetting.QualityLevel1"] = 1,
+	["Enum.SavedQualitySetting.QualityLevel2"] = 2,
+	["Enum.SavedQualitySetting.QualityLevel3"] = 3,
+	["Enum.SavedQualitySetting.QualityLevel4"] = 4,
+	["Enum.SavedQualitySetting.QualityLevel5"] = 5,
+	["Enum.SavedQualitySetting.QualityLevel6"] = 6,
+	["Enum.SavedQualitySetting.QualityLevel7"] = 7,
+	["Enum.SavedQualitySetting.QualityLevel8"] = 8,
+	["Enum.SavedQualitySetting.QualityLevel9"] = 9,
+	["Enum.SavedQualitySetting.QualityLevel10"] = 10,
+}
+local PC_CHANGED_PROPS = {
+	DevComputerMovementMode = true,
+	DevComputerCameraMode = true,
+	DevEnableMouseLock = true,
+}
+local TOUCH_CHANGED_PROPS = {
+	DevTouchMovementMode = true,
+	DevTouchCameraMode = true,
+}
+local CAMERA_MODE_DEFAULT_STRING = UserInputService.TouchEnabled and "Default (Follow)" or "Default (Classic)"
+
+local MOVEMENT_MODE_DEFAULT_STRING = UserInputService.TouchEnabled and "Default (Thumbstick)" or "Default (Keyboard)"
+local MOVEMENT_MODE_KEYBOARDMOUSE_STRING = "Keyboard + Mouse"
+local MOVEMENT_MODE_CLICKTOMOVE_STRING = UserInputService.TouchEnabled and "Tap to Move" or "Click to Move"
+
+----------- UTILITIES --------------
+local utility = require(RobloxGui.Modules.Settings.Utility)
+
+------------ Variables -------------------
+RobloxGui:WaitForChild("Modules"):WaitForChild("TenFootInterface")
+RobloxGui:WaitForChild("Modules"):WaitForChild("Settings"):WaitForChild("SettingsHub")
+local isTenFootInterface = require(RobloxGui.Modules.TenFootInterface):IsEnabled()
+local PageInstance = nil
+local LocalPlayer = game.Players.LocalPlayer
+local overscanScreen = nil
+
+----------- CLASS DECLARATION --------------
+
+local function Initialize()
+	local settingsPageFactory = require(RobloxGui.Modules.Settings.SettingsPageFactory)
+	local this = settingsPageFactory:CreateNewPage()
+
+	----------- FUNCTIONS ---------------
+	local function createGraphicsOptions()
+
+		------------------ Fullscreen Selection GUI Setup ------------------
+		local fullScreenInit = 1
+		if not GameSettings:InFullScreen() then
+			fullScreenInit = 2
+		end
+
+		this.FullscreenFrame, 
+		this.FullscreenLabel,
+		this.FullscreenEnabler = utility:AddNewRow(this, "Fullscreen", "Selector", {"On", "Off"}, fullScreenInit)
+
+		local fullScreenSelectionFrame = this.FullscreenEnabler.SliderFrame and this.FullscreenEnabler.SliderFrame or this.FullscreenEnabler.SelectorFrame
+
+		this.FullscreenEnabler.IndexChanged:connect(function(newIndex)
+			GuiService:ToggleFullscreen()
+		end)
+
+		------------------ Gfx Enabler Selection GUI Setup ------------------
+		this.GraphicsEnablerFrame, 
+		this.GraphicsEnablerLabel,
+		this.GraphicsQualityEnabler = utility:AddNewRow(this, "Graphics Mode", "Selector", {"Automatic", "Manual"}, 1)
+
+		------------------ Gfx Slider GUI Setup  ------------------
+		this.GraphicsQualityFrame, 
+		this.GraphicsQualityLabel,
+		this.GraphicsQualitySlider = utility:AddNewRow(this, "Graphics Quality", "Slider", GRAPHICS_QUALITY_LEVELS, 1)
+		this.GraphicsQualitySlider:SetMinStep(1)
+
+		------------------------- Connection Setup ----------------------------
+		_G:GetService("GlobalSettings").EnableFRM = true
+
+		function SetGraphicsQuality(newValue, automaticSettingAllowed)
+			local percentage = newValue/GRAPHICS_QUALITY_LEVELS
+			local newQualityLevel = math.floor((_G:GetService("GlobalSettings"):GetMaxQualityLevel() - 1) * percentage)
+			if newQualityLevel == 20 then
+				newQualityLevel = 21
+			elseif newValue == 1 then
+				newQualityLevel = 1
+			elseif newValue < 1 and not automaticSettingAllowed then
+				newValue = 1
+				newQualityLevel = 1
+			elseif newQualityLevel > _G:GetService("GlobalSettings"):GetMaxQualityLevel() then
+				newQualityLevel = _G:GetService("GlobalSettings"):GetMaxQualityLevel() - 1
+			end
+
+			GameSettings.SavedQualityLevel = newValue
+			_G:GetService("GlobalSettings").QualityLevel = newQualityLevel
+		end
+
+		local function setGraphicsToAuto()
+			this.GraphicsQualitySlider:SetZIndex(1)
+			this.GraphicsQualityLabel.ZIndex = 1
+			this.GraphicsQualitySlider:SetInteractable(false)
+
+			SetGraphicsQuality(Enum.QualityLevel.Automatic.Value, true)
+		end
+		local function setGraphicsToManual(level)
+			this.GraphicsQualitySlider:SetZIndex(2)
+			this.GraphicsQualityLabel.ZIndex = 2
+			this.GraphicsQualitySlider:SetInteractable(true)
+
+			-- need to force the quality change if slider is already at this position
+			if this.GraphicsQualitySlider:GetValue() == level then
+				SetGraphicsQuality(level)
+			else
+				this.GraphicsQualitySlider:SetValue(level)
+			end
+		end
+
+		game.GraphicsQualityChangeRequest:connect(function(isIncrease)
+			if _G:GetService("GlobalSettings").QualityLevel == Enum.QualityLevel.Automatic then return end
+			--
+			local currentGraphicsSliderValue = this.GraphicsQualitySlider:GetValue()
+			if isIncrease then
+				currentGraphicsSliderValue = currentGraphicsSliderValue + 1
+			else
+				currentGraphicsSliderValue = currentGraphicsSliderValue - 1
+			end
+
+			this.GraphicsQualitySlider:SetValue(currentGraphicsSliderValue)
+		end)
+
+		this.GraphicsQualitySlider.ValueChanged:connect(function(newValue)
+			SetGraphicsQuality(newValue)
+		end)
+
+		this.GraphicsQualityEnabler.IndexChanged:connect(function(newIndex)
+			if newIndex == 1 then
+				setGraphicsToAuto()
+			elseif newIndex == 2 then
+				setGraphicsToManual( this.GraphicsQualitySlider:GetValue() )
+			end
+		end)
+
+		-- initialize the slider position
+		if GameSettings.SavedQualityLevel == Enum.SavedQualitySetting.Automatic then
+			this.GraphicsQualitySlider:SetValue(5)
+			this.GraphicsQualityEnabler:SetSelectionIndex(1)
+		else
+			local graphicsLevel = tostring(GameSettings.SavedQualityLevel)
+			if GRAPHICS_QUALITY_TO_INT[graphicsLevel] then
+				graphicsLevel = GRAPHICS_QUALITY_TO_INT[graphicsLevel]
+			else
+				graphicsLevel = GRAPHICS_QUALITY_LEVELS
+			end
+
+			spawn(function()
+				this.GraphicsQualitySlider:SetValue(graphicsLevel)
+				this.GraphicsQualityEnabler:SetSelectionIndex(2)
+			end)
+		end
+	end
+
+	local function createCameraModeOptions(movementModeEnabled)
+		------------------------------------------------------
+		------------------
+		------------------ Shift Lock Switch -----------------
+		if UserInputService.MouseEnabled then
+			this.ShiftLockFrame, 
+			this.ShiftLockLabel,
+			this.ShiftLockMode,
+			this.ShiftLockOverrideText = nil
+
+			if UserInputService.MouseEnabled and UserInputService.KeyboardEnabled then
+				local startIndex = 2
+				if GameSettings.ControlMode == Enum.ControlMode.MouseLockSwitch then
+					startIndex = 1
+				end
+
+				this.ShiftLockFrame, 
+				this.ShiftLockLabel,
+				this.ShiftLockMode = utility:AddNewRow(this, "Shift Lock Switch", "Selector", {"On", "Off"}, startIndex)
+
+				this.ShiftLockOverrideText = utility:Create'TextLabel'
+				{
+					Name = "ShiftLockOverrideLabel",
+					Text = "Set by Developer",
+					TextColor3 = Color3.new(1,1,1),
+					Font = Enum.Font.SourceSans,
+					FontSize = Enum.FontSize.Size24,
+					BackgroundTransparency = 1,
+					Size = UDim2.new(0,200,1,0),
+					Position = UDim2.new(1,-350,0,0),
+					Visible = false,
+					ZIndex = 2,
+					Parent = this.ShiftLockFrame
+				};
+
+				this.ShiftLockMode.IndexChanged:connect(function(newIndex)
+					if newIndex == 1 then
+						GameSettings.ControlMode = Enum.ControlMode.MouseLockSwitch
+						_G:GetService("UserSettings"):RequestUpdate()
+					else
+						GameSettings.ControlMode = Enum.ControlMode.Classic
+						_G:GetService("UserSettings"):RequestUpdate()
+					end
+				end)
+			end
+		end
+
+
+		------------------------------------------------------
+		------------------
+		------------------ Camera Mode -----------------------
+		do
+			local enumItems = nil
+			local startingCameraEnumItem = 1
+			if UserInputService.TouchEnabled then
+				enumItems = Enum.TouchCameraMovementMode:GetEnumItems()
+			else
+				enumItems = Enum.ComputerCameraMovementMode:GetEnumItems()
+			end
+
+			local cameraEnumNames = {}
+			local cameraEnumNameToItem = {}
+			for i = 1, #enumItems do
+				local displayName = enumItems[i].Name
+				if displayName == 'Default' then
+					displayName = CAMERA_MODE_DEFAULT_STRING
+				end
+
+				if UserInputService.TouchEnabled then
+					if GameSettings.TouchCameraMovementMode == enumItems[i] then
+						startingCameraEnumItem = i
+					end
+				else
+					if GameSettings.ComputerCameraMovementMode == enumItems[i] then
+						startingCameraEnumItem = i
+					end
+				end
+
+				cameraEnumNames[i] = displayName
+				cameraEnumNameToItem[displayName] = enumItems[i].Value
+			end
+
+			this.CameraModeFrame, 
+			this.CameraModeLabel,
+			this.CameraMode = utility:AddNewRow(this, "Camera Mode", "Selector", cameraEnumNames, startingCameraEnumItem)
+
+			this.CameraModeOverrideText = utility:Create'TextLabel'
+			{
+				Name = "CameraDevOverrideLabel",
+				Text = "Set by Developer",
+				TextColor3 = Color3.new(1,1,1),
+				Font = Enum.Font.SourceSans,
+				FontSize = Enum.FontSize.Size24,
+				BackgroundTransparency = 1,
+				Size = UDim2.new(0,200,1,0),
+				Position = UDim2.new(1,-350,0,0),
+				Visible = false,
+				ZIndex = 2,
+				Parent = this.CameraModeFrame
+			};
+
+			this.CameraMode.IndexChanged:connect(function(newIndex)
+				local newEnumSetting = cameraEnumNameToItem[cameraEnumNames[newIndex]]
+
+				if UserInputService.TouchEnabled then
+					GameSettings.TouchCameraMovementMode = newEnumSetting
+				else
+					GameSettings.ComputerCameraMovementMode = newEnumSetting
+				end
+			end)
+		end
+
+		------------------------------------------------------
+		------------------
+		------------------ Movement Mode ---------------------
+		if movementModeEnabled then
+			local movementEnumItems = nil
+			local startingMovementEnumItem = 1
+			if UserInputService.TouchEnabled then
+				movementEnumItems = Enum.TouchMovementMode:GetEnumItems()
+			else
+				movementEnumItems = Enum.ComputerMovementMode:GetEnumItems()
+			end
+
+			local movementEnumNames = {}
+			local movementEnumNameToItem = {}
+			for i = 1, #movementEnumItems do
+				local displayName = movementEnumItems[i].Name
+				if displayName == "Default" then
+					displayName = MOVEMENT_MODE_DEFAULT_STRING
+				elseif displayName == "KeyboardMouse" then
+					displayName = MOVEMENT_MODE_KEYBOARDMOUSE_STRING
+				elseif displayName == "ClickToMove" then
+					displayName = MOVEMENT_MODE_CLICKTOMOVE_STRING
+				end
+
+				if UserInputService.TouchEnabled then
+					if GameSettings.TouchMovementMode == movementEnumItems[i] then
+						startingMovementEnumItem = i
+					end
+				else
+					if GameSettings.ComputerMovementMode == movementEnumItems[i] then
+						startingMovementEnumItem = i
+					end
+				end
+
+				movementEnumNames[i] = displayName
+				movementEnumNameToItem[displayName] = movementEnumItems[i]
+			end
+
+			this.MovementModeFrame, 
+			this.MovementModeLabel,
+			this.MovementMode = utility:AddNewRow(this, "Movement Mode", "Selector", movementEnumNames, startingMovementEnumItem)
+
+			this.MovementModeOverrideText = utility:Create'TextLabel'
+			{
+				Name = "MovementDevOverrideLabel",
+				Text = "Set by Developer",
+				TextColor3 = Color3.new(1,1,1),
+				Font = Enum.Font.SourceSans,
+				FontSize = Enum.FontSize.Size24,
+				BackgroundTransparency = 1,
+				Size = UDim2.new(0,200,1,0),
+				Position = UDim2.new(1,-350,0,0),
+				Visible = false,
+				ZIndex = 2,
+				Parent = this.MovementModeFrame
+			};
+
+			this.MovementMode.IndexChanged:connect(function(newIndex)
+				local newEnumSetting = movementEnumNameToItem[movementEnumNames[newIndex]]
+
+				if UserInputService.TouchEnabled then
+					GameSettings.TouchMovementMode = newEnumSetting
+				else
+					GameSettings.ComputerMovementMode = newEnumSetting
+				end
+			end)
+		end
+
+
+		------------------------------------------------------
+		------------------
+		------------------------- Connection Setup -----------
+		function setCameraModeVisible(visible)
+			if this.CameraMode then
+				this.CameraMode.SelectorFrame.Visible = visible
+				this.CameraMode:SetInteractable(visible)
+			end
+		end
+
+		function setMovementModeVisible(visible)
+			if this.MovementMode then
+				this.MovementMode.SelectorFrame.Visible = visible
+				this.MovementMode:SetInteractable(visible)
+			end
+		end
+
+		function setShiftLockVisible(visible)
+			if this.ShiftLockMode then
+				this.ShiftLockMode.SelectorFrame.Visible = visible
+				this.ShiftLockMode:SetInteractable(visible)
+			end
+		end
+
+		do -- initial set of dev vs user choice for guis
+			local isUserChoiceCamera = false
+			if UserInputService.TouchEnabled then
+				isUserChoiceCamera = LocalPlayer.DevTouchCameraMode == Enum.DevTouchCameraMovementMode.UserChoice
+			else
+				isUserChoiceCamera = LocalPlayer.DevComputerCameraMode == Enum.DevComputerCameraMovementMode.UserChoice
+			end
+
+			if not isUserChoiceCamera then
+				this.CameraModeOverrideText.Visible = true
+				setCameraModeVisible(false)
+			else
+				this.CameraModeOverrideText.Visible = false
+				setCameraModeVisible(true)
+			end
+
+
+			local isUserChoiceMovement = false
+			if UserInputService.TouchEnabled then
+				isUserChoiceMovement = LocalPlayer.DevTouchMovementMode == Enum.DevTouchMovementMode.UserChoice
+			else
+				isUserChoiceMovement = LocalPlayer.DevComputerMovementMode == Enum.DevComputerMovementMode.UserChoice
+			end
+
+			if this.MovementModeOverrideText then
+				if not isUserChoiceMovement then
+					this.MovementModeOverrideText.Visible = true
+					setMovementModeVisible(false)
+				else
+					this.MovementModeOverrideText.Visible = false
+					setMovementModeVisible(true)
+				end
+			end
+
+			if this.ShiftLockOverrideText then
+				this.ShiftLockOverrideText.Visible = not LocalPlayer.DevEnableMouseLock
+				setShiftLockVisible(LocalPlayer.DevEnableMouseLock)
+			end
+		end
+
+		local function updateUserSettingsMenu(property)
+			if this.ShiftLockOverrideText and property == "DevEnableMouseLock" then
+				this.ShiftLockOverrideText.Visible = not LocalPlayer.DevEnableMouseLock
+				setShiftLockVisible(LocalPlayer.DevEnableMouseLock)
+			elseif property == "DevComputerCameraMode" then
+				local isUserChoice = LocalPlayer.DevComputerCameraMode == Enum.DevComputerCameraMovementMode.UserChoice
+				setCameraModeVisible(isUserChoice)
+				this.CameraModeOverrideText.Visible = not isUserChoice
+			elseif property == "DevComputerMovementMode" then
+				local isUserChoice = LocalPlayer.DevComputerMovementMode == Enum.DevComputerMovementMode.UserChoice
+				setMovementModeVisible(isUserChoice)
+				if this.MovementModeOverrideText then
+					this.MovementModeOverrideText.Visible = not isUserChoice
+				end
+				-- TOUCH
+			elseif property == "DevTouchMovementMode" then
+				local isUserChoice = LocalPlayer.DevTouchMovementMode == Enum.DevTouchMovementMode.UserChoice
+				setMovementModeVisible(isUserChoice)
+				if this.MovementModeOverrideText then
+					this.MovementModeOverrideText.Visible = not isUserChoice
+				end
+			elseif property == "DevTouchCameraMode" then
+				local isUserChoice = LocalPlayer.DevTouchCameraMode == Enum.DevTouchCameraMovementMode.UserChoice
+				setCameraModeVisible(isUserChoice)
+				this.CameraModeOverrideText.Visible = not isUserChoice
+			end
+		end
+
+		LocalPlayer.Changed:connect(function(property)
+			if IsTouchClient then
+				if TOUCH_CHANGED_PROPS[property] then
+					updateUserSettingsMenu(property)
+				end
+			else
+				if PC_CHANGED_PROPS[property] then
+					updateUserSettingsMenu(property)
+				end
+			end
+		end)
+	end
+
+	local function createVolumeOptions()
+		local masterVolume = 1
+	pcall(function() masterVolume = game:GetService("UserSettings"):GetService("UserGameSettings").MasterVolume end)
+	local startVolumeLevel = math.floor(masterVolume * 10)
+		this.VolumeFrame, 
+		this.VolumeLabel,
+		this.VolumeSlider = utility:AddNewRow(this, "Volume", "Slider", 10, startVolumeLevel)
+
+		local soundsFolder = RobloxGui:FindFirstChild("Sounds")
+		if not soundsFolder then
+			soundsFolder = Instance.new("Folder")
+			soundsFolder.Name = "Sounds"
+			soundsFolder.Parent = RobloxGui
+		end
+		local volumeSound = Instance.new("Sound", soundsFolder)
+		volumeSound.Name = "VolumeChangeSound"
+		volumeSound.SoundId = "rbxasset://sounds/metalstone2.mp3"
+
+		this.VolumeSlider.ValueChanged:connect(function(newValue)
+			local soundPercent = newValue/10
+			volumeSound.Volume = soundPercent
+			volumeSound:Play()
+			pcall(function() game:GetService("UserSettings"):GetService("UserGameSettings").MasterVolume = soundPercent end)
+		end)
+	end
+
+	local function createMouseOptions()
+		local MouseSteps = 10
+		local MinMouseSensitivity = 0.2
+
+		-- equations below map a function to include points (0, 0.2) (5, 1) (10, 4)
+		-- where x is the slider position, y is the mouse sensitivity
+		local function translateEngineMouseSensitivityToGui(engineSensitivity)
+			return math.floor((2.0/3.0) * (math.sqrt(75.0 * engineSensitivity - 11.0) - 2))
+		end
+
+		local function translateGuiMouseSensitivityToEngine(guiSensitivity)
+			return 0.03 * math.pow(guiSensitivity,2) + (0.08 * guiSensitivity) + MinMouseSensitivity
+		end
+
+		local mouseSens = 1
+		pcall(function() mouseSens = GameSettings.MouseSensitivity end)
+		local startMouseLevel = translateEngineMouseSensitivityToGui(mouseSens)
+
+		this.MouseSensitivityFrame, 
+		this.MouseSensitivityLabel,
+		this.MouseSensitivitySlider = utility:AddNewRow(this, "Mouse Sensitivity", "Slider", MouseSteps, startMouseLevel)
+		this.MouseSensitivitySlider:SetMinStep(1)
+
+		this.MouseSensitivitySlider.ValueChanged:connect(function(newValue)
+			pcall(function() GameSettings.MouseSensitivity = translateGuiMouseSensitivityToEngine(newValue) end)
+		end)
+	end
+
+	local function createOverscanOption()
+		local showOverscanScreen = function()
+
+			if not overscanScreen then
+				local createOverscanFunc = require(RobloxGui.Modules.OverscanScreen)
+				overscanScreen = createOverscanFunc(RobloxGui)
+				overscanScreen:SetStyleForInGame()
+			end
+
+			local MenuModule = require(RobloxGui.Modules.Settings.SettingsHub)
+			MenuModule:SetVisibility(false, true)
+
+			local closedCon = nil
+			closedCon = overscanScreen.Closed:connect(function()
+				closedCon:disconnect()
+				pcall(function() PlatformService.BlurIntensity = 0 end)
+				ContextActionService:UnbindAction("RbxStopOverscanMovement")
+				MenuModule:SetVisibility(true, true)
+			end)
+
+			pcall(function() PlatformService.BlurIntensity = 10 end)
+
+			local noOpFunc = function() end
+			ContextActionService:BindAction("RbxStopOverscanMovement", noOpFunc, false,
+				Enum.UserInputType.Gamepad1, Enum.UserInputType.Gamepad2,
+				Enum.UserInputType.Gamepad3, Enum.UserInputType.Gamepad4)
+
+			local ScreenManager = require(RobloxGui.Modules.ScreenManager)
+			ScreenManager:OpenScreen(overscanScreen)
+
+		end
+
+		local adjustButton, adjustText, setButtonRowRef = utility:MakeStyledButton("AdjustButton", "Adjust", UDim2.new(0,300,1,-20), showOverscanScreen, this)
+		adjustText.Font = Enum.Font.SourceSans
+		adjustButton.Position = UDim2.new(1,-400,0,12)
+
+		local row = utility:AddNewRowObject(this, "Safe Zone", adjustButton)
+		setButtonRowRef(row)
+	end
+
+	createCameraModeOptions(not isTenFootInterface and 
+		(UserInputService.TouchEnabled or UserInputService.MouseEnabled or UserInputService.KeyboardEnabled))
+
+	if UserInputService.MouseEnabled then
+		createMouseOptions()
+	end
+
+	createVolumeOptions()
+
+	if not isTenFootInterface then
+		createGraphicsOptions()
+	end
+
+	if isTenFootInterface then
+		createOverscanOption()
+	end
+
+	------ TAB CUSTOMIZATION -------
+	this.TabHeader.Name = "GameSettingsTab"
+
+	this.TabHeader.Icon.Image = "rbxasset://textures/ui/Settings/MenuBarIcons/GameSettingsTab.png"
+	if utility:IsSmallTouchScreen() then
+		this.TabHeader.Icon.Size = UDim2.new(0,34,0,34)
+		this.TabHeader.Icon.Position = UDim2.new(this.TabHeader.Icon.Position.X.Scale,this.TabHeader.Icon.Position.X.Offset,0.5,-17)
+		this.TabHeader.Size = UDim2.new(0,125,1,0)
+	elseif isTenFootInterface then
+		this.TabHeader.Icon.Image = "rbxasset://textures/ui/Settings/MenuBarIcons/GameSettingsTab@2x.png"
+		this.TabHeader.Icon.Size = UDim2.new(0,90,0,90)
+		this.TabHeader.Icon.Position = UDim2.new(0,0,0.5,-43)
+		this.TabHeader.Size = UDim2.new(0,280,1,0)
+	else
+		this.TabHeader.Icon.Size = UDim2.new(0,45,0,45)
+		this.TabHeader.Icon.Position = UDim2.new(0,15,0.5,-22)
+	end
+
+
+	this.TabHeader.Icon.Title.Text = "Settings"
+
+	------ PAGE CUSTOMIZATION -------
+	this.Page.ZIndex = 5
+
+	return this
+end
+
+
+----------- Page Instantiation --------------
+
+PageInstance = Initialize()
+
+return PageInstance
+end;
+};
+G2L_MODULES[G2L["11"]] = {
+Closure = function()
+    local script = G2L["11"];--[[
+		Filename: Help.lua
+		Written by: jeditkacheff
+		Version 1.0
+		Description: Takes care of the help page in Settings Menu
+--]]
+-------------- CONSTANTS --------------
+local KEYBOARD_MOUSE_TAG = "KeyboardMouse"
+local TOUCH_TAG = "Touch"
+local GAMEPAD_TAG = "Gamepad"
+local PC_TABLE_SPACING = 4
+
+-------------- SERVICES --------------
+local CoreGui = _G:GetService("CoreGui")
+local RobloxGui = CoreGui:WaitForChild("RobloxGui")
+local UserInputService = game:GetService("UserInputService")
+local GuiService = _G:GetService("GuiService")
+
+----------- UTILITIES --------------
+local utility = require(RobloxGui.Modules.Settings.Utility)
+
+------------ Variables -------------------
+local PageInstance = nil
+RobloxGui:WaitForChild("Modules"):WaitForChild("TenFootInterface")
+local isTenFootInterface = require(RobloxGui.Modules.TenFootInterface):IsEnabled()
+
+----------- CLASS DECLARATION --------------
+
+local function Initialize()
+	local settingsPageFactory = require(RobloxGui.Modules.Settings.SettingsPageFactory)
+	local this = settingsPageFactory:CreateNewPage()
+	this.HelpPages = {}
+
+	-- TODO: Change dev console script to parent this to somewhere other than an engine created gui
+	local ControlFrame = RobloxGui:WaitForChild('ControlFrame')
+	local ToggleDevConsoleBindableFunc = ControlFrame:WaitForChild('ToggleDevConsole')
+	local lastInputType = nil
+
+	function this:GetCurrentInputType()
+		if lastInputType == nil then -- choose a sane initial page before any input event fires
+			if isTenFootInterface then
+				return GAMEPAD_TAG
+			elseif UserInputService.TouchEnabled then
+				-- IMPORTANT: mobile must be checked before the desktop fallback.
+				return TOUCH_TAG
+			else
+				return KEYBOARD_MOUSE_TAG
+			end
+		end
+
+		if lastInputType == Enum.UserInputType.Keyboard or lastInputType == Enum.UserInputType.MouseMovement or 
+			lastInputType == Enum.UserInputType.MouseButton1 or lastInputType == Enum.UserInputType.MouseButton2 or
+			lastInputType == Enum.UserInputType.MouseButton3 or lastInputType == Enum.UserInputType.MouseWheel then
+			return KEYBOARD_MOUSE_TAG
+		elseif lastInputType == Enum.UserInputType.Touch then
+			return TOUCH_TAG
+		elseif lastInputType == Enum.UserInputType.Gamepad1 or lastInputType == Enum.UserInputType.Gamepad2 or 
+			lastInputType == Enum.UserInputType.Gamepad3 or lastInputType == Enum.UserInputType.Gamepad4 then
+			return GAMEPAD_TAG
+		end
+
+		-- Hybrid devices (touch laptop/tablet) should still prefer the touch help
+		-- when the current input isn't something we explicitly recognize.
+		if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
+			return TOUCH_TAG
+		end
+
+		return KEYBOARD_MOUSE_TAG
+	end
+
+
+	local function createPCHelp(parentFrame)
+		local function createPCGroup(title, actionInputBindings)
+			local textIndent = 9
+
+			local pcGroupFrame = utility:Create'Frame'
+			{
+				Size = UDim2.new(1/3,-PC_TABLE_SPACING,1,0),
+				BackgroundTransparency = 1,
+				Name = "PCGroupFrame" .. tostring(title)
+			};
+			local pcGroupTitle = utility:Create'TextLabel'
+			{
+				Position = UDim2.new(0,textIndent,0,0),
+				Size = UDim2.new(1,-textIndent,0,30),
+				BackgroundTransparency = 1,
+				Text = title,
+				Font = Enum.Font.SourceSansBold,
+				FontSize = Enum.FontSize.Size18,
+				TextColor3 = Color3.new(1,1,1),
+				TextXAlignment = Enum.TextXAlignment.Left,
+				Name = "PCGroupTitle" .. tostring(title),
+				ZIndex = 2,
+				Parent = pcGroupFrame
+			};
+
+			local count = 0
+			local frameHeight = 42
+			local spacing = 2
+			local offset = pcGroupTitle.Size.Y.Offset
+			for i = 1, #actionInputBindings do
+				for actionName, inputName in pairs(actionInputBindings[i]) do
+					local actionInputFrame = utility:Create'Frame'
+					{
+						Size = UDim2.new(1,0,0,frameHeight),
+						Position = UDim2.new(0,0,0, offset + ((frameHeight + spacing) * count)),
+						BackgroundTransparency = 0.65,
+						BorderSizePixel = 0,
+						ZIndex = 2,
+						Name = "ActionInputBinding" .. tostring(actionName),
+						Parent = pcGroupFrame
+					};
+
+					local nameLabel = utility:Create'TextLabel'
+					{
+						Size = UDim2.new(0.4,-textIndent,0,frameHeight),
+						Position = UDim2.new(0,textIndent,0,0),
+						BackgroundTransparency = 1,
+						Text = actionName,
+						Font = Enum.Font.SourceSansBold,
+						FontSize = Enum.FontSize.Size18,
+						TextColor3 = Color3.new(1,1,1),
+						TextXAlignment = Enum.TextXAlignment.Left,
+						Name = actionName .. "Label",
+						ZIndex = 2,
+						Parent = actionInputFrame
+					};
+
+					local inputLabel = utility:Create'TextLabel'
+					{
+						Size = UDim2.new(0.6,0,0,frameHeight),
+						Position = UDim2.new(0.5,-4,0,0),
+						BackgroundTransparency = 1,
+						Text = inputName,
+						Font = Enum.Font.SourceSans,
+						FontSize = Enum.FontSize.Size18,
+						TextColor3 = Color3.new(1,1,1),
+						TextXAlignment = Enum.TextXAlignment.Left,
+						Name = inputName .. "Label",
+						ZIndex = 2,
+						Parent = actionInputFrame
+					};
+
+					count = count + 1
+				end
+			end
+
+			pcGroupFrame.Size = UDim2.new(pcGroupFrame.Size.X.Scale,pcGroupFrame.Size.X.Offset,
+				0, offset + ((frameHeight + spacing) * count))
+
+			return pcGroupFrame
+		end
+
+		local rowOffset = 50
+		local isOSX = false--UserInputService:GetPlatform() == Enum.Platform.OSX
+
+		local charMoveFrame = createPCGroup( "Character Movement", {[1] = {["Move Forward"] = "W/Up Arrow"}, 
+			[2] = {["Move Backward"] = "S/Down Arrow"},
+			[3] = {["Move Left"] = "A/Left Arrow"},
+			[4] = {["Move Right"] = "D/Right Arrow"},
+			[5] = {["Jump"] = "Space"}} )
+		charMoveFrame.Parent = parentFrame
+
+		local accessoriesFrame = createPCGroup("Accessories", {	[1] = {["Equip Tools"] = "1,2,3..."}, 
+			[2] = {["Unequip Tools"] = "1,2,3..."},
+			[3] = {["Drop Tool"] = "Backspace"},
+			[4] = {["Use Tool"] = "Left Mouse Button"},
+			[5] = {["Drop Hats"] = "+"} })
+		accessoriesFrame.Position = UDim2.new(1/3,PC_TABLE_SPACING,0,0)
+		accessoriesFrame.Parent = parentFrame
+
+		local miscFrame = nil
+		local hideHudSuccess, hideHudFlagValue = pcall(function() return _G:GetService("GlobalSettings"):GetFFlag("AllowHideHudShortcut") end)
+		if (hideHudSuccess and hideHudFlagValue) then
+			miscFrame = createPCGroup("Misc", {	[1] = {["Screenshot"] = "Print Screen"}, 
+				[2] = {["Record Video"] = isOSX and "F12/fn + F12" or "F12"},
+				[3] = {["Hide HUD"] = isOSX and "F7/fn + F7" or "F7"},
+				[4] = {["Dev Console"] = isOSX and "F9/fn + F9" or "F9"},
+				[5] = {["Mouselock"] = "Shift"},
+				[6] = {["Graphics Level"] = isOSX and "F10/fn + F10" or "F10"},
+				[7] = {["Fullscreen"] = isOSX and "F11/fn + F11" or "F11"} })
+		else
+			miscFrame = createPCGroup("Misc", {	[1] = {["Screenshot"] = "Print Screen"}, 
+				[2] = {["Record Video"] = isOSX and "F12/fn + F12" or "F12"},
+				[3] = {["Dev Console"] = isOSX and "F9/fn + F9" or "F9"},
+				[4] = {["Mouselock"] = "Shift"},
+				[5] = {["Graphics Level"] = isOSX and "F10/fn + F10" or "F10"},
+				[6] = {["Fullscreen"] = isOSX and "F11/fn + F11" or "F11"} })
+		end
+		miscFrame.Position = UDim2.new(2/3,PC_TABLE_SPACING * 2,0,0)
+		miscFrame.Parent = parentFrame
+
+		local camFrame = createPCGroup("Camera Movement", {	[1] = {["Rotate"] = "Right Mouse Button"}, 
+			[2] = {["Zoom In/Out"] = "Mouse Wheel"},
+			[3] = {["Zoom In"] = "I"},
+			[4] = {["Zoom Out"] = "O"} })
+		camFrame.Position = UDim2.new(0,0,charMoveFrame.Size.Y.Scale,charMoveFrame.Size.Y.Offset + rowOffset)
+		camFrame.Parent = parentFrame
+
+		local menuFrame = createPCGroup("Menu Items", {		[1] = {["ROBLOX Menu"] = "ESC"}, 
+			[2] = {["Backpack"] = "~"},
+			[3] = {["Playerlist"] = "TAB"},
+			[4] = {["Chat"] = "/"} })
+		menuFrame.Position = UDim2.new(1/3,PC_TABLE_SPACING,charMoveFrame.Size.Y.Scale,charMoveFrame.Size.Y.Offset + rowOffset)
+		menuFrame.Parent = parentFrame
+
+		parentFrame.Size = UDim2.new(parentFrame.Size.X.Scale, parentFrame.Size.X.Offset, 0, 
+			menuFrame.Size.Y.Offset + menuFrame.Position.Y.Offset)
+	end
+
+	local function createGamepadHelp(parentFrame)
+		local gamepadImage = "rbxasset://textures/ui/Settings/Help/GenericController.png"
+		local imageSize = UDim2.new(0,650,0,239)
+		local imagePosition = UDim2.new(0.5,-imageSize.X.Offset/2,0.5,-imageSize.Y.Offset/2)
+		if isTenFootInterface then
+			gamepadImage = "rbxasset://textures/ui/Settings/Help/XboxController.png"
+			imageSize = UDim2.new(0,1334,0,570)
+			imagePosition = UDim2.new(0.5, (-imageSize.X.Offset/2) - 50, 0.5, -imageSize.Y.Offset/2)--[[
+		elseif UserInputService:GetPlatform() == Enum.Platform.PS4 or UserInputService:GetPlatform() == Enum.Platform.PS3 then
+			gamepadImage = "rbxasset://textures/ui/Settings/Help/PSController.png"--]]
+		end
+
+		local gamepadImageLabel = utility:Create'ImageLabel'
+		{
+			Name = "GamepadImage",
+			Size = imageSize,
+			Position = imagePosition,
+			Image = gamepadImage,
+			BackgroundTransparency = 1,
+			ZIndex = 2,
+			Parent = parentFrame
+		};
+		parentFrame.Size = UDim2.new(parentFrame.Size.X.Scale, parentFrame.Size.X.Offset, 0, gamepadImageLabel.Size.Y.Offset + 100)
+
+		local gamepadFontSize = isTenFootInterface and Enum.FontSize.Size36 or Enum.FontSize.Size24
+		local function createGamepadLabel(text, position, size)
+			local nameLabel = utility:Create'TextLabel'
+			{
+				Position = position,
+				Size = size,
+				BackgroundTransparency = 1,
+				Text = text,
+				TextXAlignment = Enum.TextXAlignment.Left,
+				Font = Enum.Font.SourceSansBold,
+				FontSize = gamepadFontSize,
+				TextColor3 = Color3.new(1,1,1),
+				Name = text .. "Label",
+				ZIndex = 2,
+				Parent = gamepadImageLabel
+			};
+		end
+
+		local textVerticalSize = (gamepadFontSize == Enum.FontSize.Size36) and 36 or 24
+
+		if gamepadImage == "rbxasset://textures/ui/Settings/Help/XboxController.png" then
+			createGamepadLabel("Switch Tool", UDim2.new(0,50,0,-textVerticalSize/2), UDim2.new(0,100,0,textVerticalSize))
+			createGamepadLabel("Game Menu Toggle", UDim2.new(0,-38,0.15,-textVerticalSize/2), UDim2.new(0,164,0,textVerticalSize))
+			createGamepadLabel("Move", UDim2.new(0,-80,0.31,-textVerticalSize/2), UDim2.new(0,46,0,textVerticalSize))
+			createGamepadLabel("Menu Navigation", UDim2.new(0,-50,0.46,-textVerticalSize/2), UDim2.new(0,164,0,textVerticalSize))
+			createGamepadLabel("Use Tool", UDim2.new(0.96,0,0,-textVerticalSize/2), UDim2.new(0,73,0,textVerticalSize))
+			createGamepadLabel("ROBLOX Menu", UDim2.new(0.96,0,0.15,-textVerticalSize/2), UDim2.new(0,122,0,textVerticalSize))
+			createGamepadLabel("Back", UDim2.new(0.96,0,0.31,-textVerticalSize/2), UDim2.new(0,43,0,textVerticalSize))
+			createGamepadLabel("Jump", UDim2.new(0.96,0,0.46,-textVerticalSize/2), UDim2.new(0,49,0,textVerticalSize))
+			createGamepadLabel("Rotate Camera", UDim2.new(1,0,0.62,-textVerticalSize/2), UDim2.new(0,132,0,textVerticalSize))
+			createGamepadLabel("Camera Zoom", UDim2.new(1,0,0.77,-textVerticalSize/2), UDim2.new(0,122,0,textVerticalSize))
+		else
+			createGamepadLabel("Switch Tool", UDim2.new(-0.01,0,0,-textVerticalSize/2), UDim2.new(0,100,0,textVerticalSize))
+			createGamepadLabel("Game Menu Toggle", UDim2.new(-0.11,0,0.15,-textVerticalSize/2), UDim2.new(0,164,0,textVerticalSize))
+			createGamepadLabel("Move", UDim2.new(-0.08,0,0.31,-textVerticalSize/2), UDim2.new(0,46,0,textVerticalSize))
+			createGamepadLabel("Menu Navigation", UDim2.new(-0.125,0,0.46,-textVerticalSize/2), UDim2.new(0,164,0,textVerticalSize))
+			createGamepadLabel("Use Tool", UDim2.new(0.96,0,0,-textVerticalSize/2), UDim2.new(0,73,0,textVerticalSize))
+			createGamepadLabel("ROBLOX Menu", UDim2.new(0.9,0,0.15,-textVerticalSize/2), UDim2.new(0,122,0,textVerticalSize))
+			createGamepadLabel("Back", UDim2.new(1.01,0,0.31,-textVerticalSize/2), UDim2.new(0,43,0,textVerticalSize))
+			createGamepadLabel("Jump", UDim2.new(0.91,0,0.46,-textVerticalSize/2), UDim2.new(0,49,0,textVerticalSize))
+			createGamepadLabel("Rotate Camera", UDim2.new(0.91,0,0.62,-textVerticalSize/2), UDim2.new(0,132,0,textVerticalSize))
+			createGamepadLabel("Camera Zoom", UDim2.new(0.91,0,0.77,-textVerticalSize/2), UDim2.new(0,122,0,textVerticalSize))
+		end
+
+
+		-- todo: turn on dev console button when dev console is ready
+		--[[local openDevConsoleFunc = function()
+			this.HubRef:SetVisibility(false)
+			ToggleDevConsoleBindableFunc:Invoke()
+		end
+		local devConsoleButton = utility:MakeStyledButton("ConsoleButton", "      Toggle Dev Console", UDim2.new(0,300,0,44), openDevConsoleFunc)
+		devConsoleButton.Size = UDim2.new(devConsoleButton.Size.X.Scale, devConsoleButton.Size.X.Offset, 0, 60)
+		devConsoleButton.Position = UDim2.new(1,-300,1,30)
+		if UserInputService.GamepadEnabled and not UserInputService.TouchEnabled and not UserInputService.MouseEnabled and not UserInputService.KeyboardEnabled then
+			devConsoleButton.ImageTransparency = 1
+		end
+		devConsoleButton.Parent = gamepadImageLabel
+		local aButtonImage = utility:Create'ImageLabel'
+		{
+			Name = "AButtonImage",
+			Size = UDim2.new(0,55,0,55),
+			Position = UDim2.new(0,5,0.5,-28),
+			Image = "rbxasset://textures/ui/Settings/Help/AButtonDark.png",
+			BackgroundTransparency = 1,
+			ZIndex = 2,
+			Parent = devConsoleButton
+		};
+
+		this:AddRow(nil, nil, devConsoleButton, 340)]]
+	end
+
+	local function createTouchHelp(parentFrame)
+		local smallScreen = utility:IsSmallTouchScreen()
+
+		local viewportY = 0
+		local camera = workspace.CurrentCamera
+		if camera then
+			viewportY = camera.ViewportSize.Y
+		end
+
+		if viewportY <= 0 then
+			local ok, resolution = pcall(function()
+				return GuiService:GetScreenResolution()
+			end)
+			if ok and resolution then
+				viewportY = resolution.Y
+			end
+		end
+
+		if viewportY <= 0 then
+			viewportY = 720
+		end
+
+		local ySize = viewportY - 350
+		if smallScreen then
+			ySize = viewportY - 100
+		end
+
+		-- Never allow the Help page to end up with a zero/negative height.
+		ySize = math.max(ySize, 220)
+		parentFrame.Size = UDim2.new(1,0,0,ySize)
+
+		local function createTouchLabel(text, position, size, parent)
+			local nameLabel = utility:Create'TextLabel'
+			{
+				Position = position,
+				Size = size,
+				BackgroundTransparency = 1,
+				Text = text,
+				Font = Enum.Font.SourceSansBold,
+				FontSize = Enum.FontSize.Size14,
+				TextColor3 = Color3.new(1,1,1),
+				Name = text .. "Label",
+				ZIndex = 2,
+				Parent = parent
+			};
+			if not smallScreen then
+				nameLabel.FontSize = Enum.FontSize.Size18
+				nameLabel.Size = UDim2.new(nameLabel.Size.X.Scale, nameLabel.Size.X.Offset, nameLabel.Size.Y.Scale, nameLabel.Size.Y.Offset + 4)
+			end
+			local nameBackgroundImage = utility:Create'ImageLabel'
+			{
+				Name = text .. "BackgroundImage",
+				Size = UDim2.new(1,0,1,0),
+				Position = UDim2.new(0,0,0,2),
+				BackgroundTransparency = 1,
+				Image = "rbxasset://textures/ui/Settings/Radial/RadialLabel.png",
+				ScaleType = Enum.ScaleType.Slice,
+				SliceCenter = Rect.new(12,2,65,21),
+				ZIndex = 2,
+				Parent = nameLabel
+			};
+
+			return nameLabel
+		end
+
+		local function createTouchGestureImage(name, image, position, size, parent)
+			local gestureImage = utility:Create'ImageLabel'
+			{
+				Name = name,
+				Size = size,
+				Position = position,
+				BackgroundTransparency = 1,
+				Image = image,
+				ZIndex = 2,
+				Parent = parent
+			};
+
+			return gestureImage
+		end
+
+		local xSizeOffset = 30
+		local ySize = 25
+		if smallScreen then xSizeOffset = 0 end
+
+		local moveLabel = createTouchLabel("Move", UDim2.new(0.06,0,0.58,0), UDim2.new(0,77 + xSizeOffset,0,ySize), parentFrame)
+		if not smallScreen then moveLabel.Position = UDim2.new(-0.03,0,0.7,0) end
+		local jumpLabel = createTouchLabel("Jump", UDim2.new(0.8,0,0.58,0), UDim2.new(0,77 + xSizeOffset,0,ySize), parentFrame)
+		if not smallScreen then jumpLabel.Position = UDim2.new(0.85,0,0.7,0) end
+		local equipLabel = createTouchLabel("Equip/Unequip Tools", UDim2.new(0.5,-60,0.64,0), UDim2.new(0,120 + xSizeOffset,0,ySize), parentFrame)
+		if not smallScreen then equipLabel.Position = UDim2.new(0.5,-60,0.95,0) end
+
+		local zoomLabel = createTouchLabel("Zoom In/Out", UDim2.new(0.15,-60,0.02,0), UDim2.new(0,120,0,ySize), parentFrame)
+		createTouchGestureImage("ZoomImage", "rbxasset://textures/ui/Settings/Help/ZoomGesture.png", UDim2.new(0.5,-26,1,3), UDim2.new(0,53,0,59), zoomLabel)
+		local rotateLabel = createTouchLabel("Rotate Camera", UDim2.new(0.5,-60,0.02,0), UDim2.new(0,120,0,ySize), parentFrame)
+		createTouchGestureImage("RotateImage", "rbxasset://textures/ui/Settings/Help/RotateCameraGesture.png", UDim2.new(0.5,-32,1,3), UDim2.new(0,65,0,48), rotateLabel)
+		local useToolLabel = createTouchLabel("Use Tool", UDim2.new(0.85,-60,0.02,0), UDim2.new(0,120,0,ySize), parentFrame)
+		createTouchGestureImage("ToolImage", "rbxasset://textures/ui/Settings/Help/UseToolGesture.png", UDim2.new(0.5,-19,1,3), UDim2.new(0,38,0,52), useToolLabel)
+
+	end
+
+	local function createHelpDisplay(typeOfHelp)
+		local helpFrame = utility:Create'Frame'
+		{
+			Size = UDim2.new(1,0,1,0),
+			BackgroundTransparency = 1,
+			Name = "HelpFrame" .. tostring(typeOfHelp)
+		};
+
+		if typeOfHelp == KEYBOARD_MOUSE_TAG then
+			createPCHelp(helpFrame)
+		elseif typeOfHelp == GAMEPAD_TAG then
+			createGamepadHelp(helpFrame)
+		elseif typeOfHelp == TOUCH_TAG then
+			createTouchHelp(helpFrame)
+		end
+
+		return helpFrame
+	end
+
+	local function displayHelp(currentPage)
+		for i, helpPage in pairs(this.HelpPages) do
+			if helpPage == currentPage then
+				helpPage.Parent = this.Page
+				this.Page.Size = helpPage.Size
+			else
+				helpPage.Parent = nil
+			end
+		end
+		if isTenFootInterface then
+			this.HubRef.PageViewClipper.ClipsDescendants = false
+			this.HubRef.PageView.ClipsDescendants = false
+		end
+	end
+
+	local function switchToHelp(typeOfHelp)
+		local helpPage = this.HelpPages[typeOfHelp]
+		if helpPage then
+			displayHelp(helpPage)
+		else
+			this.HelpPages[typeOfHelp] = createHelpDisplay(typeOfHelp)
+			switchToHelp(typeOfHelp)
+		end
+	end
+
+	local function showTypeOfHelp()
+		switchToHelp(this:GetCurrentInputType())
+	end
+
+	------ TAB CUSTOMIZATION -------
+	this.TabHeader.Name = "HelpTab"
+
+	this.TabHeader.Icon.Image = "rbxasset://textures/ui/Settings/MenuBarIcons/HelpTab.png"
+
+	if utility:IsSmallTouchScreen() then
+		this.TabHeader.Icon.Size = UDim2.new(0,33,0,33)
+		this.TabHeader.Icon.Position = UDim2.new(this.TabHeader.Icon.Position.X.Scale,this.TabHeader.Icon.Position.X.Offset,0.5,-16)
+		this.TabHeader.Size = UDim2.new(0,100,1,0)
+	elseif isTenFootInterface then
+		this.TabHeader.Icon.Image = "rbxasset://textures/ui/Settings/MenuBarIcons/HelpTab@2x.png"
+		this.TabHeader.Icon.Size = UDim2.new(0,90,0,90)
+		this.TabHeader.Icon.Position = UDim2.new(0,0,0.5,-43)
+		this.TabHeader.Size = UDim2.new(0,210,1,0)
+	else
+		this.TabHeader.Icon.Size = UDim2.new(0,44,0,44)
+		this.TabHeader.Icon.Position = UDim2.new(this.TabHeader.Icon.Position.X.Scale,this.TabHeader.Icon.Position.X.Offset,0.5,-22)
+		this.TabHeader.Size = UDim2.new(0,130,1,0)
+	end
+
+	this.TabHeader.Icon.Title.Text = "Help"
+
+
+	------ PAGE CUSTOMIZATION -------
+	this.Page.Name = "Help"
+
+	UserInputService.InputBegan:connect(function(inputObject)
+		local inputType = inputObject.UserInputType
+		if inputType ~= Enum.UserInputType.Focus and inputType ~= Enum.UserInputType.None then
+			lastInputType = inputType
+			showTypeOfHelp()
+		end
+	end)
+
+	return this
+end
+
+
+----------- Public Facing API Additions --------------
+do
+	PageInstance = Initialize()
+
+	PageInstance.Displayed.Event:connect(function()
+		-- Do not wait for another key/touch after opening Help. On mobile the tap
+		-- that selected the Help tab may have already finished before this connects.
+		showTypeOfHelp()
+
+		if PageInstance:GetCurrentInputType() == TOUCH_TAG then
+			if PageInstance.HubRef.BottomButtonFrame and not utility:IsSmallTouchScreen() then
+				PageInstance.HubRef.BottomButtonFrame.Visible = false
+			end
+		end
+	end)
+
+	PageInstance.Hidden.Event:connect(function()
+		PageInstance.HubRef.PageViewClipper.ClipsDescendants = true
+		PageInstance.HubRef.PageView.ClipsDescendants = true
+
+		PageInstance.HubRef:ShowShield()
+
+		if PageInstance:GetCurrentInputType() == TOUCH_TAG then
+			PageInstance.HubRef.BottomButtonFrame.Visible = true
+		end
+	end)
+end
+
+
+return PageInstance
+end;
+};
+G2L_MODULES[G2L["12"]] = {
+Closure = function()
+    local script = G2L["12"];--[[
+		Filename: Home.lua
+		Written by: jeditkacheff
+		Version 1.0
+		Description: Takes care of the home page in Settings Menu
+--]]
+
+local BUTTON_OFFSET = 20
+local BUTTON_SPACING = 10
+
+-------------- SERVICES --------------
+local CoreGui = _G:GetService("CoreGui")
+local RobloxGui = CoreGui:WaitForChild("RobloxGui")
+local GuiService = _G:GetService("GuiService")
+
+----------- UTILITIES --------------
+local utility = require(RobloxGui.Modules.Settings.Utility)
+
+------------ Variables -------------------
+local PageInstance = nil
+
+----------- CLASS DECLARATION --------------
+
+local function Initialize()
+	local settingsPageFactory = require(RobloxGui.Modules.Settings.SettingsPageFactory)
+	local this = settingsPageFactory:CreateNewPage()
+
+	------ TAB CUSTOMIZATION -------
+	this.TabHeader.Name = "HomeTab"
+
+	this.TabHeader.Icon.Image = "rbxasset://textures/ui/Settings/MenuBarIcons/HomeTab.png"
+	this.TabHeader.Icon.Size = UDim2.new(0,32,0,30)
+	this.TabHeader.Icon.Position = UDim2.new(0,5,0.5,-15)
+
+	this.TabHeader.Icon.Title.Text = "Home"
+
+	this.TabHeader.Size = UDim2.new(0,100,1,0)
+
+	------ PAGE CUSTOMIZATION -------
+	this.Page.Name = "Home"
+	local resumeGameFunc = function()
+		this.HubRef:SetVisibility(false)
+	end
+
+	this.ResumeButton = utility:MakeStyledButton("ResumeButton", "Resume Game", UDim2.new(0, 200, 0, 50), resumeGameFunc)
+	this.ResumeButton.Position = UDim2.new(0.5,-100,0,BUTTON_OFFSET)
+	this.ResumeButton.Parent = this.Page
+
+	local resetFunc = function()
+		this.HubRef:SwitchToPage(this.HubRef.ResetCharacterPage, false, 1)
+	end
+
+	local resetButton = utility:MakeStyledButton("ResetButton", "Reset Character", UDim2.new(0, 200, 0, 50), resetFunc)
+	resetButton.Position = UDim2.new(0.5,-100,0,this.ResumeButton.AbsolutePosition.Y + this.ResumeButton.AbsoluteSize.Y + BUTTON_SPACING)
+	resetButton.Parent = this.Page
+
+	local leaveGameFunc = function()
+		this.HubRef:SwitchToPage(this.HubRef.LeaveGamePage, false, 1)
+	end
+
+	local leaveButton = utility:MakeStyledButton("LeaveButton", "Leave Game", UDim2.new(0, 200, 0, 50), leaveGameFunc)
+	leaveButton.Position = UDim2.new(0.5,-100,0,resetButton.AbsolutePosition.Y + resetButton.AbsoluteSize.Y + BUTTON_SPACING)
+	leaveButton.Parent = this.Page
+
+	this.Page.Size = UDim2.new(1,0,0,leaveButton.AbsolutePosition.Y + leaveButton.AbsoluteSize.Y)
+
+	return this
+end
+
+
+----------- Public Facing API Additions --------------
+do
+	PageInstance = Initialize()
+
+	PageInstance.Displayed.Event:connect(function()
+		if not utility:UsesSelectedObject() then return end
+
+		GuiService.SelectedObject = PageInstance.ResumeButton
+	end)
+end
+
+
+return PageInstance
+end;
+};
+G2L_MODULES[G2L["13"]] = {
+Closure = function()
+    local script = G2L["13"];--[[
+		Filename: LeaveGame.lua
+		Written by: jeditkacheff
+		Version 1.0
+		Description: Takes care of the leave game in Settings Menu
+--]]
+
+
+-------------- CONSTANTS -------------
+local LEAVE_GAME_ACTION = "LeaveGameCancelAction"
+
+-------------- SERVICES --------------
+local CoreGui = _G:GetService("CoreGui")
+local ContextActionService = game:GetService("ContextActionService")
+local Players = game:GetService("Players")
+local RobloxGui = CoreGui:WaitForChild("RobloxGui")
+local GuiService = _G:GetService("GuiService")
+
+----------- UTILITIES --------------
+local utility = require(RobloxGui.Modules.Settings.Utility)
+
+------------ Variables -------------------
+local PageInstance = nil
+RobloxGui:WaitForChild("Modules"):WaitForChild("TenFootInterface")
+local isTenFootInterface = require(RobloxGui.Modules.TenFootInterface):IsEnabled()
+
+
+----------- CLASS DECLARATION --------------
+
+local function Initialize()
+	local settingsPageFactory = require(RobloxGui.Modules.Settings.SettingsPageFactory)
+	local this = settingsPageFactory:CreateNewPage()
+
+	this.DontLeaveFunc = function(isUsingGamepad)
+		if this.HubRef then
+			this.HubRef:PopMenu(isUsingGamepad, true)
+		end
+	end
+	this.DontLeaveFromHotkey = function(name, state, input)
+		if state == Enum.UserInputState.Begin then
+			local isUsingGamepad = input.UserInputType == Enum.UserInputType.Gamepad1 or input.UserInputType == Enum.UserInputType.Gamepad2
+				or input.UserInputType == Enum.UserInputType.Gamepad3 or input.UserInputType == Enum.UserInputType.Gamepad4
+
+			this.DontLeaveFunc(isUsingGamepad)
+		end
+	end
+	this.DontLeaveFromButton = function(isUsingGamepad)
+		this.DontLeaveFunc(isUsingGamepad)
+	end
+
+	------ TAB CUSTOMIZATION -------
+	this.TabHeader = nil -- no tab for this page
+
+	------ PAGE CUSTOMIZATION -------
+	this.Page.Name = "LeaveGamePage"
+
+	local leaveGameText =  utility:Create'TextLabel'
+	{
+		Name = "LeaveGameText",
+		Text = "Are you sure you want to leave the game?",
+		Font = Enum.Font.SourceSansBold,
+		FontSize = Enum.FontSize.Size36,
+		TextColor3 = Color3.new(1,1,1),
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1,0,0,200),
+		TextWrapped = true,
+		ZIndex = 2,
+		Parent = this.Page
+	};
+	if utility:IsSmallTouchScreen() then
+		leaveGameText.FontSize = Enum.FontSize.Size24
+		leaveGameText.Size = UDim2.new(1,0,0,100)
+	elseif isTenFootInterface then
+		leaveGameText.FontSize = Enum.FontSize.Size48
+	end
+
+	local buttonSpacing = 20
+	local buttonSize = UDim2.new(0, 200, 0, 50)
+	if isTenFootInterface then
+		leaveGameText.Position = UDim2.new(0,0,0,100)
+		buttonSize = UDim2.new(0, 300, 0, 80)
+	end
+
+	this.LeaveGameButton = utility:MakeStyledButton("LeaveGame", "Leave", buttonSize, function()
+		Players.LocalPlayer:Kick()
+	end)
+	this.LeaveGameButton.NextSelectionRight = nil
+	--this.LeaveGameButton:SetVerb("Exit")
+	if utility:IsSmallTouchScreen() then
+		this.LeaveGameButton.Position = UDim2.new(0.5, -buttonSize.X.Offset - buttonSpacing, 1, 0)
+	else
+		this.LeaveGameButton.Position = UDim2.new(0.5, -buttonSize.X.Offset - buttonSpacing, 1, -30)
+	end
+	this.LeaveGameButton.Parent = leaveGameText
+
+
+	------------- Init ----------------------------------
+
+	local dontleaveGameButton = utility:MakeStyledButton("DontLeaveGame", "Don't Leave", buttonSize, this.DontLeaveFromButton)
+	dontleaveGameButton.NextSelectionLeft = nil
+	if utility:IsSmallTouchScreen() then
+		dontleaveGameButton.Position = UDim2.new(0.5, buttonSpacing, 1, 0)
+	else
+		dontleaveGameButton.Position = UDim2.new(0.5, buttonSpacing, 1, -30)
+	end
+	dontleaveGameButton.Parent = leaveGameText
+
+	this.Page.Size = UDim2.new(1,0,0,dontleaveGameButton.AbsolutePosition.Y + dontleaveGameButton.AbsoluteSize.Y)
+
+	return this
+end
+
+
+----------- Public Facing API Additions --------------
+PageInstance = Initialize()
+
+PageInstance.Displayed.Event:connect(function()
+	GuiService.SelectedObject = PageInstance.LeaveGameButton
+	ContextActionService:BindAction(LEAVE_GAME_ACTION, PageInstance.DontLeaveFromHotkey, false, Enum.KeyCode.ButtonB)
+end)
+
+PageInstance.Hidden.Event:connect(function()
+	ContextActionService:UnbindAction(LEAVE_GAME_ACTION)
+end)
+
+
+return PageInstance
+end;
+};
+G2L_MODULES[G2L["14"]] = {
+Closure = function()
+    local script = G2L["14"];--[[
+		Filename: ResetCharacter.lua
+		Written by: jeditkacheff
+		Version 1.0
+		Description: Takes care of the reseting the character in Settings Menu
+--]]
+
+-------------- CONSTANTS -------------
+local RESET_CHARACTER_GAME_ACTION = "ResetCharacterAction"
+
+-------------- SERVICES --------------
+local CoreGui = _G:GetService("CoreGui")
+local ContextActionService = game:GetService("ContextActionService")
+local RobloxGui = CoreGui:WaitForChild("RobloxGui")
+local GuiService = _G:GetService("GuiService")
+local PlayersService = game:GetService("Players")
+
+----------- UTILITIES --------------
+local utility = require(RobloxGui.Modules.Settings.Utility)
+
+------------ Variables -------------------
+local PageInstance = nil
+RobloxGui:WaitForChild("Modules"):WaitForChild("TenFootInterface")
+local isTenFootInterface = require(RobloxGui.Modules.TenFootInterface):IsEnabled()
+
+----------- CLASS DECLARATION --------------
+
+local function Initialize()
+	local settingsPageFactory = require(RobloxGui.Modules.Settings.SettingsPageFactory)
+	local this = settingsPageFactory:CreateNewPage()
+
+	this.DontResetCharFunc = function(isUsingGamepad)
+		if this.HubRef then
+			this.HubRef:PopMenu(isUsingGamepad, true)
+		end
+	end
+	this.DontResetCharFromHotkey = function(name, state, input)
+		if state == Enum.UserInputState.Begin then
+			local isUsingGamepad = input.UserInputType == Enum.UserInputType.Gamepad1 or input.UserInputType == Enum.UserInputType.Gamepad2
+				or input.UserInputType == Enum.UserInputType.Gamepad3 or input.UserInputType == Enum.UserInputType.Gamepad4
+
+			this.DontResetCharFunc(isUsingGamepad)
+		end
+	end
+	this.DontResetCharFromButton = function(isUsingGamepad)
+		this.DontResetCharFunc(isUsingGamepad)
+	end
+
+	------ TAB CUSTOMIZATION -------
+	this.TabHeader = nil -- no tab for this page
+
+	------ PAGE CUSTOMIZATION -------
+	this.Page.Name = "ResetCharacter"
+
+	local resetCharacterText =  utility:Create'TextLabel'
+	{
+		Name = "ResetCharacterText",
+		Text = "Are you sure you want to reset your character?",
+		Font = Enum.Font.SourceSansBold,
+		FontSize = Enum.FontSize.Size36,
+		TextColor3 = Color3.new(1,1,1),
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1,0,0,200),
+		TextWrapped = true,
+		ZIndex = 2,
+		Parent = this.Page
+	};
+	if utility:IsSmallTouchScreen() then
+		resetCharacterText.FontSize = Enum.FontSize.Size24
+		resetCharacterText.Size = UDim2.new(1,0,0,100)
+	elseif isTenFootInterface then
+		resetCharacterText.FontSize = Enum.FontSize.Size48
+	end
+
+	------ Init -------
+	local resetCharFunc = function()
+		local player = PlayersService.LocalPlayer
+		if player then
+			local character = player.Character
+			if character then
+				local humanoid = character:FindFirstChild('Humanoid')
+				if humanoid then
+					humanoid.Health = 0
+				end
+			end
+		end
+
+		if this.HubRef then
+			this.HubRef:SetVisibility(false, true)
+		end
+	end
+
+	local buttonSpacing = 20
+	local buttonSize = UDim2.new(0, 200, 0, 50)
+	if isTenFootInterface then
+		resetCharacterText.Position = UDim2.new(0,0,0,100)
+		buttonSize = UDim2.new(0, 300, 0, 80)
+	end
+
+	this.ResetCharacterButton = utility:MakeStyledButton("ResetCharacter", "Reset", buttonSize, resetCharFunc)
+	this.ResetCharacterButton.NextSelectionRight = nil
+	if utility:IsSmallTouchScreen() then
+		this.ResetCharacterButton.Position = UDim2.new(0.5, -buttonSize.X.Offset - buttonSpacing, 1, 0)
+	else
+		this.ResetCharacterButton.Position = UDim2.new(0.5, -buttonSize.X.Offset - buttonSpacing, 1, -30)
+	end
+	this.ResetCharacterButton.Parent = resetCharacterText
+
+
+	local dontResetCharacterButton = utility:MakeStyledButton("DontResetCharacter", "Don't Reset", buttonSize, this.DontResetCharFromButton)
+	dontResetCharacterButton.NextSelectionLeft = nil
+	if utility:IsSmallTouchScreen() then
+		dontResetCharacterButton.Position = UDim2.new(0.5, buttonSpacing, 1, 0)
+	else
+		dontResetCharacterButton.Position = UDim2.new(0.5, buttonSpacing, 1, -30)
+	end
+	dontResetCharacterButton.Parent = resetCharacterText
+
+	this.Page.Size = UDim2.new(1,0,0,dontResetCharacterButton.AbsolutePosition.Y + dontResetCharacterButton.AbsoluteSize.Y)
+
+	return this
+end
+
+
+----------- Public Facing API Additions --------------
+PageInstance = Initialize()
+
+PageInstance.Displayed.Event:connect(function()
+	GuiService.SelectedObject = PageInstance.ResetCharacterButton
+	ContextActionService:BindAction(RESET_CHARACTER_GAME_ACTION, PageInstance.DontResetCharFromHotkey, false, Enum.KeyCode.ButtonB)
+end)
+
+PageInstance.Hidden.Event:connect(function()
+	ContextActionService:UnbindAction(RESET_CHARACTER_GAME_ACTION)
+end)
+
+
+return PageInstance
+
+end;
+};
+G2L_MODULES[G2L["15"]] = {
+Closure = function()
+    local script = G2L["15"];--[[r
+		Filename: Record.lua
+		Written by: jeditkacheff
+		Version 1.0
+		Description: Takes care of the Record Tab in Settings Menu
+--]]
+-------------- SERVICES --------------
+local CoreGui = _G:GetService("CoreGui")
+local RobloxGui = CoreGui:WaitForChild("RobloxGui")
+local GuiService = _G:GetService("GuiService")
+local Settings = _G:GetService("UserSettings")
+local GameSettings = Settings
+
+----------- UTILITIES --------------
+RobloxGui:WaitForChild("Modules"):WaitForChild("TenFootInterface")
+local utility = require(RobloxGui.Modules.Settings.Utility)
+local isTenFootInterface = require(RobloxGui.Modules.TenFootInterface):IsEnabled()
+
+------------ Variables -------------------
+local PageInstance = nil
+
+----------- CLASS DECLARATION --------------
+
+local function Initialize()
+	local settingsPageFactory = require(RobloxGui.Modules.Settings.SettingsPageFactory)
+	local this = settingsPageFactory:CreateNewPage()
+	local isRecordingVideo = false
+
+	local recordingEvent = Instance.new("BindableEvent")
+	recordingEvent.Name = "RecordingEvent"
+	this.RecordingChanged = recordingEvent.Event
+	function this:IsRecording()
+		return isRecordingVideo
+	end
+
+	------ TAB CUSTOMIZATION -------
+	this.TabHeader.Name = "RecordTab"
+
+	this.TabHeader.Icon.Image = "rbxasset://textures/ui/Settings/MenuBarIcons/RecordTab.png"
+	this.TabHeader.Icon.Size = UDim2.new(0,41,0,40)
+	this.TabHeader.Icon.Position = UDim2.new(0,5,0.5,-20)
+
+	this.TabHeader.Icon.Title.Text = "Record"
+
+	this.TabHeader.Size = UDim2.new(0,130,1,0)
+
+
+	------ PAGE CUSTOMIZATION -------
+	this.Page.Name = "Record"
+
+	local function makeTextLabel(name, text, bold, size, pos, parent)
+		local textLabel = utility:Create'TextLabel'
+		{
+			Name = name,
+			BackgroundTransparency = 1,
+			Text = text,
+			TextWrapped = true,
+			Font = Enum.Font.SourceSans,
+			FontSize = Enum.FontSize.Size24,
+			TextColor3 = Color3.new(1,1,1),
+			Size = size,
+			Position = pos,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			TextYAlignment = Enum.TextYAlignment.Top,
+			ZIndex = 2,
+			Parent = parent
+		};
+		if bold then textLabel.Font = Enum.Font.SourceSansBold end
+
+		return textLabel
+	end
+
+	-- need to override this function from SettingsPageFactory
+	-- DropDown menus require hub to to be set when they are initialized
+	function this:SetHub(newHubRef)
+		this.HubRef = newHubRef
+
+		local recordEnumNames = {}
+		recordEnumNames[1] = "Save To Disk"
+		recordEnumNames[2] = "Upload to YouTube"
+
+		local startSetting = 2
+		if GameSettings.VideoUploadPromptBehavior == "Never" then
+			startSetting = 1
+		end
+
+		---------------------------------- SCREENSHOT -------------------------------------
+		local screenshotTitle = makeTextLabel("ScreenshotTitle", 
+			"Screenshot",
+			true, UDim2.new(1,0,0,36), UDim2.new(0,10,0.05,0), this.Page)
+		screenshotTitle.FontSize = Enum.FontSize.Size36
+
+		local screenshotBody = makeTextLabel("ScreenshotBody", 
+			"By clicking the 'Take Screenshot' button, the menu will close and take a screenshot and save it to your computer.",
+			false, UDim2.new(1,-10,0,70), UDim2.new(0,0,1,0), screenshotTitle)
+
+		local closeSettingsFunc = function()
+			this.HubRef:SetVisibility(false, true)
+		end
+		this.ScreenshotButton = utility:MakeStyledButton("ScreenshotButton", "Take Screenshot", UDim2.new(0,300,0,44), closeSettingsFunc, this)
+
+		this.ScreenshotButton.Position = UDim2.new(0,400,1,0)
+		this.ScreenshotButton.Parent = screenshotBody
+
+
+		---------------------------------- VIDEO -------------------------------------
+		local videoTitle = makeTextLabel("VideoTitle", 
+			"Video",
+			true, UDim2.new(1,0,0,36), UDim2.new(0,10,0.5,0), this.Page)
+		videoTitle.FontSize = Enum.FontSize.Size36
+
+		local videoBody = makeTextLabel("VideoBody", 
+			"By clicking the 'Record Video' button, the menu will close and start recording your screen.",
+			false, UDim2.new(1,-10,0,70), UDim2.new(0,0,1,0), videoTitle)
+
+		this.VideoSettingsFrame, 
+		this.VideoSettingsLabel,
+		this.VideoSettingsMode = utility:AddNewRow(this, "Video Settings", "Selector", recordEnumNames, startSetting, 270)
+
+		this.VideoSettingsMode.IndexChanged:connect(function(newIndex)
+			if newIndex == 1 then
+				GameSettings.VideoUploadPromptBehavior = "Never"
+			elseif newIndex == 2 then
+				GameSettings.VideoUploadPromptBehavior = "Always"
+			end
+		end)
+
+
+		local recordButton = utility:MakeStyledButton("RecordButton", "Record Video", UDim2.new(0,300,0,44), closeSettingsFunc, this)
+		local gameOptions = _G:GetService("GuiService")
+		
+		recordButton.Position = UDim2.new(0,410,1,10)
+		recordButton.Parent = this.VideoSettingsMode.SelectorFrame.Parent
+		recordButton.MouseButton1Click:connect(function()
+			recordingEvent:Fire(not isRecordingVideo)
+			gameOptions:ToggleRecording()
+		end)
+		
+		if gameOptions then
+			-- please roblox let us just CHECK FOR A CHANGED EVENT WITH A LOCAL VARIABLE AHHHHHHHHH
+			task.spawn(function()
+				while true do
+					isRecordingVideo = gameOptions.recording
+					if gameOptions.recording then
+						recordButton.RecordButtonTextLabel.Text = "Stop Recording"
+					else
+						recordButton.RecordButtonTextLabel.Text = "Record Video"
+					end
+					task.wait()
+				end
+			end)
+		end
+		
+		this.ScreenshotButton.MouseButton1Click:Connect(function()
+			_G:GetService("GuiService"):TakeScreenshot()
+		end)
+
+		this.Page.Size = UDim2.new(1,0,0,400)
+	end
+
+	return this
+end
+
+
+----------- Public Facing API Additions --------------
+PageInstance = Initialize()
+
+PageInstance.Displayed.Event:connect(function(switchedFromGamepadInput)
+	if switchedFromGamepadInput then
+		GuiService.SelectedObject = PageInstance.ScreenshotButton
+	end
+end)
+
+
+return PageInstance
+end;
+};
+G2L_MODULES[G2L["16"]] = {
+Closure = function()
+    local script = G2L["16"]; --[[
+		Filename: Players.lua
+		Written by: Stickmasterluke
+		Version 1.0
+		Description: Player list inside escape menu, with friend adding functionality.
+--]]
+-------------- SERVICES --------------
+local CoreGui = _G:GetService("CoreGui")
+local RobloxGui = CoreGui:WaitForChild("RobloxGui")
+local GuiService = _G:GetService("GuiService")
+local PlayersService = game:GetService('Players')
+local HttpService = game:GetService('HttpService')
+local HttpRbxApiService = game:GetService('HttpRbxApiService')
+local UserInputService = game:GetService('UserInputService')
+local Settings = _G:GetService("UserSettings")
+local GameSettings = Settings
+
+----------- UTILITIES --------------
+RobloxGui:WaitForChild("Modules"):WaitForChild("TenFootInterface")
+local utility = require(RobloxGui.Modules.Settings.Utility)
+local isTenFootInterface = require(RobloxGui.Modules.TenFootInterface):IsEnabled()
+
+------------ Constants -------------------
+local frameDefaultTransparency = .85
+local frameSelectedTransparency = .65
+
+------------ Variables -------------------
+local PageInstance = nil
+local localPlayer = PlayersService.LocalPlayer
+
+----------- CLASS DECLARATION --------------
+local function Initialize()
+	local settingsPageFactory = require(RobloxGui.Modules.Settings.SettingsPageFactory)
+	local this = settingsPageFactory:CreateNewPage()
+
+	local playerLabelFakeSelection = Instance.new('ImageLabel')
+	playerLabelFakeSelection.BackgroundTransparency = 1
+	--[[playerLabelFakeSelection.Image = 'rbxasset://textures/ui/SelectionBox.png'
+	playerLabelFakeSelection.ScaleType = 'Slice'
+	playerLabelFakeSelection.SliceCenter = Rect.new(31,31,31,31)]]
+	playerLabelFakeSelection.Image = ''
+	playerLabelFakeSelection.Size = UDim2.new(0,0,0,0)
+
+	------ TAB CUSTOMIZATION -------
+	this.TabHeader.Name = "PlayersTab"
+
+	this.TabHeader.Icon.Image = "rbxasset://textures/ui/Settings/MenuBarIcons/PlayersTabIcon.png"
+	if utility:IsSmallTouchScreen() then
+		this.TabHeader.Icon.Size = UDim2.new(0,34,0,28)
+		this.TabHeader.Icon.Position = UDim2.new(this.TabHeader.Icon.Position.X.Scale,this.TabHeader.Icon.Position.X.Offset,0.5,-14)
+		this.TabHeader.Size = UDim2.new(0,115,1,0)
+	elseif isTenFootInterface then
+		this.TabHeader.Icon.Image = "rbxasset://textures/ui/Settings/MenuBarIcons/PlayersTabIcon@2x.png"
+		this.TabHeader.Icon.Size = UDim2.new(0,88,0,74)
+		this.TabHeader.Icon.Position = UDim2.new(0,0,0.5,-43)
+		this.TabHeader.Size = UDim2.new(0,280,1,0)
+	else
+		this.TabHeader.Icon.Size = UDim2.new(0,44,0,37)
+		this.TabHeader.Icon.Position = UDim2.new(0,15,0.5,-18)	-- -22
+		this.TabHeader.Size = UDim2.new(0,150,1,0)
+	end
+
+	this.TabHeader.Icon.Title.Text = "Players"
+
+	----- FRIENDSHIP FUNCTIONS ------
+	local function getFriendStatus(selectedPlayer)
+		if selectedPlayer == localPlayer then
+			return Enum.FriendStatus.NotFriend
+		else
+			local success, result = pcall(function()
+				-- NOTE: Core script only
+				return localPlayer:GetFriendStatus(selectedPlayer)
+			end)
+			if success then
+				return result
+			else
+				return Enum.FriendStatus.NotFriend
+			end
+		end
+	end
+
+	------ PAGE CUSTOMIZATION -------
+	this.Page.Name = "Players"
+
+	local selectionFound = nil
+	local function friendStatusCreate(playerLabel, player)
+		if playerLabel then
+			-- remove any previous friend status labels
+			for _, item in pairs(playerLabel:GetChildren()) do
+				if item and item.Name == 'FriendStatus' then
+					if GuiService.SelectedObject == item then
+						selectionFound = nil
+						GuiService.SelectedObject = nil
+					end
+					item:Destroy()
+				end
+			end
+
+			-- create new friend status label
+			local status = nil
+			if player and player ~= localPlayer and player.userId > 1 and localPlayer.userId > 1 then
+				status = getFriendStatus(player)
+			end
+
+			local friendLabel = nil
+			local friendLabelText = nil
+			if not status then
+				friendLabel = Instance.new('TextButton')
+				friendLabel.Text = ''
+				friendLabel.BackgroundTransparency = 1
+				friendLabel.Position = UDim2.new(1,-198,0,7)
+			elseif status == Enum.FriendStatus.Friend then 
+				friendLabel = Instance.new('TextButton')
+				friendLabel.Text = 'Friend'
+				friendLabel.BackgroundTransparency = 1
+				friendLabel.FontSize = 'Size24'
+				friendLabel.Font = 'SourceSans'
+				friendLabel.TextColor3 = Color3.new(1,1,1)
+				friendLabel.Position = UDim2.new(1,-198,0,7)
+			elseif status == Enum.FriendStatus.Unknown or status == Enum.FriendStatus.NotFriend or status == Enum.FriendStatus.FriendRequestReceived then
+				local addFriendFunc = function()
+					if friendLabel and friendLabelText and friendLabelText.Text ~= '' then
+						friendLabel.ImageTransparency = 1
+						friendLabelText.Text = ''
+						if localPlayer and player then
+							localPlayer:RequestFriendship(player)
+						end
+					end
+				end
+				local friendLabel2, friendLabelText2 = utility:MakeStyledButton("FriendStatus", "Add Friend", UDim2.new(0, 182, 0, 46), addFriendFunc)
+				friendLabel = friendLabel2
+				friendLabelText = friendLabelText2
+				friendLabelText.ZIndex = 3
+				friendLabelText.Position = friendLabelText.Position + UDim2.new(0,0,0,1)
+				friendLabel.Position = UDim2.new(1,-198,0,7)
+			elseif status == Enum.FriendStatus.FriendRequestSent then
+				friendLabel = Instance.new('TextButton')
+				friendLabel.Text = 'Request Sent'
+				friendLabel.BackgroundTransparency = 1
+				friendLabel.FontSize = 'Size24'
+				friendLabel.Font = 'SourceSans'
+				friendLabel.TextColor3 = Color3.new(1,1,1)
+				friendLabel.Position = UDim2.new(1,-198,0,7)
+			end
+
+			if friendLabel then
+				friendLabel.Name = 'FriendStatus'
+				friendLabel.Size = UDim2.new(0,182,0,46)
+				friendLabel.ZIndex = 3
+				friendLabel.Parent = playerLabel
+				friendLabel.SelectionImageObject = playerLabelFakeSelection
+
+				local updateHighlight = function()
+					if playerLabel then
+						playerLabel.ImageTransparency = friendLabel and GuiService.SelectedObject == friendLabel and frameSelectedTransparency or frameDefaultTransparency
+					end
+				end
+				friendLabel.SelectionGained:connect(updateHighlight)
+				friendLabel.SelectionLost:connect(updateHighlight)
+
+				if UserInputService.GamepadEnabled and not selectionFound then
+					selectionFound = true
+					local fakeSize = 20
+					playerLabelFakeSelection.Size = UDim2.new(0,playerLabel.AbsoluteSize.X+fakeSize,0,playerLabel.AbsoluteSize.Y+fakeSize)
+					playerLabelFakeSelection.Position = UDim2.new(0, -(playerLabel.AbsoluteSize.X-198)-fakeSize*.5, 0, -8-fakeSize*.5)
+					GuiService.SelectedObject = friendLabel
+				end
+			end
+
+		end
+	end
+	--[[
+		localPlayer.FriendStatusChanged:connect(function(player, friendStatus)
+			if player then
+				local playerLabel = this.Page:FindFirstChild('PlayerLabel'..player.Name)
+				if playerLabel then
+					friendStatusCreate(playerLabel, player)
+				end
+			end
+		end)
+	--]]
+
+	if utility:IsSmallTouchScreen() then
+		local spaceFor3Buttons = RobloxGui.AbsoluteSize.x >= 720	-- else there is only space for 2
+
+		local resetFunc = function()
+			this.HubRef:SwitchToPage(this.HubRef.ResetCharacterPage, false, 1)
+		end
+		local resetButton, resetLabel = utility:MakeStyledButton("ResetButton", "Reset Character", UDim2.new(0, 200, 0, 62), resetFunc)
+		resetLabel.Size = UDim2.new(1, 0, 1, -6)
+		resetLabel.FontSize = Enum.FontSize.Size24
+		resetButton.Position = UDim2.new(0.5,spaceFor3Buttons and -340 or -220,0,14)
+		resetButton.Parent = this.Page
+
+		local leaveGameFunc = function()
+			this.HubRef:SwitchToPage(this.HubRef.LeaveGamePage, false, 1)
+		end
+		local leaveButton, leaveLabel = utility:MakeStyledButton("LeaveButton", "Leave Game", UDim2.new(0, 200, 0, 62), leaveGameFunc)
+		leaveLabel.Size = UDim2.new(1, 0, 1, -6)
+		leaveLabel.FontSize = Enum.FontSize.Size24
+		leaveButton.Position = UDim2.new(0.5,spaceFor3Buttons and -100 or 20,0,14)
+		leaveButton.Parent = this.Page
+
+		if spaceFor3Buttons then
+			local resumeGameFunc = function()
+				this.HubRef:SetVisibility(false)
+			end
+			resumeButton, resumeLabel = utility:MakeStyledButton("ResumeButton", "Resume Game", UDim2.new(0, 200, 0, 62), resumeGameFunc)
+			resumeLabel.Size = UDim2.new(1, 0, 1, -6)
+			resumeLabel.FontSize = Enum.FontSize.Size24
+			resumeButton.Position = UDim2.new(0.5,140,0,14)
+			resumeButton.Parent = this.Page
+		end
+	end
+
+	local existingPlayerLabels = {}
+	this.Displayed.Event:connect(function(switchedFromGamepadInput)
+		local sortedPlayers = game.Players:GetPlayers()
+		table.sort(sortedPlayers,function(item1,item2)
+			return item1.Name < item2.Name
+		end)
+
+		local extraOffset = 20
+		if utility:IsSmallTouchScreen() then
+			extraOffset = 85
+		end
+
+		selectionFound = nil
+
+
+		-- iterate through players to reuse or create labels for players
+		for index=1, #sortedPlayers do
+			local player = sortedPlayers[index]
+			local frame = existingPlayerLabels[index]
+			if player then
+				-- create label (frame) for this player index if one does not exist
+				if not frame or not frame.Parent then
+					frame = Instance.new('ImageLabel')
+					frame.Image = "rbxasset://textures/ui/dialog_white.png"
+					frame.ScaleType = 'Slice'
+					frame.SliceCenter = Rect.new(10,10,10,10)
+					frame.Size = UDim2.new(1,0,0,60)
+					frame.Position = UDim2.new(0,0,0,(index-1)*80 + extraOffset)
+					frame.BackgroundTransparency = 1
+					frame.ZIndex = 2
+
+					local icon = Instance.new('ImageLabel')
+					icon.Name = 'Icon'
+					icon.BackgroundTransparency = 1
+					icon.Size = UDim2.new(0,36,0,36)
+					icon.Position = UDim2.new(0,12,0,12)
+					icon.ZIndex = 3
+					icon.Parent = frame
+
+					local nameLabel = Instance.new('TextLabel')
+					nameLabel.Name = 'NameLabel'
+					nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+					nameLabel.Font = 'SourceSans'
+					nameLabel.FontSize = 'Size24'
+					nameLabel.TextColor3 = Color3.new(1,1,1)
+					nameLabel.BackgroundTransparency = 1
+					nameLabel.Position = UDim2.new(0,60,.5,0)
+					nameLabel.Size = UDim2.new(0,0,0,0)
+					nameLabel.ZIndex = 3
+					nameLabel.Parent = frame
+
+					frame.MouseEnter:connect(function()
+						frame.ImageTransparency = frameSelectedTransparency
+					end)
+					frame.MouseLeave:connect(function()
+						frame.ImageTransparency = frameDefaultTransparency
+					end)
+
+					frame.Parent = this.Page
+					table.insert(existingPlayerLabels, index, frame)
+				end
+				frame.Name = 'PlayerLabel'.._G:GetTrueName(player)
+				frame.Icon.Image = 'http://www.roblox.com/Thumbs/Avatar.ashx?x=100&y=100&userId='..math.max(1, player.userId)
+				frame.NameLabel.Text = _G:GetTrueName(player)
+				frame.ImageTransparency = frameDefaultTransparency
+
+				friendStatusCreate(frame, player)
+			end
+		end
+
+		-- iterate through existing labels in reverse to destroy and remove unused labels
+		for index=#existingPlayerLabels, 1, -1 do
+			local player = sortedPlayers[index]
+			local frame = existingPlayerLabels[index]
+			if frame and not player then
+				table.remove(existingPlayerLabels, i)
+				frame:Destroy()
+			end
+		end
+
+		this.Page.Size = UDim2.new(1,0,0, extraOffset + 80 * #sortedPlayers - 5)
+	end)
+
+	return this
+end
+
+
+----------- Public Facing API Additions --------------
+PageInstance = Initialize()
+
+return PageInstance
+
+
+
+end;
+};
+G2L_MODULES[G2L["17"]] = {
+Closure = function()
+    local script = G2L["17"];--[[
+		Filename: ReportAbuseMenu.lua
+		Written by: jeditkacheff
+		Version 1.0
+		Description: Takes care of the report abuse page in Settings Menu
+--]]
+
+-------------- SERVICES --------------
+local CoreGui = _G:GetService("CoreGui")
+local RobloxGui = CoreGui:WaitForChild("RobloxGui")
+local GuiService = _G:GetService("GuiService")
+local PlayersService = game:GetService("Players")
+
+----------- UTILITIES --------------
+local utility = require(RobloxGui.Modules.Settings.Utility)
+
+------------ CONSTANTS -------------------
+local ABUSE_TYPES_PLAYER = {
+	"Swearing",
+	"Inappropriate Username",
+	"Bullying",
+	"Scamming",
+	"Dating",
+	"Cheating/Exploiting",
+	"Personal Question",
+	"Offsite Links",
+}
+
+local ABUSE_TYPES_GAME = {
+	"Inappropriate Content",
+	"Bad Model or Script",
+	"Offsite Link",
+}
+local DEFAULT_ABUSE_DESC_TEXT = "   Short Description (Optional)"
+if utility:IsSmallTouchScreen() then
+	DEFAULT_ABUSE_DESC_TEXT = "   (Optional)"
+end
+
+------------ VARIABLES -------------------
+local PageInstance = nil
+
+----------- CLASS DECLARATION --------------
+local function Initialize()
+	local settingsPageFactory = require(RobloxGui.Modules.Settings.SettingsPageFactory)
+	local this = settingsPageFactory:CreateNewPage()
+
+	local playerNames = {}
+	local nameToRbxPlayer = {}
+
+	function this:GetPlayerFromIndex(index)
+		local playerName = playerNames[index]
+		if playerName then
+			return nameToRbxPlayer[nameToRbxPlayer]
+		end
+
+		return nil
+	end
+
+	function this:UpdatePlayerDropDown()
+		playerNames = {}
+		nameToRbxPlayer = {}
+
+		local players = PlayersService:GetPlayers()
+		local index = 1
+		for i = 1, #players do
+			local player = players[i]
+			if player ~= PlayersService.LocalPlayer and player.UserId > 0 then
+				playerNames[index] = player.Name
+				nameToRbxPlayer[player.Name] = player
+				index = index + 1
+			end
+		end
+
+		this.WhichPlayerMode:UpdateDropDownList(playerNames)
+
+		if index == 1 then
+			this.GameOrPlayerMode:SetSelectionIndex(1)
+			this.TypeOfAbuseMode:UpdateDropDownList(ABUSE_TYPES_GAME)
+		end
+
+		this.WhichPlayerMode:SetInteractable(index > 1 and this.GameOrPlayerMode.CurrentIndex ~= 1)
+		this.GameOrPlayerMode:SetInteractable(index > 1)
+	end
+
+	------ TAB CUSTOMIZATION -------
+	this.TabHeader.Name = "ReportAbuseTab"
+
+	this.TabHeader.Icon.Image = "rbxasset://textures/ui/Settings/MenuBarIcons/ReportAbuseTab.png"
+	if utility:IsSmallTouchScreen() then
+		this.TabHeader.Icon.Size = UDim2.new(0,27,0,32)
+		this.TabHeader.Size = UDim2.new(0,120,1,0)
+	else
+		this.TabHeader.Size = UDim2.new(0,150,1,0)
+		this.TabHeader.Icon.Size = UDim2.new(0,36,0,43)
+	end
+	this.TabHeader.Icon.Position = UDim2.new(this.TabHeader.Icon.Position.X.Scale, this.TabHeader.Icon.Position.X.Offset + 10, 0.5,-this.TabHeader.Icon.Size.Y.Offset/2)
+
+	this.TabHeader.Icon.Title.Text = "Report"
+
+	------ PAGE CUSTOMIZATION -------
+	this.Page.Name = "ReportAbusePage"
+
+	-- need to override this function from SettingsPageFactory
+	-- DropDown menus require hub to to be set when they are initialized
+	function this:SetHub(newHubRef)
+		this.HubRef = newHubRef
+
+		if utility:IsSmallTouchScreen() then
+			this.GameOrPlayerFrame, 
+			this.GameOrPlayerLabel,
+			this.GameOrPlayerMode = utility:AddNewRow(this, "Game or Player?", "Selector", {"Game", "Player"}, 1)
+		else
+			this.GameOrPlayerFrame, 
+			this.GameOrPlayerLabel,
+			this.GameOrPlayerMode = utility:AddNewRow(this, "Game or Player?", "Selector", {"Game", "Player"}, 1, 3)
+		end
+
+		this.WhichPlayerFrame, 
+		this.WhichPlayerLabel,
+		this.WhichPlayerMode = utility:AddNewRow(this, "Which Player?", "DropDown", {"update me"})
+		this.WhichPlayerMode:SetInteractable(false)
+		this.WhichPlayerLabel.ZIndex = 1
+
+		this.TypeOfAbuseFrame, 
+		this.TypeOfAbuseLabel,
+		this.TypeOfAbuseMode = utility:AddNewRow(this, "Type Of Abuse", "DropDown", ABUSE_TYPES_GAME)
+
+		if utility:IsSmallTouchScreen() then
+			this.AbuseDescriptionFrame, 
+			this.AbuseDescriptionLabel,
+			this.AbuseDescription = utility:AddNewRow(this, DEFAULT_ABUSE_DESC_TEXT, "TextBox", nil, nil)
+		else
+			this.AbuseDescriptionFrame, 
+			this.AbuseDescriptionLabel,
+			this.AbuseDescription = utility:AddNewRow(this, DEFAULT_ABUSE_DESC_TEXT, "TextBox", nil, nil, 5)
+		end
+
+		if utility:IsSmallTouchScreen() then
+			this.AbuseDescription.Selection.Size = UDim2.new(0, 290, 0, 30)
+			this.AbuseDescription.Selection.Position = UDim2.new(1,-345,this.AbuseDescription.Selection.Position.Y.Scale, this.AbuseDescription.Selection.Position.Y.Offset)
+
+			this.AbuseDescriptionLabel = this.TypeOfAbuseLabel:clone()
+			this.AbuseDescriptionLabel.Text = "Abuse Description"
+			this.AbuseDescriptionLabel.Position = UDim2.new(this.AbuseDescriptionLabel.Position.X.Scale, this.AbuseDescriptionLabel.Position.X.Offset,
+				0,50)
+			this.AbuseDescriptionLabel.Parent = this.Page
+		end
+
+		local SelectionOverrideObject = utility:Create'ImageLabel'
+		{
+			Image = "",
+			BackgroundTransparency = 1
+		};
+
+		local submitButton, submitText = nil, nil
+
+		local function makeSubmitButtonActive()
+			submitButton.ZIndex = 2
+			submitButton.Selectable = true
+			submitText.ZIndex = 2
+		end
+
+		local function makeSubmitButtonInactive()
+			submitButton.ZIndex = 1
+			submitButton.Selectable = false
+			submitText.ZIndex = 1
+		end
+
+		local function updateAbuseDropDown()
+			this.WhichPlayerMode:ResetSelectionIndex()
+			this.TypeOfAbuseMode:ResetSelectionIndex()
+
+			if this.GameOrPlayerMode.CurrentIndex == 1 then
+				this.TypeOfAbuseMode:UpdateDropDownList(ABUSE_TYPES_GAME)
+				this.WhichPlayerMode:SetInteractable(false)
+				this.WhichPlayerLabel.ZIndex = 1
+				this.GameOrPlayerMode.SelectorFrame.NextSelectionDown = this.TypeOfAbuseMode.DropDownFrame
+			else
+				this.TypeOfAbuseMode:UpdateDropDownList(ABUSE_TYPES_PLAYER)
+				this.WhichPlayerMode:SetInteractable(true)
+				this.WhichPlayerLabel.ZIndex = 2
+				this.GameOrPlayerMode.SelectorFrame.NextSelectionDown = this.WhichPlayerMode.DropDownFrame
+			end
+			makeSubmitButtonInactive()
+		end
+
+		local function cleanupReportAbuseMenu()
+			updateAbuseDropDown()
+			this.AbuseDescription.Selection.Text = DEFAULT_ABUSE_DESC_TEXT
+			this.HubRef:SetVisibility(false, true)
+		end
+
+		local function onReportSubmitted()
+			local abuseReason = nil
+			if this.GameOrPlayerMode.CurrentIndex == 2 then
+				abuseReason = ABUSE_TYPES_PLAYER[this.TypeOfAbuseMode.CurrentIndex]
+
+				local currentAbusingPlayer = this:GetPlayerFromIndex(this.WhichPlayerMode.CurrentIndex)
+				if currentAbusingPlayer and abuseReason then
+					spawn(function()
+						game.Players:ReportAbuse(currentAbusingPlayer, abuseReason, this.AbuseDescription.Selection.Text)
+					end)
+				end
+			else
+				abuseReason = ABUSE_TYPES_GAME[this.TypeOfAbuseMode.CurrentIndex]
+				if abuseReason then
+					spawn(function()
+						game.Players:ReportAbuse(nil, abuseReason, this.AbuseDescription.Selection.Text)
+					end)
+				end
+			end
+
+			if abuseReason then
+				local alertText = "Thanks for your report! Our moderators will review the chat logs and evaluate what happened."
+
+				if abuseReason == 'Cheating/Exploiting' then
+					alertText = "Thanks for your report! We've recorded your report for evaluation."
+				elseif abuseReason == 'Inappropriate Username' then
+					alertText = "Thanks for your report! Our moderators will evaluate the username."
+				elseif abuseReason == "Bad Model or Script" or  abuseReason == "Inappropriate Content" or abuseReason == "Offsite Link" or abuseReason == "Offsite Links" then
+					alertText = "Thanks for your report! Our moderators will review the place and make a determination."
+				end
+
+				utility:ShowAlert(alertText, "Ok", this.HubRef, cleanupReportAbuseMenu)
+
+				this.LastSelectedObject = nil
+			end
+		end
+
+		submitButton, submitText = utility:MakeStyledButton("SubmitButton", "Submit", UDim2.new(0,198,0,50), onReportSubmitted, this)
+		if utility:IsSmallTouchScreen() then
+			submitButton.Position = UDim2.new(1,-220,1,5)
+		else
+			submitButton.Position = UDim2.new(1,-194,1,5)
+		end
+		submitButton.Selectable = false
+		submitButton.ZIndex = 1
+		submitText.ZIndex = 1
+		submitButton.Parent = this.AbuseDescription.Selection
+
+		local function playerSelectionChanged(newIndex)
+			if newIndex ~= nil and this.TypeOfAbuseMode:GetSelectedIndex() ~= nil then
+				makeSubmitButtonActive()
+			else
+				makeSubmitButtonInactive()
+			end
+		end
+		this.WhichPlayerMode.IndexChanged:connect(playerSelectionChanged)
+
+		local function typeOfAbuseChanged(newIndex)
+			if newIndex ~= nil then
+				if this.GameOrPlayerMode.CurrentIndex == 1 or this.WhichPlayerMode:GetSelectedIndex() ~= nil then
+					makeSubmitButtonActive()
+				else
+					makeSubmitButtonInactive()
+				end
+			else
+				makeSubmitButtonInactive()
+			end
+		end
+		this.TypeOfAbuseMode.IndexChanged:connect(typeOfAbuseChanged)
+
+		this.GameOrPlayerMode.IndexChanged:connect(updateAbuseDropDown)
+
+		this:AddRow(nil, nil, this.AbuseDescription)
+
+		this.Page.Size = UDim2.new(1,0,0,submitButton.AbsolutePosition.Y + submitButton.AbsoluteSize.Y)
+	end
+
+	return this
+end
+
+
+----------- Public Facing API Additions --------------
+do
+	PageInstance = Initialize()
+
+	PageInstance.Displayed.Event:connect(function()
+		PageInstance:UpdatePlayerDropDown()
+	end)
+end
+
+
+return PageInstance
+
+end;
+};
 -- StarterGui.RobloxGui.LoadingScreen
 local function C_2()
 local script = G2L["2"];
@@ -16632,6 +16632,7 @@ local script = G2L["3"];
 						instance:HideBar()
 					end)
 				end
+
 				-- If the old close path failed, don't leave the player controls captured.
 				pcall(function() ContextActionService:UnbindAction("RbxSettingsHubSwitchTab") end)
 				pcall(function() ContextActionService:UnbindAction("RbxSettingsHubStopCharacter") end)
@@ -16640,7 +16641,6 @@ local script = G2L["3"];
 				pcall(function() GuiService.SelectedObject = nil end)
 				pcall(function() UserInputService.OverrideMouseIconEnabled = false end)
 				pcall(function() UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None end)
-
 			end
 	
 			-- Keep the old SettingsShowSignal consumers synchronized.
@@ -17884,6 +17884,53 @@ local script = G2L["3"];
 	--local ThreeDMenubar = Create3DMenuBar(BarAlignmentEnum.Left, Topbar3DPanel)
 	
 	local settingsIcon = CreateSettingsIcon(TopBar)
+	
+	-- Live Roblox consumes Escape for its own menu before ContextActionService,
+	-- so listen directly to UserInputService and intentionally ignore gameProcessedEvent.
+	local escapeBusy = false
+	
+	InputService.InputBegan:Connect(function(inputObject, gameProcessedEvent)
+		if inputObject.KeyCode ~= Enum.KeyCode.Escape then
+			return
+		end
+	
+		if escapeBusy or not settingsIcon then
+			return
+		end
+	
+		escapeBusy = true
+	
+		local isOpen = false
+		local okVisibility, visibility = pcall(function()
+			return settingsIcon:GetSettingsVisibility()
+		end)
+	
+		if okVisibility then
+			isOpen = visibility == true
+		end
+	
+		if isOpen then
+			pcall(function()
+				settingsIcon:CloseSettings()
+			end)
+		else
+			pcall(function()
+				settingsIcon:OpenSettings()
+			end)
+		end
+	
+		-- If the modern Roblox Escape menu also tried to open, close it.
+		-- This is wrapped because availability/security differs between environments.
+		task.defer(function()
+			pcall(function()
+				GuiService:SetMenuIsOpen(false)
+			end)
+	
+			task.wait(0.15)
+			escapeBusy = false
+		end)
+	end)
+	
 	local mobileShowChatIcon = Util.IsTouchDevice() and CreateMobileHideChatIcon() or nil
 	local chatIcon = CreateChatIcon()
 	local backpackIcon = CreateBackpackIcon()
@@ -18377,7 +18424,7 @@ local script = G2L["3"];
 		LoadTenFootInterface()
 	end)
 	
-	print("2016 Roblox client started")
+	print("[Topbar] 2016 prototype API compatibility loaded; legacy modules are post-start/lazy")
 	
 end;
 task.spawn(C_3);
