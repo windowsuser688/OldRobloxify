@@ -11,3 +11,4 @@ PC is highly recommended, Mobile works too except its just a bit buggy lol
 ```lua
 loadstring(game:HttpGet("https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/Source.lua"))
 ```
+If loadstring doesn't work, try using the source.
