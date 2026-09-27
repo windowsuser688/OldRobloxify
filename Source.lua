@@ -1,4 +1,5 @@
 game.CoreGui.TopBarApp:Destroy()
+game.StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)
 local CoreGui = game:GetService("CoreGui")
 local ContextActionService = game:GetService("ContextActionService")
 
