@@ -655,7 +655,6 @@ RunService.RenderStepped:Connect(function(deltaTime)
 	end
 end)
 
-
 local G2L = {};
 
 -- StarterGui.RobloxGui
@@ -9331,20 +9330,29 @@ local function CreateDropDown(dropDownStringTable, startPosition, settingsHub)
 	local active = false
 	local hideDropDownSelection = function(name, inputState)
 		if name ~= nil and inputState ~= Enum.UserInputState.Begin then return end
-		this.DropDownFrame.Selectable = interactable
 
-		if DropDownFullscreenFrame.Visible and usesSelectedObject() then
-			GuiService.SelectedObject = lastSelectedObject
-		end
+		-- Do the critical recovery first. Nothing below is allowed to leave the hub frozen.
 		DropDownFullscreenFrame.Visible = false
-		if guiServiceChangeCon then guiServiceChangeCon:disconnect() end
-		ContextActionService:UnbindAction(guid .. "Action")
-		ContextActionService:UnbindAction(guid .. "FreezeAction")
-
-		settingsHub:SetActive(true)
-
-		dropDownButtonEnabled.Value = interactable
 		active = false
+		pcall(function() ContextActionService:UnbindAction(guid .. "Action") end)
+		pcall(function() ContextActionService:UnbindAction(guid .. "FreezeAction") end)
+		pcall(function() settingsHub:SetActive(true) end)
+
+		pcall(function()
+			this.DropDownFrame.Selectable = interactable
+			dropDownButtonEnabled.Value = interactable
+		end)
+
+		pcall(function()
+			if usesSelectedObject() then
+				GuiService.SelectedObject = lastSelectedObject
+			end
+		end)
+
+		if guiServiceChangeCon then
+			pcall(function() guiServiceChangeCon:disconnect() end)
+			guiServiceChangeCon = nil
+		end
 	end
 	local noOpFunc = function() end
 
@@ -9372,10 +9380,13 @@ local function CreateDropDown(dropDownStringTable, startPosition, settingsHub)
 				end
 			end)
 		--]]
-		ContextActionService:BindAction(guid .. "FreezeAction", noOpFunc, false, Enum.UserInputType.Keyboard, Enum.UserInputType.Gamepad1)
+		-- Old CoreGui code froze all keyboard/gamepad input and deactivated the hub.
+		-- In a PlayerGui recreation that can leave the menu permanently unresponsive
+		-- if any legacy dropdown callback fails. Keep only the explicit close action.
+		ContextActionService:UnbindAction(guid .. "FreezeAction")
 		ContextActionService:BindAction(guid .. "Action", hideDropDownSelection, false, Enum.KeyCode.ButtonB, Enum.KeyCode.Escape)
 
-		settingsHub:SetActive(false)
+		pcall(function() settingsHub:SetActive(true) end)
 
 		dropDownButtonEnabled.Value = false
 	end
@@ -11094,7 +11105,8 @@ local function CreateSettingsHub()
 			BackgroundTransparency = 1,
 			Position = UDim2.new(0, 0, 1, -1),
 			Size = UDim2.new(1, 0, 1, 0),
-			Modal = true,
+			-- PlayerGui compatibility: do not use internal CoreGui modal capture.
+			Modal = false,
 			Text = '',
 			Parent = this.Shield
 		}
@@ -11646,13 +11658,36 @@ local function CreateSettingsHub()
 		end)
 	end
 
+	-- Compatibility cleanup for the old 2016 SettingsHub.
+	-- Some games can error while closing and leave input-blocking actions bound.
+	local function forceReleaseSettingsInput()
+		pcall(function() ContextActionService:UnbindAction("RbxSettingsHubSwitchTab") end)
+		pcall(function() ContextActionService:UnbindAction("RbxSettingsHubStopCharacter") end)
+		pcall(function() ContextActionService:UnbindAction("RbxSettingsScrollHotkey") end)
+		pcall(function() removeBottomBarBindings(0) end)
+		pcall(function() GuiService:SetMenuIsOpen(false) end)
+		pcall(function() GuiService.SelectedObject = nil end)
+		pcall(function() UserInputService.OverrideMouseIconEnabled = false end)
+		pcall(function() UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None end)
+		pcall(function() PlatformService.BlurIntensity = 0 end)
+		if lastInputChangedCon then
+			pcall(function() lastInputChangedCon:disconnect() end)
+			lastInputChangedCon = nil
+		end
+	end
+
 	function setVisibilityInternal(visible, noAnimation, customStartPage)
 		this.OpenStateChangedCount = this.OpenStateChangedCount + 1
 		local switchedFromGamepadInput = switchedFromGamepadInput or isTenFootInterface
 		this.Visible = visible
 
+		-- Never allow an old dropdown/page to leave the recreated hub inactive.
+		this:SetActive(true)
 
-		this.Modal.Visible = this.Visible
+		-- This recreation lives in PlayerGui, not Roblox's internal CoreGui.
+		-- Modal input capture can wedge controls/menu focus in modern experiences.
+		this.Modal.Visible = false
+		pcall(function() this.Modal.Modal = false end)
 
 		if this.TabConnection then
 			this.TabConnection:disconnect()
@@ -11662,7 +11697,7 @@ local function CreateSettingsHub()
 		if this.Visible then
 			this.SettingsShowSignal:fire(this.Visible)
 
-			pcall(function() GuiService:SetMenuIsOpen(true) end)
+			-- Do not claim Roblox's internal menu-open state from a PlayerGui clone.
 			this.Shield.Visible = this.Visible
 			if noAnimation then
 				this.Shield.Position = SETTINGS_SHIELD_ACTIVE_POSITION
@@ -11670,17 +11705,9 @@ local function CreateSettingsHub()
 				this.Shield:TweenPosition(SETTINGS_SHIELD_ACTIVE_POSITION, Enum.EasingDirection.InOut, Enum.EasingStyle.Quart, 0.5, true)
 			end
 
-			local noOpFunc = function() end
-			ContextActionService:BindAction("RbxSettingsHubStopCharacter", noOpFunc, false,
-				Enum.PlayerActions.CharacterForward, 
-				Enum.PlayerActions.CharacterBackward, 
-				Enum.PlayerActions.CharacterLeft,
-				Enum.PlayerActions.CharacterRight,
-				Enum.PlayerActions.CharacterJump, 
-				Enum.KeyCode.LeftShift,
-				Enum.KeyCode.RightShift,
-				Enum.KeyCode.Tab,
-				Enum.UserInputType.Gamepad1, Enum.UserInputType.Gamepad2, Enum.UserInputType.Gamepad3, Enum.UserInputType.Gamepad4)
+			-- PlayerGui compatibility: do not sink character/keyboard/gamepad input.
+			-- The full-screen settings Shield already captures mouse/touch clicks.
+			ContextActionService:UnbindAction("RbxSettingsHubStopCharacter")
 
 			ContextActionService:BindAction("RbxSettingsHubSwitchTab", switchTabFromBumpers, false, Enum.KeyCode.ButtonR1, Enum.KeyCode.ButtonL1)
 			ContextActionService:BindAction("RbxSettingsScrollHotkey", scrollHotkeyFunc, false, Enum.KeyCode.PageUp, Enum.KeyCode.PageDown)
@@ -11727,6 +11754,9 @@ local function CreateSettingsHub()
 				backpack:OpenClose()
 			end
 		else
+			-- Release controls BEFORE any fragile legacy cleanup runs.
+			forceReleaseSettingsInput()
+
 			pcall(function() UserInputService.OverrideMouseIconEnabled = false end)
 
 			if noAnimation then
@@ -11746,17 +11776,17 @@ local function CreateSettingsHub()
 				lastInputChangedCon:disconnect()
 			end
 
-			playerList:HideTemp('SettingsMenu', false)
+			pcall(function() playerList:HideTemp('SettingsMenu', false) end)
 
 			if chatWasVisible then
-				chat:ToggleVisibility()
+				pcall(function() chat:ToggleVisibility() end)
 				chatWasVisible = false
 			end
 
 			pcall(function() UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None end)
 			pcall(function() PlatformService.BlurIntensity = 0 end)
 
-			clearMenuStack()
+			pcall(clearMenuStack)
 			ContextActionService:UnbindAction("RbxSettingsHubSwitchTab") 
 			ContextActionService:UnbindAction("RbxSettingsHubStopCharacter")
 			ContextActionService:UnbindAction("RbxSettingsScrollHotkey")
@@ -17073,11 +17103,35 @@ local script = G2L["3"];
 					end)
 				end
 			else
+				-- Kill any orphaned 2016 dropdown overlay before doing anything else.
+				pcall(function()
+					local rg = G2L["1"]
+					if rg then
+						for _, obj in ipairs(rg:GetDescendants()) do
+							if obj.Name == "DropDownFullscreenFrame" and obj:IsA("GuiObject") then
+								obj.Visible = false
+							end
+						end
+					end
+				end)
+				pcall(function()
+					if type(instance.SetActive) == "function" then instance:SetActive(true) end
+				end)
+
 				if type(instance.HideBar) == "function" then
 					pcall(function()
 						instance:HideBar()
 					end)
 				end
+
+				-- If the old close path failed, don't leave the player controls captured.
+				pcall(function() ContextActionService:UnbindAction("RbxSettingsHubSwitchTab") end)
+				pcall(function() ContextActionService:UnbindAction("RbxSettingsHubStopCharacter") end)
+				pcall(function() ContextActionService:UnbindAction("RbxSettingsScrollHotkey") end)
+				pcall(function() GuiService:SetMenuIsOpen(false) end)
+				pcall(function() GuiService.SelectedObject = nil end)
+				pcall(function() UserInputService.OverrideMouseIconEnabled = false end)
+				pcall(function() UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None end)
 			end
 	
 			-- Keep the old SettingsShowSignal consumers synchronized.
@@ -17181,25 +17235,22 @@ local script = G2L["3"];
 			hamburgerBusy = true
 	
 			task.spawn(function()
-				local hub = LoadSettingsHub()
-				if not hub then
-					warn("[Topbar] Hamburger: SettingsHub failed to load")
-					hamburgerBusy = false
-					return
-				end
-	
-				MenuModule = hub
-				connectSignal()
-	
-				local ok, err = pcall(function()
-					hub:ToggleVisibility(false)
+				-- Use the same verified visibility path as the stable menu controls.
+				-- Do not call the legacy SettingsHub:ToggleVisibility directly here;
+				-- that path can leave the old 2016 hub half-open in some games.
+				local ok, result = pcall(function()
+					return toggleSettings(false)
 				end)
 	
 				if not ok then
-					warn("[Topbar] Hamburger: SettingsHub:ToggleVisibility failed:", err)
+					warn("[Topbar] Hamburger safe toggle failed:", result)
+					local hub = ensureHub()
+					if hub then
+						local currentlyVisible = readVisibility()
+						forceHubVisualState(hub, not currentlyVisible)
+					end
 				end
 	
-				-- The hub's SettingsShowSignal is authoritative for the icon.
 				task.delay(0.1, function()
 					onVisibilityChanged(readVisibility())
 					hamburgerBusy = false
@@ -17234,21 +17285,7 @@ local script = G2L["3"];
 		end)
 	
 		rawset(menuItem, "ToggleSettings", function(self, switchedFromGamepadInput)
-			local hub = LoadSettingsHub()
-			if not hub then return false end
-	
-			local ok, err = pcall(function()
-				hub:ToggleVisibility(switchedFromGamepadInput)
-			end)
-			if not ok then
-				warn("[Topbar] SettingsHub:ToggleVisibility failed:", err)
-				return false
-			end
-	
-			MenuModule = hub
-			connectSignal()
-			onVisibilityChanged(readVisibility())
-			return readVisibility()
+			return toggleSettings(switchedFromGamepadInput)
 		end)
 	
 		rawset(menuItem, "GetSettingsVisibility", function(self)
