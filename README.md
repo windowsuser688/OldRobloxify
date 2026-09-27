@@ -9,6 +9,16 @@ PC is highly recommended, Mobile works too except its just a bit buggy lol
 ## Loadstring
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/Source.lua"))
+option = "2016M"
+
+if option == "2016M" then
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/Source2016M.lua"))()
+elseif option == "2016E" then
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/Source2016E.lua"))()
+elseif option == "2015L" then
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/Source2015L.lua"))()
+else
+	print("Unknown client version")
+end
 ```
 If loadstring doesn't work, try using the source.
