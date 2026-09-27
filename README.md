@@ -17,6 +17,8 @@ elseif option == "2016E" then
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/Source2016E.lua"))()
 elseif option == "2015L" then
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/Source2015L.lua"))()
+elseif option == "2015M" then
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/Source2015M.lua"))()
 else
 	print("Unknown client version")
 end
