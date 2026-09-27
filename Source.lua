@@ -254,9 +254,9 @@ G2L["7"] = Instance.new("ModuleScript", G2L["4"]);
 G2L["7"]["Name"] = [[PlayerPermissionsModule]];
 
 
--- StarterGui.RobloxGui.Modules.PlayerlistModule
+-- StarterGui.RobloxGui.Modules.Chat
 G2L["8"] = Instance.new("ModuleScript", G2L["4"]);
-G2L["8"]["Name"] = [[PlayerlistModule]];
+G2L["8"]["Name"] = [[Chat]];
 
 
 -- StarterGui.RobloxGui.Modules.PlayerDropDown
@@ -264,9 +264,9 @@ G2L["9"] = Instance.new("ModuleScript", G2L["4"]);
 G2L["9"]["Name"] = [[PlayerDropDown]];
 
 
--- StarterGui.RobloxGui.Modules.Chat
+-- StarterGui.RobloxGui.Modules.PlayerlistModule
 G2L["a"] = Instance.new("ModuleScript", G2L["4"]);
-G2L["a"]["Name"] = [[Chat]];
+G2L["a"]["Name"] = [[PlayerlistModule]];
 
 
 -- StarterGui.RobloxGui.Modules.Settings
@@ -2881,2371 +2881,6 @@ end;
 G2L_MODULES[G2L["8"]] = {
 Closure = function()
     local script = G2L["8"];--[[
-  // FileName: PlayerlistModule.lua
-  // Version 1.3
-  // Written by: jmargh
-  // Description: Implementation of in game player list and leaderboard
-]]
-
-local GuiService = game:GetService("GuiService")
-local UserInputService = game:GetService("UserInputService")
-local TeamsService = game:GetService("Teams")
-local ContextActionService = game:GetService("ContextActionService")
-local GroupService = game:GetService("GroupService")
-local StarterGui = game:GetService("StarterGui")
-local PlayersService = game:GetService("Players")
-
-local Player = PlayersService.LocalPlayer
-while not Player do
-	PlayersService:GetPropertyChangedSignal("LocalPlayer"):Wait()
-	Player = PlayersService.LocalPlayer
-end
-
--- 2026 compatibility: these modules now live under the experience's RobloxGui
--- instead of protected CoreGui.
-local RobloxGui = script:FindFirstAncestor("RobloxGui")
-if not RobloxGui then
-	RobloxGui = Player:WaitForChild("PlayerGui"):WaitForChild("RobloxGui")
-end
-local Modules = RobloxGui:WaitForChild("Modules")
-
-local StatsUtils = { ButtonHeight = 0 }
-local statsFolder = Modules:FindFirstChild("Stats")
-if statsFolder and statsFolder:FindFirstChild("StatsUtils") then
-	local ok, result = pcall(require, statsFolder.StatsUtils)
-	if ok and type(result) == "table" then
-		StatsUtils = result
-	end
-end
-
-local TenFootInterface = nil
-local tenFootModule = Modules:FindFirstChild("TenFootInterface")
-if tenFootModule then
-	local ok, result = pcall(require, tenFootModule)
-	if ok then
-		TenFootInterface = result
-	end
-end
-local isTenFootInterface = false
-if TenFootInterface and type(TenFootInterface.IsEnabled) == "function" then
-	local ok, result = pcall(function() return TenFootInterface:IsEnabled() end)
-	isTenFootInterface = ok and result or false
-else
-	local ok, result = pcall(function() return GuiService:IsTenFootInterface() end)
-	isTenFootInterface = ok and result or false
-end
-
-local playerDropDownModule = require(Modules:WaitForChild("PlayerDropDown"))
-local blockingUtility = playerDropDownModule:CreateBlockingUtility()
-local playerDropDown = playerDropDownModule:CreatePlayerDropDown()
-
-local PlayerPermissionsModule = require(Modules:WaitForChild("PlayerPermissionsModule"))
-
---[[ Remotes ]]--
-local RemoveEvent_OnFollowRelationshipChanged = nil
-local RemoteFunc_GetFollowRelationships = nil
-
---[[ Start Module ]]--
-local Playerlist = {}
-
---[[ Public Event API ]]--
--- Parameters: Sorted Array - see GameStats below
-Playerlist.OnLeaderstatsChanged = Instance.new('BindableEvent')
--- Parameters: nameOfStat(string), formatedStringOfStat(string)
-Playerlist.OnStatChanged = Instance.new('BindableEvent')
-
---[[ Client Stat Table ]]--
--- Sorted Array of tables
-local GameStats = {}
--- Fields
--- Name: String the developer has given the stat
--- Text: Formated string of the stat value
--- AddId: Child add order id
--- IsPrimary: Is this the primary stat
--- Priority: Sorting priority
--- NOTE: IsPrimary and Priority are unofficially supported. They are left over legacy from the old player list.
--- They can be un-supported at anytime. You should prefer using child add order to order your stats in the leader board.
-
---[[ Script Variables ]]--
-local topbarEnabled = true
-local playerlistCoreGuiEnabled = true
-local MyPlayerEntryTopFrame = nil
-local PlayerEntries = {}
-local StatAddId = 0
-local TeamEntries = {}
-local TeamAddId = 0
-local NeutralTeam = nil
-local IsShowingNeutralFrame = false
-local LastSelectedFrame = nil
-local LastSelectedPlayer = nil
-local MinContainerSize = UDim2.new(0, 165, 0.5, 0)
-if isTenFootInterface then
-	MinContainerSize = UDim2.new(0, 1000, 0, 720)
-end
-local TempHideKeys = {}
-
-local PlayerEntrySizeY = 24
-if isTenFootInterface then
-	PlayerEntrySizeY = 80
-end
-
-local TeamEntrySizeY = 18
-
-if isTenFootInterface then
-	TeamEntrySizeY = 32
-end
-
-local NameEntrySizeX = 170
-if isTenFootInterface then
-	NameEntrySizeX = 350
-end
-
-local StatEntrySizeX = 75
-if isTenFootInterface then
-	StatEntrySizeX = 250
-end
-
-local function getViewportSize()
-	local camera = workspace.CurrentCamera
-	return camera and camera.ViewportSize or Vector2.new(1280, 720)
-end
--- The original 2016 module intentionally disabled the playerlist on small touch screens.
--- OldRobloxify wants the classic playerlist to remain available on mobile.
-local IsSmallScreenDevice = false
-
-
---[[ Constants ]]--
-local ENTRY_PAD = 2
-local BG_TRANSPARENCY = 0.5
-local BG_COLOR = Color3.new(31/255, 31/255, 31/255)
-local BG_COLOR_TOP = Color3.new(106/255, 106/255, 106/255)
-local TEXT_STROKE_TRANSPARENCY = 0.75
-local TEXT_COLOR = Color3.new(1, 1, 243/255)
-local TEXT_STROKE_COLOR = Color3.new(34/255, 34/255, 34/255)
-local TWEEN_TIME = 0.15
-local MAX_LEADERSTATS = 4
-local MAX_STR_LEN = 12
-local TILE_SPACING = 2
-if isTenFootInterface then
-	BG_COLOR_TOP = Color3.new(25/255, 25/255, 25/255)
-	BG_COLOR = Color3.new(60/255, 60/255, 60/255)
-	BG_TRANSPARENCY = 0.25
-	TEXT_STROKE_TRANSPARENCY = 1
-	TILE_SPACING = 5
-end
-local SHADOW_IMAGE = 'rbxasset://textures/ui/PlayerList/TileShadowMissingTop.png'--'http://www.roblox.com/asset?id=286965900'
-local SHADOW_SLICE_SIZE = 5
-local SHADOW_SLICE_RECT = Rect.new(SHADOW_SLICE_SIZE+1, SHADOW_SLICE_SIZE+1, SHADOW_SLICE_SIZE*2-1, SHADOW_SLICE_SIZE*2-1)
-
-local CUSTOM_ICONS = {	-- Admins with special icons
-	['7210880'] = 'rbxassetid://134032333', -- Jeditkacheff
-	['13268404'] = 'rbxassetid://113059239', -- Sorcus
-	['261'] = 'rbxassetid://105897927', -- shedlestky
-	['20396599'] = 'rbxassetid://161078086', -- Robloxsai
-}
-
-local ABUSES = {
-	"Swearing",
-	"Bullying",
-	"Scamming",
-	"Dating",
-	"Cheating/Exploiting",
-	"Personal Questions",
-	"Offsite Links",
-	"Bad Username",
-}
-
---[[ Images ]]--
-local CHAT_ICON = 'rbxasset://textures/ui/chat_teamButton.png'
-local ADMIN_ICON = 'rbxasset://textures/ui/icon_admin-16.png'
-local INTERN_ICON = 'rbxasset://textures/ui/icon_intern-16.png'
-local PLACE_OWNER_ICON = 'rbxasset://textures/ui/icon_placeowner.png'
-local BC_ICON = 'rbxasset://textures/ui/icon_BC-16.png'
-local TBC_ICON = 'rbxasset://textures/ui/icon_TBC-16.png'
-local OBC_ICON = 'rbxasset://textures/ui/icon_OBC-16.png'
-local BLOCKED_ICON = 'rbxasset://textures/ui/PlayerList/BlockedIcon.png'
-local FRIEND_ICON = 'rbxasset://textures/ui/icon_friends_16.png'
-local FRIEND_REQUEST_ICON = 'rbxasset://textures/ui/icon_friendrequestsent_16.png'
-local FRIEND_RECEIVED_ICON = 'rbxasset://textures/ui/icon_friendrequestrecieved-16.png'
-
-local FOLLOWER_ICON = 'rbxasset://textures/ui/icon_follower-16.png'
-local FOLLOWING_ICON = 'rbxasset://textures/ui/icon_following-16.png'
-local MUTUAL_FOLLOWING_ICON = 'rbxasset://textures/ui/icon_mutualfollowing-16.png'
-
-local CHARACTER_BACKGROUND_IMAGE = 'rbxasset://textures/ui/PlayerList/CharacterBackgroundImage.png'
-
---[[ Helper Functions ]]--
-local function clamp(value, min, max)
-	if value < min then
-		value = min
-	elseif value > max then
-		value = max
-	end
-
-	return value
-end
-
-local function getFriendStatusIcon(friendStatus)
-	if friendStatus == Enum.FriendStatus.Unknown or friendStatus == Enum.FriendStatus.NotFriend then
-		return nil
-	elseif friendStatus == Enum.FriendStatus.Friend then
-		return FRIEND_ICON
-	elseif friendStatus == Enum.FriendStatus.FriendRequestSent then
-		return FRIEND_REQUEST_ICON
-	elseif friendStatus == Enum.FriendStatus.FriendRequestReceived then
-		return FRIEND_RECEIVED_ICON
-	else
-		error("PlayerList: Unknown value for friendStatus: "..tostring(friendStatus))
-	end
-end
-
-local function getCustomPlayerIcon(player)
-	local userIdStr = tostring(player.UserId)
-	if CUSTOM_ICONS[userIdStr] then return nil end
-	--
-
-	if PlayerPermissionsModule.IsPlayerAdminAsync(player) then
-		return ADMIN_ICON
-	elseif PlayerPermissionsModule.IsPlayerInternAsync(player) then
-		return INTERN_ICON
-	end
-end
-
-local function setAvatarIconAsync(player, iconImage)
-	local ok, image = pcall(function()
-		return PlayersService:GetUserThumbnailAsync(
-			player.UserId,
-			Enum.ThumbnailType.HeadShot,
-			Enum.ThumbnailSize.Size100x100
-		)
-	end)
-	if ok and image then
-		iconImage.Image = image
-	else
-		iconImage.Image = "rbxasset://textures/ui/Shell/Icons/DefaultProfileIcon.png"
-	end
-end
-
-local function getMembershipIcon(player)
-	if isTenFootInterface then
-		return ""
-	end
-
-	if blockingUtility:IsPlayerBlockedByUserId(player.UserId) then
-		return BLOCKED_ICON
-	end
-
-	local userIdStr = tostring(player.UserId)
-	if CUSTOM_ICONS[userIdStr] then
-		return CUSTOM_ICONS[userIdStr]
-	elseif player.UserId == game.CreatorId and game.CreatorType == Enum.CreatorType.User then
-		return PLACE_OWNER_ICON
-	end
-
-	-- Builders Club / Turbo / OBC no longer exist. Premium deliberately does
-	-- not reuse those legacy icons.
-	return ""
-end
-
-local function isValidStat(obj)
-	return obj:IsA('StringValue') or obj:IsA('IntValue') or obj:IsA('BoolValue') or obj:IsA('NumberValue') or
-		obj:IsA('DoubleConstrainedValue') or obj:IsA('IntConstrainedValue')
-end
-
-local function sortPlayerEntries(a, b)
-	if a.PrimaryStat == b.PrimaryStat then
-		return a.Player.Name:upper() < b.Player.Name:upper()
-	end
-	if not a.PrimaryStat then return false end
-	if not b.PrimaryStat then return true end
-	local statA = a.PrimaryStat
-	local statB = b.PrimaryStat
-	statA = tonumber(statA) or statA
-	statB = tonumber(statB) or statB
-	if type(statA) ~= type(statB) then
-		statA = tostring(statA)
-		statB = tostring(statB)
-	end
-	return statA > statB
-end
-
-local function sortLeaderStats(a, b)
-	if a.IsPrimary ~= b.IsPrimary then
-		return a.IsPrimary
-	end
-	if a.Priority == b.Priority then
-		return a.AddId < b.AddId
-	end
-	return a.Priority < b.Priority
-end
-
-local function sortTeams(a, b)
-	if a.TeamScore == b.TeamScore then
-		return a.Id < b.Id
-	end
-	if not a.TeamScore then return false end
-	if not b.TeamScore then return true end
-	return a.TeamScore < b.TeamScore
-end
-
--- Start of Gui Creation
-local Container = Instance.new('Frame')
-Container.Name = "PlayerListContainer"
-Container.Size = MinContainerSize
-
-if isTenFootInterface then
-	Container.Position = UDim2.new(0.5, -MinContainerSize.X.Offset/2, 0.25, 0)  
-else
-	Container.Position = UDim2.new(1, -167, 0, 38)
-end
-
--- Every time Performance Stats toggles on/off we need to 
--- reposition the main Container, so things don't overlap.
--- Optimally I could just call an "UpdateContainerPosition" function 
--- that takes into account everything that affects Container position 
--- and recalculate things.
--- 
--- Unfortunately, the position of Container may be kind of hard to re-calculate
--- on the fly when it's been shaped based on current leader board state.
---
--- So instead we do this: 
--- We always track where we'd be putting the widget if there were no 
--- position stats in targetContainerYOffset.
--- Whenever we reposition Container, we first move it to the ignoring-stats
--- location, (updating targetContainerYOffset), then call the 
--- AdjustContainerPosition function to derive final position.
-local targetContainerYOffset = Container.Position.Y.Offset
-
-Container.BackgroundTransparency = 1
-Container.Visible = false
-Container.Parent = RobloxGui
-
-local function AdjustContainerPosition()
-	if Container == nil then
-		return
-	end
-	Container.Position = UDim2.new(
-		Container.Position.X.Scale,
-		Container.Position.X.Offset,
-		Container.Position.Y.Scale,
-		targetContainerYOffset
-	)
-end
-AdjustContainerPosition()
-
--- Scrolling Frame
-local noSelectionObject = Instance.new("Frame")
-noSelectionObject.BackgroundTransparency = 1
-noSelectionObject.BorderSizePixel = 0
-
-local ScrollList = Instance.new('ScrollingFrame')
-ScrollList.Name = "ScrollList"
-ScrollList.Size = UDim2.new(1, -1, 0, 0)
-if isTenFootInterface then
-	ScrollList.Position = UDim2.new(0, 0, 0, PlayerEntrySizeY + TILE_SPACING)
-	ScrollList.Size = UDim2.new(1, 19, 0, 0)
-end
-ScrollList.BackgroundTransparency = 1
-ScrollList.BackgroundColor3 = Color3.new()
-ScrollList.BorderSizePixel = 0
-ScrollList.CanvasSize = UDim2.new(0, 0, 0, 0)	-- NOTE: Look into if x needs to be set to anything
-ScrollList.ScrollBarThickness = 6
-ScrollList.BottomImage = 'rbxasset://textures/ui/scroll-bottom.png'
-ScrollList.MidImage = 'rbxasset://textures/ui/scroll-middle.png'
-ScrollList.TopImage = 'rbxasset://textures/ui/scroll-top.png'
-ScrollList.SelectionImageObject = noSelectionObject
-ScrollList.Selectable = false
-ScrollList.Parent = Container
-
--- PlayerDropDown clipping frame
-local PopupClipFrame = Instance.new('Frame')
-PopupClipFrame.Name = "PopupClipFrame"
-PopupClipFrame.Size = UDim2.new(0, 150, 1.5, 0)
-PopupClipFrame.Position = UDim2.new(0, -150 - ENTRY_PAD, 0, 0)
-PopupClipFrame.BackgroundTransparency = 1
-PopupClipFrame.ClipsDescendants = true
-PopupClipFrame.Parent = Container
-
-
---[[ Creation Helper Functions ]]--
-local function createEntryFrame(name, sizeYOffset, isTopStat)
-	local containerFrame = Instance.new('Frame')
-	containerFrame.Name = name
-	containerFrame.Position = UDim2.new(0, 0, 0, 0)
-	containerFrame.Size = UDim2.new(1, 0, 0, sizeYOffset)
-	if isTenFootInterface then
-		containerFrame.Position = UDim2.new(0, 10, 0, 0)
-		containerFrame.Size = containerFrame.Size + UDim2.new(0, -20, 0, 0)
-	end
-	containerFrame.BackgroundTransparency = 1
-	containerFrame.ZIndex = isTenFootInterface and 2 or 1
-
-	local nameFrame = Instance.new('TextButton')
-	nameFrame.Name = "BGFrame"
-	nameFrame.Position = UDim2.new(0, 0, 0, 0)
-	nameFrame.Size = UDim2.new(0, NameEntrySizeX, 0, sizeYOffset)
-	nameFrame.BackgroundTransparency = isTopStat and 0 or BG_TRANSPARENCY
-	nameFrame.BackgroundColor3 = isTopStat and BG_COLOR_TOP or BG_COLOR
-	nameFrame.BorderSizePixel = 0
-	nameFrame.AutoButtonColor = false
-	nameFrame.Text = ""
-	nameFrame.Parent = containerFrame
-	nameFrame.ZIndex = isTenFootInterface and 2 or 1
-
-	return containerFrame, nameFrame
-end
-
-local function createEntryNameText(name, text, sizeXOffset, posXOffset)
-	local nameLabel = Instance.new('TextLabel')
-	nameLabel.Name = name
-	nameLabel.Size = UDim2.new(-0.01, sizeXOffset, 1, 0)
-	nameLabel.Position = UDim2.new(0.01, posXOffset, 0, 0)
-	nameLabel.BackgroundTransparency = 1
-	nameLabel.Font = Enum.Font.SourceSans
-	if isTenFootInterface then
-		nameLabel.TextSize = 32
-	else
-		nameLabel.TextSize = 14
-	end
-	nameLabel.TextColor3 = TEXT_COLOR
-	nameLabel.TextStrokeTransparency = TEXT_STROKE_TRANSPARENCY
-	nameLabel.TextStrokeColor3 = TEXT_STROKE_COLOR
-	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
-	nameLabel.ClipsDescendants = true
-	nameLabel.Text = text
-	nameLabel.ZIndex = isTenFootInterface and 2 or 1
-
-	return nameLabel
-end
-
-local function createStatFrame(offset, parent, name, isTopStat)
-	local statFrame = Instance.new('Frame')
-	statFrame.Name = name
-	statFrame.Size = UDim2.new(0, StatEntrySizeX, 1, 0)
-	statFrame.Position = UDim2.new(0, offset + TILE_SPACING, 0, 0)
-	statFrame.BackgroundTransparency = isTopStat and 0 or BG_TRANSPARENCY
-	statFrame.BackgroundColor3 = isTopStat and BG_COLOR_TOP or BG_COLOR
-	statFrame.BorderSizePixel = 0
-	statFrame.Parent = parent
-
-	if isTenFootInterface then
-		statFrame.ZIndex = 2
-
-		local shadow = Instance.new("ImageLabel")
-		shadow.BackgroundTransparency = 1
-		shadow.Name = 'Shadow'
-		shadow.Image = SHADOW_IMAGE
-		shadow.Position = UDim2.new(0, -SHADOW_SLICE_SIZE, 0, 0)
-		shadow.Size = UDim2.new(1, SHADOW_SLICE_SIZE*2, 1, SHADOW_SLICE_SIZE)
-		shadow.ScaleType = Enum.ScaleType.Slice
-		shadow.SliceCenter = SHADOW_SLICE_RECT
-		shadow.Parent = statFrame
-	end
-
-	return statFrame
-end
-
-local function createStatText(parent, text, isTopStat, isTeamStat)
-	local statText = Instance.new('TextLabel')
-	statText.Name = "StatText"
-	statText.Size = isTopStat and UDim2.new(1, 0, 0.5, 0) or UDim2.new(1, 0, 1, 0)
-	statText.Position = isTopStat and UDim2.new(0, 0, 0.5, 0) or UDim2.new(0, 0, 0, 0)
-	statText.BackgroundTransparency = 1
-	statText.Font = isTopStat and Enum.Font.SourceSansBold or Enum.Font.SourceSans
-	if isTenFootInterface then
-		statText.TextSize = 32
-	else
-		statText.TextSize = 14
-	end
-	statText.TextColor3 = TEXT_COLOR
-	statText.TextStrokeColor3 = TEXT_STROKE_COLOR
-	statText.TextStrokeTransparency = TEXT_STROKE_TRANSPARENCY
-	statText.Text = text
-	statText.Active = true
-	statText.Parent = parent
-	if isTenFootInterface then
-		statText.ZIndex = 2
-	end
-
-	if isTopStat then
-		local statName = statText:Clone()
-		statName.Name = "StatName"
-		statName.Text = tostring(parent.Name)
-		statName.Position = UDim2.new(0,0,0,0)
-		statName.Font = Enum.Font.SourceSans
-		statName.ClipsDescendants = true
-		statName.Parent = parent
-		if isTenFootInterface then
-			statName.ZIndex = 2
-		end
-	end
-
-	if isTeamStat then
-		statText.Font = Enum.Font.SourceSansBold
-	end
-
-	return statText
-end
-
-local function createImageIcon(image, name, xOffset, parent)
-	local imageLabel = Instance.new('ImageLabel')
-	imageLabel.Name = name
-	if isTenFootInterface then
-		imageLabel.Size = UDim2.new(0, 64, 0, 64)
-		imageLabel.ZIndex = 2
-
-		local background = Instance.new("ImageLabel", imageLabel)
-		background.Name = 'Background'
-		background.BackgroundTransparency = 1
-		background.Image = CHARACTER_BACKGROUND_IMAGE
-		background.Size = UDim2.new(0, 66, 0, 66)
-		background.Position = UDim2.new(0.5, -66/2, 0.5, -66/2)
-		background.ZIndex = 2
-	else
-		imageLabel.Size = UDim2.new(0, 16, 0, 16)
-	end
-	imageLabel.Position = UDim2.new(0.01, xOffset, 0.5, -imageLabel.Size.Y.Offset/2)
-	imageLabel.BackgroundTransparency = 1
-	imageLabel.Image = image
-	imageLabel.BorderSizePixel = 0
-	imageLabel.Parent = parent
-
-	return imageLabel
-end
-
-local function getScoreValue(statObject)
-	if statObject:IsA('DoubleConstrainedValue') or statObject:IsA('IntConstrainedValue') then
-		return statObject.ConstrainedValue
-	elseif statObject:IsA('BoolValue') then
-		if statObject.Value then return 1 else return 0 end
-	else
-		return statObject.Value
-	end
-end
-
-local THIN_CHARS = "[^%[iIl\%.,']"
-local function strWidth(str)
-	return string.len(str) - math.floor(string.len(string.gsub(str, THIN_CHARS, "")) / 2)
-end
-
-local function formatNumber(value)
-	local _,_,minusSign, int, fraction = tostring(value):find('([-]?)(%d+)([.]?%d*)')
-	int = int:reverse():gsub("%d%d%d", "%1,")
-	return minusSign..int:reverse():gsub("^,", "")..fraction
-end
-
-local function formatStatString(text)
-	local numberValue = tonumber(text)
-	if numberValue then
-		text = formatNumber(numberValue)
-	end
-
-	if strWidth(text) <= MAX_STR_LEN then
-		return text
-	else
-		return string.sub(text, 1, MAX_STR_LEN - 3).."..."
-	end
-end
-
---[[ Resize Functions ]]--
-local LastMaxScrollSize = 0
-local function setScrollListSize()
-	local teamSize = #TeamEntries * TeamEntrySizeY
-	local playerSize = #PlayerEntries * PlayerEntrySizeY
-	local spacing = #PlayerEntries * ENTRY_PAD + #TeamEntries * ENTRY_PAD
-	local canvasSize = teamSize + playerSize + spacing
-	if #TeamEntries > 0 and NeutralTeam and IsShowingNeutralFrame then
-		canvasSize = canvasSize + TeamEntrySizeY + ENTRY_PAD
-	end
-	ScrollList.CanvasSize = UDim2.new(0, 0, 0, canvasSize)
-	local newScrollListSize = math.min(canvasSize, Container.AbsoluteSize.Y)
-	if ScrollList.Size.Y.Offset == LastMaxScrollSize then
-		if isTenFootInterface then
-			ScrollList.Size = UDim2.new(1, 20, 0, newScrollListSize)
-		else
-			ScrollList.Size = UDim2.new(1, 0, 0, newScrollListSize)
-		end
-	end
-	LastMaxScrollSize = newScrollListSize
-end
-
---[[ Re-position Functions ]]--
-local function setPlayerEntryPositions()
-	local position = 0
-	for i = 1, #PlayerEntries do
-		if isTenFootInterface and PlayerEntries[i].Frame ~= MyPlayerEntryTopFrame then
-			PlayerEntries[i].Frame.Position = UDim2.new(0, 10, 0, position)
-			position = position + PlayerEntrySizeY + TILE_SPACING
-		elseif PlayerEntries[i].Frame ~= MyPlayerEntryTopFrame then
-			PlayerEntries[i].Frame.Position = UDim2.new(0, 0, 0, position)
-			position = position + PlayerEntrySizeY + TILE_SPACING
-		end
-	end
-end
-
-local function setTeamEntryPositions()
-	local teams = {}
-	for _,teamEntry in ipairs(TeamEntries) do
-		local team = teamEntry.Team
-		teams[tostring(team.TeamColor)] = {}
-	end
-	if NeutralTeam then
-		teams.Neutral = {}
-	end
-
-	for _,playerEntry in ipairs(PlayerEntries) do
-		if playerEntry.Frame ~= MyPlayerEntryTopFrame then
-			local player = playerEntry.Player
-			if player.Neutral then
-				table.insert(teams.Neutral, playerEntry)
-			elseif teams[tostring(player.TeamColor)] then
-				table.insert(teams[tostring(player.TeamColor)], playerEntry)
-			else
-				table.insert(teams.Neutral, playerEntry)
-			end
-		end
-	end
-
-	local position = 0
-	for _,teamEntry in ipairs(TeamEntries) do
-		local team = teamEntry.Team
-		teamEntry.Frame.Position = UDim2.new(0, isTenFootInterface and 10 or 0, 0, position)
-		position = position + TeamEntrySizeY + TILE_SPACING
-		local players = teams[tostring(team.TeamColor)]
-		for _,playerEntry in ipairs(players) do
-			playerEntry.Frame.Position = UDim2.new(0, isTenFootInterface and 10 or 0, 0, position)
-			position = position + PlayerEntrySizeY + TILE_SPACING
-		end
-	end
-	if NeutralTeam then
-		NeutralTeam.Frame.Position = UDim2.new(0, isTenFootInterface and 10 or 0, 0, position)
-		position = position + TeamEntrySizeY + TILE_SPACING
-		if #teams.Neutral > 0 then
-			IsShowingNeutralFrame = true
-			local players = teams.Neutral
-			for _,playerEntry in ipairs(players) do
-				playerEntry.Frame.Position = UDim2.new(0, isTenFootInterface and 10 or 0, 0, position)
-				position = position + PlayerEntrySizeY + TILE_SPACING
-			end
-		else
-			IsShowingNeutralFrame = false
-		end
-	end
-end
-
-local function setEntryPositions()
-	table.sort(PlayerEntries, sortPlayerEntries)
-	if #TeamEntries > 0 then
-		setTeamEntryPositions()
-	else
-		setPlayerEntryPositions()
-	end
-end
-
-local function updateSocialIcon(newIcon, bgFrame)
-	local socialIcon = bgFrame:FindFirstChild('SocialIcon')
-	local nameFrame = bgFrame:FindFirstChild('PlayerName')
-	local offset = 19
-	if socialIcon then
-		if newIcon then
-			socialIcon.Image = newIcon
-		else
-			if nameFrame then
-				local newSize = nameFrame.Size.X.Offset + socialIcon.Size.X.Offset + 2
-				nameFrame.Size = UDim2.new(-0.01, newSize, 0.5, 0)
-				nameFrame.Position = UDim2.new(0.01, offset, 0.245, 0)
-			end
-			socialIcon:Destroy()
-		end
-	elseif newIcon and bgFrame then
-		socialIcon = createImageIcon(newIcon, "SocialIcon", offset, bgFrame)
-		offset = offset + socialIcon.Size.X.Offset + 2
-		if nameFrame then
-			local newSize = bgFrame.Size.X.Offset - offset
-			nameFrame.Size = UDim2.new(-0.01, newSize, 0.5, 0)
-			nameFrame.Position = UDim2.new(0.01, offset, 0.245, 0)
-		end
-	end
-end
-
-local function getFriendStatus(selectedPlayer)
-	if selectedPlayer == Player then
-		return Enum.FriendStatus.NotFriend
-	end
-
-	local success, isFriend = pcall(function()
-		return Player:IsFriendsWithAsync(selectedPlayer.UserId)
-	end)
-	if success and isFriend then
-		return Enum.FriendStatus.Friend
-	end
-	return Enum.FriendStatus.NotFriend
-end
-
-function popupHidden()
-	if LastSelectedFrame then
-		for _,childFrame in pairs(LastSelectedFrame:GetChildren()) do
-			if childFrame:IsA('TextButton') or childFrame:IsA('Frame') then
-				childFrame.BackgroundColor3 = BG_COLOR
-			end
-		end
-	end
-	ScrollList.ScrollingEnabled = true
-	LastSelectedFrame = nil
-	LastSelectedPlayer = nil
-end
-playerDropDown.HiddenSignal:Connect(popupHidden)
-
-local function openPlatformProfileUI(rbxUid)
-	if not rbxUid or rbxUid < 1 then return end
-	pcall(function()
-		GuiService:InspectPlayerFromUserId(rbxUid)
-	end)
-end
-
-local function onEntryFrameSelected(selectedFrame, selectedPlayer)
-	if isTenFootInterface then
-		openPlatformProfileUI(selectedPlayer.UserId)
-		return
-	end
-
-	-- Keep the original behavior of not opening a dropdown for yourself.
-	-- Studio local-server clients can use negative/non-production UserIds,
-	-- so do NOT reject them here.
-	if selectedPlayer == Player then
-		return
-	end
-
-	if LastSelectedFrame ~= selectedFrame then
-		if LastSelectedFrame then
-			for _,childFrame in pairs(LastSelectedFrame:GetChildren()) do
-				if childFrame:IsA('TextButton') or childFrame:IsA('Frame') then
-					childFrame.BackgroundColor3 = BG_COLOR
-				end
-			end
-		end
-
-		LastSelectedFrame = selectedFrame
-		LastSelectedPlayer = selectedPlayer
-
-		for _,childFrame in pairs(selectedFrame:GetChildren()) do
-			if childFrame:IsA('TextButton') or childFrame:IsA('Frame') then
-				childFrame.BackgroundColor3 = Color3.new(0, 1, 1)
-			end
-		end
-
-		ScrollList.ScrollingEnabled = false
-
-		local ok, PopupFrame = pcall(function()
-			return playerDropDown:CreatePopup(selectedPlayer)
-		end)
-
-		if not ok or not PopupFrame then
-			warn("[2016 PlayerList] PlayerDropDown failed:", PopupFrame)
-			popupHidden()
-			return
-		end
-
-		local y = selectedFrame.Position.Y.Offset - ScrollList.CanvasPosition.Y
-		PopupFrame.Position = UDim2.new(1, 1, 0, y)
-		PopupFrame.Parent = PopupClipFrame
-		PopupFrame:TweenPosition(
-			UDim2.new(0, 0, 0, y),
-			Enum.EasingDirection.InOut,
-			Enum.EasingStyle.Quad,
-			TWEEN_TIME,
-			true
-		)
-	else
-		playerDropDown:Hide()
-		LastSelectedFrame = nil
-		LastSelectedPlayer = nil
-	end
-end
-
-local function onFriendshipChanged(otherPlayer, newFriendStatus)
-	local entryToUpdate = nil
-	for _,entry in ipairs(PlayerEntries) do
-		if entry.Player == otherPlayer then
-			entryToUpdate = entry
-			break
-		end
-	end
-	if not entryToUpdate then
-		return
-	end
-	local newIcon = getFriendStatusIcon(newFriendStatus)
-	local frame = entryToUpdate.Frame
-	local bgFrame = frame:FindFirstChild('BGFrame')
-	if bgFrame then
-		--no longer friends, but might still be following
-		-- TODO: We need to get follow relationship here; we currently don't have a way
-		-- to get a single users result, so the server script will need to be updated
-		-- issue will be when unfriending a user, but still following them, the icon
-		-- will not show correctly.
-		updateSocialIcon(newIcon, bgFrame)
-	end
-end
-
--- Modern public friendship notifications are exposed through StarterGui:GetCore.
-if not isTenFootInterface then
-	task.spawn(function()
-		local okFriended, friendedEvent = pcall(function()
-			return StarterGui:GetCore("PlayerFriendedEvent")
-		end)
-		if okFriended and friendedEvent then
-			friendedEvent.Event:Connect(function(otherPlayer)
-				onFriendshipChanged(otherPlayer, Enum.FriendStatus.Friend)
-			end)
-		end
-
-		local okUnfriended, unfriendedEvent = pcall(function()
-			return StarterGui:GetCore("PlayerUnfriendedEvent")
-		end)
-		if okUnfriended and unfriendedEvent then
-			unfriendedEvent.Event:Connect(function(otherPlayer)
-				onFriendshipChanged(otherPlayer, Enum.FriendStatus.NotFriend)
-			end)
-		end
-	end)
-end
-
---[[ Begin New Server Followers ]]--
-local function setFollowRelationshipsView(relationshipTable)
-	if not relationshipTable then
-		return
-	end
-
-	for i = 1, #PlayerEntries do
-		local entry = PlayerEntries[i]
-		local player = entry.Player
-		local userId = tostring(player.UserId)
-
-		-- don't update icon if already friends
-		local friendStatus = getFriendStatus(player)
-		if friendStatus == Enum.FriendStatus.Friend then
-			return
-		end
-
-		local icon = nil
-		if relationshipTable[userId] then
-			local relationship = relationshipTable[userId]
-			if relationship.IsMutual == true then
-				icon = MUTUAL_FOLLOWING_ICON
-			elseif relationship.IsFollowing == true then
-				icon = FOLLOWING_ICON
-			elseif relationship.IsFollower == true then
-				icon = FOLLOWER_ICON
-			end
-		end
-
-		local frame = entry.Frame
-		local bgFrame = frame:FindFirstChild('BGFrame')
-		if bgFrame then
-			updateSocialIcon(icon, bgFrame)
-		end
-	end
-end
-
-local function getFollowRelationships()
-	local result = nil
-	if RemoteFunc_GetFollowRelationships then
-		result = RemoteFunc_GetFollowRelationships:InvokeServer()
-	end
-	return result
-end
-
---[[ End New Server Followers ]]--
-
-local function updateAllTeamScores()
-	local teamScores = {}
-	for _,playerEntry in ipairs(PlayerEntries) do
-		local player = playerEntry.Player
-		local leaderstats = player:FindFirstChild('leaderstats')
-		local team = player.Neutral and 'Neutral' or tostring(player.TeamColor)
-		local isInValidColor = true
-		if team ~= 'Neutral' then
-			for _,teamEntry in ipairs(TeamEntries) do
-				local color = teamEntry.Team.TeamColor
-				if team == tostring(color) then
-					isInValidColor = false
-					break
-				end
-			end
-		end
-		if isInValidColor then
-			team = 'Neutral'
-		end
-		if not teamScores[team] then
-			teamScores[team] = {}
-		end
-		if playerEntry.Frame ~= MyPlayerEntryTopFrame then
-			if leaderstats then
-				for _,stat in ipairs(GameStats) do
-					local statObject = leaderstats:FindFirstChild(stat.Name)
-					if statObject and not statObject:IsA('StringValue') then
-						if not teamScores[team][stat.Name] then
-							teamScores[team][stat.Name] = 0
-						end
-						teamScores[team][stat.Name] = teamScores[team][stat.Name] + getScoreValue(statObject)
-					end
-				end
-			end
-		end
-	end
-
-	for _,teamEntry in ipairs(TeamEntries) do
-		local team = teamEntry.Team
-		local frame = teamEntry.Frame
-		local color = tostring(team.TeamColor)
-		local stats = teamScores[color]
-		if stats then
-			for statName,statValue in pairs(stats) do
-				local statFrame = frame:FindFirstChild(statName)
-				if statFrame then
-					local statText = statFrame:FindFirstChild('StatText')
-					if statText then
-						statText.Text = formatStatString(tostring(statValue))
-					end
-				end
-			end
-		else
-			for _,childFrame in pairs(frame:GetChildren()) do
-				local statText = childFrame:FindFirstChild('StatText')
-				if statText then
-					statText.Text = ''
-				end
-			end
-		end
-	end
-	if NeutralTeam then
-		local frame = NeutralTeam.Frame
-		local stats = teamScores['Neutral']
-		if stats then
-			frame.Visible = true
-			for statName,statValue in pairs(stats) do
-				local statFrame = frame:FindFirstChild(statName)
-				if statFrame then
-					local statText = statFrame:FindFirstChild('StatText')
-					if statText then
-						statText.Text = formatStatString(tostring(statValue))
-					end
-				end
-			end
-		else
-			frame.Visible = false
-		end
-	end
-end
-
-local function updateTeamEntry(entry)
-	local frame = entry.Frame
-	local team = entry.Team
-	local color = team.TeamColor.Color
-	local offset = NameEntrySizeX
-	for _,stat in ipairs(GameStats) do
-		local statFrame = frame:FindFirstChild(stat.Name)
-		if not statFrame then
-			statFrame = createStatFrame(offset, frame, stat.Name)
-			statFrame.BackgroundColor3 = color
-			createStatText(statFrame, "", false, true)
-		end
-		statFrame.Position = UDim2.new(0, offset + TILE_SPACING, 0, 0)
-		offset = offset + statFrame.Size.X.Offset + TILE_SPACING
-	end
-end
-
-local function updatePrimaryStats(statName)
-	for _,entry in ipairs(PlayerEntries) do
-		local player = entry.Player
-		local leaderstats = player:FindFirstChild('leaderstats')
-		entry.PrimaryStat = nil
-		if leaderstats then
-			local statObject = leaderstats:FindFirstChild(statName)
-			if statObject then
-				local scoreValue = getScoreValue(statObject)
-				entry.PrimaryStat = scoreValue
-			end
-		end
-	end
-end
-
-local updateLeaderstatFrames = nil
--- TODO: fire event to top bar?
-local function initializeStatText(stat, statObject, entry, statFrame, index, isTopStat)
-	local player = entry.Player
-	local statValue = getScoreValue(statObject)
-	if statObject.Name == GameStats[1].Name then
-		entry.PrimaryStat = statValue
-	end
-	local statText = createStatText(statFrame, formatStatString(tostring(statValue)), isTopStat)
-	-- Top Bar insertion
-	if player == Player then
-		stat.Text = statText.Text
-	end
-
-	statObject.Changed:Connect(function(newValue)
-		local scoreValue = getScoreValue(statObject)
-		statText.Text = formatStatString(tostring(scoreValue))
-		if statObject.Name == GameStats[1].Name then
-			entry.PrimaryStat = scoreValue
-		end
-		-- Top bar changed event
-		if player == Player then
-			stat.Text = statText.Text
-			Playerlist.OnStatChanged:Fire(stat.Name, stat.Text)
-		end
-		updateAllTeamScores()
-		setEntryPositions()
-	end)
-	statObject.ChildAdded:Connect(function(child)
-		if child.Name == "IsPrimary" then
-			GameStats[1].IsPrimary = false
-			stat.IsPrimary = true
-			updatePrimaryStats(stat.Name)
-			if updateLeaderstatFrames then updateLeaderstatFrames() end
-			Playerlist.OnLeaderstatsChanged:Fire(GameStats)
-		end
-	end)
-end
-
-updateLeaderstatFrames = function()
-	table.sort(GameStats, sortLeaderStats)
-	if #TeamEntries > 0 then
-		for _,entry in ipairs(TeamEntries) do
-			updateTeamEntry(entry)
-		end
-		if NeutralTeam then
-			updateTeamEntry(NeutralTeam)
-		end
-	end
-
-	for _,entry in ipairs(PlayerEntries) do
-		local player = entry.Player
-		local mainFrame = entry.Frame
-		local offset = NameEntrySizeX
-		local leaderstats = player:FindFirstChild('leaderstats')
-		local isTopStat = (entry.Frame == MyPlayerEntryTopFrame)
-
-		if leaderstats then
-			for _,stat in ipairs(GameStats) do
-				local statObject = leaderstats:FindFirstChild(stat.Name)
-				local statFrame = mainFrame:FindFirstChild(stat.Name)
-
-				if not statFrame then
-					statFrame = createStatFrame(offset, mainFrame, stat.Name, isTopStat)
-					if statObject then
-						initializeStatText(stat, statObject, entry, statFrame, _, isTopStat)
-					end
-				elseif statObject then
-					local statText = statFrame:FindFirstChild('StatText')
-					if not statText then
-						initializeStatText(stat, statObject, entry, statFrame, _, isTopStat)
-					end
-				end
-				statFrame.Position = UDim2.new(0, offset + TILE_SPACING, 0, 0)
-				offset = offset + statFrame.Size.X.Offset + TILE_SPACING
-			end
-		else
-			for _,stat in ipairs(GameStats) do
-				local statFrame = mainFrame:FindFirstChild(stat.Name)
-				if not statFrame then
-					statFrame = createStatFrame(offset, mainFrame, stat.Name, isTopStat)
-				end
-				offset = offset + statFrame.Size.X.Offset + TILE_SPACING
-			end
-		end
-
-		if entry.Frame ~= MyPlayerEntryTopFrame then
-			if isTenFootInterface then
-				Container.Position = UDim2.new(0.5, -offset/2, 0, 110)
-				Container.Size = UDim2.new(0, offset, 0.8, 0)
-			else
-				Container.Position = UDim2.new(1, -offset, 0, 38)
-				Container.Size = UDim2.new(0, offset, 0.5, 0)
-			end
-			targetContainerYOffset = Container.Position.Y.Offset
-			AdjustContainerPosition()
-
-			local newMinContainerOffset = offset
-			MinContainerSize = UDim2.new(0, newMinContainerOffset, 0.5, 0)
-		end
-	end
-	updateAllTeamScores()
-	setEntryPositions()
-	Playerlist.OnLeaderstatsChanged:Fire(GameStats)
-end
-
-local function addNewStats(leaderstats)
-	for i,stat in ipairs(leaderstats:GetChildren()) do
-		if isValidStat(stat) and #GameStats < MAX_LEADERSTATS then
-			local gameHasStat = false
-			for _,gStat in ipairs(GameStats) do
-				if stat.Name == gStat.Name then
-					gameHasStat = true
-					break
-				end
-			end
-
-			if not gameHasStat then
-				local newStat = {}
-				newStat.Name = stat.Name
-				newStat.Text = "-"
-				newStat.Priority = 0
-				local priority = stat:FindFirstChild('Priority')
-				if priority and priority:IsA("ValueBase") then newStat.Priority = tonumber(priority.Value) or 0 end
-				newStat.IsPrimary = false
-				local isPrimary = stat:FindFirstChild('IsPrimary')
-				if isPrimary then
-					newStat.IsPrimary = true
-				end
-				newStat.AddId = StatAddId
-				StatAddId = StatAddId + 1
-				table.insert(GameStats, newStat)
-				table.sort(GameStats, sortLeaderStats)
-				if #GameStats == 1 then
-					setScrollListSize()
-					setEntryPositions()
-				end
-			end
-		end
-	end
-end
-
-local function removeStatFrameFromEntry(stat, frame)
-	local statFrame = frame:FindFirstChild(stat.Name)
-	if statFrame then
-		statFrame:Destroy()
-	end
-end
-
-local function doesStatExists(stat)
-	local doesExists = false
-	for _,entry in ipairs(PlayerEntries) do
-		local player = entry.Player
-		if player then
-			local leaderstats = player:FindFirstChild('leaderstats')
-			if leaderstats and leaderstats:FindFirstChild(stat.Name) then
-				doesExists = true
-				break
-			end
-		end
-	end
-
-	return doesExists
-end
-
-local function onStatRemoved(oldStat, entry)
-	if isValidStat(oldStat) then
-		removeStatFrameFromEntry(oldStat, entry.Frame)
-		local statExists = doesStatExists(oldStat)
-		--
-		local toRemove = nil
-		for i, stat in ipairs(GameStats) do
-			if stat.Name == oldStat.Name then
-				toRemove = i
-				break
-			end
-		end
-		-- removed from player but not from game; another player still has this stat
-		if statExists then
-			if toRemove and entry.Player == Player then
-				GameStats[toRemove].Text = "-"
-				Playerlist.OnStatChanged:Fire(GameStats[toRemove].Name, GameStats[toRemove].Text)
-			end
-			-- removed from game
-		else
-			for _,playerEntry in ipairs(PlayerEntries) do
-				removeStatFrameFromEntry(oldStat, playerEntry.Frame)
-			end
-			for _,teamEntry in ipairs(TeamEntries) do
-				removeStatFrameFromEntry(oldStat, teamEntry.Frame)
-			end
-			if toRemove then
-				table.remove(GameStats, toRemove)
-				table.sort(GameStats, sortLeaderStats)
-			end
-		end
-		if GameStats[1] then
-			updatePrimaryStats(GameStats[1].Name)
-		end
-		updateLeaderstatFrames()
-	end
-end
-
-local function onStatAdded(leaderstats, entry)
-	leaderstats.ChildAdded:Connect(function(newStat)
-		if isValidStat(newStat) then
-			addNewStats(newStat.Parent)
-			updateLeaderstatFrames()
-		end
-	end)
-	leaderstats.ChildRemoved:Connect(function(child)
-		onStatRemoved(child, entry)
-	end)
-	addNewStats(leaderstats)
-	updateLeaderstatFrames()
-end
-
-local function setLeaderStats(entry)
-	local player = entry.Player
-	local leaderstats = player:FindFirstChild('leaderstats')
-
-	if leaderstats then
-		onStatAdded(leaderstats, entry)
-	end
-
-	local function onPlayerChildChanged(property, child)
-		if property == 'Name' and child.Name == 'leaderstats' then
-			onStatAdded(child, entry)
-		end
-	end
-
-	player.ChildAdded:Connect(function(child)
-		if child.Name == 'leaderstats' then
-			onStatAdded(child, entry)
-		end
-		child.Changed:Connect(function(property) onPlayerChildChanged(property, child) end)
-	end)
-	for _,child in pairs(player:GetChildren()) do
-		child.Changed:Connect(function(property) onPlayerChildChanged(property, child) end)
-	end
-
-	player.ChildRemoved:Connect(function(child)
-		if child.Name == 'leaderstats' then
-			for i,stat in ipairs(child:GetChildren()) do
-				onStatRemoved(stat, entry)
-			end
-			updateLeaderstatFrames()
-		end
-	end)
-end
-
-local offsetSize = 18
-if isTenFootInterface then offsetSize = 32 end
-
-local function createPlayerEntry(player, isTopStat)
-	local playerEntry = {}
-	local name = player.Name
-
-	local containerFrame, entryFrame = createEntryFrame(name, PlayerEntrySizeY, isTopStat)
-	entryFrame.Active = true
-
-	entryFrame.MouseButton1Click:Connect(function()
-		onEntryFrameSelected(containerFrame, player)
-	end)
-
-	local currentXOffset = 1
-
-	-- check membership
-	local membershipIconImage = getMembershipIcon(player)
-	local membershipIcon = nil
-	if membershipIconImage then
-		membershipIcon = createImageIcon(membershipIconImage, "MembershipIcon", currentXOffset, entryFrame)
-		currentXOffset = currentXOffset + membershipIcon.Size.X.Offset + 2
-	else
-		currentXOffset = currentXOffset + offsetSize
-	end
-
-	task.spawn(function()
-		if isTenFootInterface and membershipIcon then
-			setAvatarIconAsync(player, membershipIcon)
-		end
-	end)
-
-	-- Some functions yield, so we need to spawn off in order to not cause a race condition with other events like PlayersService.ChildRemoved
-	task.spawn(function()
-		local success, result = pcall(function()
-			if game.CreatorType ~= Enum.CreatorType.Group then return false end
-			local rolesResult = GroupService:GetRolesInGroupAsync(player.UserId, game.CreatorId)
-			if not rolesResult.IsMember then return false end
-			for _, role in ipairs(rolesResult.Roles or {}) do
-				if role.Rank >= 255 then return true end
-			end
-			return false
-		end)
-		if success then
-			if game.CreatorType == Enum.CreatorType.Group and result then
-				membershipIconImage = PLACE_OWNER_ICON
-				if not membershipIcon then
-					membershipIcon = createImageIcon(membershipIconImage, "MembershipIcon", 1, entryFrame)
-				else
-					membershipIcon.Image = membershipIconImage
-				end
-			end
-		else
-			print("PlayerList: GetRankInGroup failed because", result)
-		end
-		local iconImage = getCustomPlayerIcon(player)
-		if iconImage then
-			if not membershipIcon then
-				membershipIcon = createImageIcon(iconImage, "MembershipIcon", 1, entryFrame)
-			else
-				membershipIcon.Image = iconImage
-			end
-		end
-		-- Friendship and Follower status is checked by onFriendshipChanged, which is called by the FriendStatusChanged
-		-- event. This event is fired when any player joins the game. onFriendshipChanged will check Follower status in
-		-- the case that we are not friends with the new player who is joining.
-	end)
-
-	local playerNameXSize = entryFrame.Size.X.Offset - currentXOffset
-	local playerName = createEntryNameText("PlayerName", name, playerNameXSize, currentXOffset)
-	playerName.Parent = entryFrame
-	playerEntry.Player = player
-	playerEntry.Frame = containerFrame
-
-	if isTenFootInterface then
-		local shadow = Instance.new("ImageLabel")
-		shadow.BackgroundTransparency = 1
-		shadow.Name = 'Shadow'
-		shadow.Image = SHADOW_IMAGE
-		shadow.Position = UDim2.new(0, -SHADOW_SLICE_SIZE, 0, 0)
-		shadow.Size = UDim2.new(1, SHADOW_SLICE_SIZE*2, 1, SHADOW_SLICE_SIZE)
-		shadow.ScaleType = Enum.ScaleType.Slice
-		shadow.SliceCenter = SHADOW_SLICE_RECT
-		shadow.Parent = entryFrame
-	end
-
-	if isTopStat then
-		playerName.Font = Enum.Font.SourceSansBold
-	end
-
-	return playerEntry
-end
-
-local function createTeamEntry(team)
-	local teamEntry = {}
-	teamEntry.Team = team
-	teamEntry.TeamScore = 0
-
-	local containerFrame, entryFrame = createEntryFrame(team.Name, TeamEntrySizeY)
-	entryFrame.Selectable = false	-- dont allow gamepad selection of team frames
-	entryFrame.BackgroundColor3 = team.TeamColor.Color
-
-	local teamName = createEntryNameText("TeamName", team.Name, entryFrame.AbsoluteSize.X, 1)
-	teamName.Parent = entryFrame
-
-	teamEntry.Frame = containerFrame
-
-	if isTenFootInterface then
-		local shadow = Instance.new("ImageLabel")
-		shadow.BackgroundTransparency = 1
-		shadow.Name = 'Shadow'
-		shadow.Image = SHADOW_IMAGE
-		shadow.Position = UDim2.new(0, -SHADOW_SLICE_SIZE, 0, 0)
-		shadow.Size = UDim2.new(1, SHADOW_SLICE_SIZE*2, 1, SHADOW_SLICE_SIZE)
-		shadow.ScaleType = Enum.ScaleType.Slice
-		shadow.SliceCenter = SHADOW_SLICE_RECT
-		shadow.Parent = entryFrame
-	end
-
-	-- connections
-	team.Changed:Connect(function(property)
-		if property == 'Name' then
-			teamName.Text = team.Name
-		elseif property == 'TeamColor' then
-			for _,childFrame in pairs(containerFrame:GetChildren()) do
-				if childFrame:IsA('GuiObject') then
-					childFrame.BackgroundColor3 = team.TeamColor.Color
-				end
-			end
-
-			setTeamEntryPositions()
-			updateAllTeamScores()
-			setEntryPositions()
-			setScrollListSize()
-		end
-	end)
-
-	return teamEntry
-end
-
-local function createNeutralTeam()
-	if not NeutralTeam then
-		local team = Instance.new('Team')
-		team.Name = 'Neutral'
-		team.TeamColor = BrickColor.new('White')
-		NeutralTeam = createTeamEntry(team)
-		NeutralTeam.Frame.Parent = ScrollList
-	end
-end
-
---[[ Insert/Remove Player Functions ]]--
-local function setupEntry(player, newEntry, isTopStat)
-	setLeaderStats(newEntry)
-
-	if isTopStat then
-		newEntry.Frame.Parent = Container
-		table.insert(PlayerEntries, newEntry)
-	else
-		newEntry.Frame.Parent = ScrollList
-		table.insert(PlayerEntries, newEntry)
-		setScrollListSize()
-	end
-
-	updateLeaderstatFrames()
-
-	player.Changed:Connect(function(property)
-		if #TeamEntries > 0 and (property == 'Neutral' or property == 'TeamColor') then
-			setTeamEntryPositions()
-			updateAllTeamScores()
-			setEntryPositions()
-			setScrollListSize()
-		end
-	end)
-end
-
-local function insertPlayerEntry(player)
-	local entry = createPlayerEntry(player)
-	setupEntry(player, entry)
-
-	-- create an entry on the top of the playerlist
-	if player == Player and isTenFootInterface then
-		local localEntry = createPlayerEntry(player, true)
-		MyPlayerEntryTopFrame = localEntry.Frame
-		MyPlayerEntryTopFrame.BackgroundTransparency = 1
-		MyPlayerEntryTopFrame.BorderSizePixel = 0
-		setupEntry(player, localEntry, true)
-	end
-end
-
-local function removePlayerEntry(player)
-	for i = 1, #PlayerEntries do
-		if PlayerEntries[i].Player == player then
-			PlayerEntries[i].Frame:Destroy()
-			table.remove(PlayerEntries, i)
-			break
-		end
-	end
-	setEntryPositions()
-	setScrollListSize()
-end
-
---[[ Team Functions ]]--
-local function onTeamAdded(team)
-	for i = 1, #TeamEntries do
-		if TeamEntries[i].Team.TeamColor == team.TeamColor then
-			TeamEntries[i].Frame:Destroy()
-			table.remove(TeamEntries, i)
-			break
-		end
-	end
-	local entry = createTeamEntry(team)
-	entry.Id = TeamAddId
-	TeamAddId = TeamAddId + 1
-	if not NeutralTeam then
-		createNeutralTeam()
-	end
-	table.insert(TeamEntries, entry)
-	table.sort(TeamEntries, sortTeams)
-	setTeamEntryPositions()
-	updateLeaderstatFrames()
-	setScrollListSize()
-	entry.Frame.Parent = ScrollList
-end
-
-local function onTeamRemoved(removedTeam)
-	for i = 1, #TeamEntries do
-		local team = TeamEntries[i].Team
-		if team.Name == removedTeam.Name then
-			TeamEntries[i].Frame:Destroy()
-			table.remove(TeamEntries, i)
-			break
-		end
-	end
-	if #TeamEntries == 0 then
-		if NeutralTeam then
-			NeutralTeam.Frame:Destroy()
-			NeutralTeam.Team:Destroy()
-			NeutralTeam = nil
-			IsShowingNeutralFrame = false
-		end
-	end
-	setEntryPositions()
-	updateLeaderstatFrames()
-	setScrollListSize()
-end
-
---[[ Resize/Position Functions ]]--
-local function clampCanvasPosition()
-	local maxCanvasPosition = ScrollList.CanvasSize.Y.Offset - ScrollList.Size.Y.Offset
-	if maxCanvasPosition >= 0 and ScrollList.CanvasPosition.Y > maxCanvasPosition then
-		ScrollList.CanvasPosition = Vector2.new(0, maxCanvasPosition)
-	end
-end
-
-local function resizePlayerList()
-	setScrollListSize()
-	clampCanvasPosition()
-end
-
-RobloxGui.Changed:Connect(function(property)
-	if property == 'AbsoluteSize' then
-		task.spawn(function()	-- must spawn because F11 delays when abs size is set
-			resizePlayerList()
-		end)
-	end
-end)
-
-UserInputService.InputBegan:Connect(function(inputObject, isProcessed)
-	if isProcessed then return end
-	local inputType = inputObject.UserInputType
-	if (inputType == Enum.UserInputType.Touch and  inputObject.UserInputState == Enum.UserInputState.Begin) or
-		inputType == Enum.UserInputType.MouseButton1 then
-		if LastSelectedFrame then
-			playerDropDown:Hide()
-		end
-	end
-end)
-
--- NOTE: Core script only
-
---[[ Player Add/Remove Connections ]]--
-PlayersService.PlayerAdded:Connect(insertPlayerEntry)
-for _,player in pairs(PlayersService:GetPlayers()) do
-	insertPlayerEntry(player)
-end
-
---[[ Followers ]]
--- The 2016 RobloxReplicatedStorage follower remotes were private CoreScript
--- infrastructure and are no longer available to experience scripts.
--- Friend icons still update through the supported friendship events above.
-
-PlayersService.PlayerRemoving:Connect(function(child)
-	if child:IsA('Player') then
-		if LastSelectedPlayer and child == LastSelectedPlayer then
-			playerDropDown:Hide()
-		end
-		removePlayerEntry(child)
-	end
-end)
-
---[[ Teams ]]--
-local function initializeTeams(teams)
-	for _,team in pairs(teams:GetTeams()) do
-		onTeamAdded(team)
-	end
-
-	teams.ChildAdded:Connect(function(team)
-		if team:IsA("Team") then
-			onTeamAdded(team)
-		end
-	end)
-
-	teams.ChildRemoved:Connect(function(team)
-		if team:IsA("Team") then
-			onTeamRemoved(team)
-		end
-	end)
-end
-
-initializeTeams(TeamsService)
-
---[[ Public API ]]--
-Playerlist.GetStats = function()
-	return GameStats
-end
-
-local noOpFunc = function ( )
-end
-
-local isOpen = not isTenFootInterface
-
-local closeListFunc = function(name, state, input)
-	if state ~= Enum.UserInputState.Begin then return end
-
-	isOpen = false
-	Container.Visible = false
-	ContextActionService:UnbindAction("CloseList")
-	ContextActionService:UnbindAction("StopAction")
-	GuiService.SelectedObject = nil
-	UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None
-end
-
-local setVisible = function(state, fromTemp)
-	Container.Visible = state
-
-	if state then
-		local children = ScrollList:GetChildren()
-		if children and #children > 0 then
-			local frame = children[1]
-			local frameChildren = frame:GetChildren()
-			for i = 1, #frameChildren do
-				if frameChildren[i]:IsA("TextButton") then
-					local lastInputType = UserInputService:GetLastInputType()
-					local isUsingGamepad = (lastInputType == Enum.UserInputType.Gamepad1 or lastInputType == Enum.UserInputType.Gamepad2 or
-						lastInputType == Enum.UserInputType.Gamepad3 or lastInputType == Enum.UserInputType.Gamepad4)
-
-					if isUsingGamepad and not fromTemp then
-						GuiService.SelectedObject = frameChildren[i]
-						GuiService:Select(ScrollList)
-						UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
-						ContextActionService:BindAction("StopAction", noOpFunc, false, Enum.UserInputType.Gamepad1)
-						ContextActionService:BindAction("CloseList", closeListFunc, false, Enum.KeyCode.ButtonB, Enum.KeyCode.ButtonStart)
-					end
-					break
-				end
-			end
-		end
-	else
-		UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None
-
-		ContextActionService:UnbindAction("CloseList")
-		ContextActionService:UnbindAction("StopAction")
-
-		if GuiService.SelectedObject and GuiService.SelectedObject:IsDescendantOf(Container) then
-			GuiService.SelectedObject = nil
-		end
-	end
-end
-
-Playerlist.ToggleVisibility = function(name, inputState, inputObject)
-	if inputState and inputState ~= Enum.UserInputState.Begin then return end
-	if IsSmallScreenDevice then return end
-	if not playerlistCoreGuiEnabled then return end
-
-	isOpen = not isOpen
-
-	if next(TempHideKeys) == nil then
-		setVisible(isOpen)
-	end
-end
-
-Playerlist.IsOpen = function()
-	return isOpen
-end
-
-Playerlist.HideTemp = function(self, key, hidden)
-	if not playerlistCoreGuiEnabled then return end
-	if IsSmallScreenDevice then return end
-
-	TempHideKeys[key] = hidden and true or nil
-
-	if next(TempHideKeys) == nil then
-		if isOpen then
-			setVisible(true, true)
-		end
-	else
-		if isOpen then
-			setVisible(false, true)
-		end
-	end
-end
-local topStat = nil
-if isTenFootInterface and TenFootInterface and type(TenFootInterface.SetupTopStat) == "function" then
-	local ok, result = pcall(function() return TenFootInterface:SetupTopStat() end)
-	if ok then topStat = result end
-end
-
---[[ Core Gui Changed events ]]--
--- NOTE: Core script only
-local function onCoreGuiChanged(coreGuiType, enabled)
-	if coreGuiType == Enum.CoreGuiType.All or coreGuiType == Enum.CoreGuiType.PlayerList then
-		-- on console we can always toggle on/off, ignore change
-		if isTenFootInterface then
-			playerlistCoreGuiEnabled = true
-			return
-		end
-
-		playerlistCoreGuiEnabled = enabled and topbarEnabled
-
-		-- not visible on small screen devices
-		if IsSmallScreenDevice then
-			Container.Visible = false
-			return
-		end
-
-		setVisible(playerlistCoreGuiEnabled and isOpen and next(TempHideKeys) == nil, true)
-
-		if isTenFootInterface and topStat then
-			topStat:SetTopStatEnabled(playerlistCoreGuiEnabled)
-		end
-
-		if playerlistCoreGuiEnabled then
-			ContextActionService:BindAction("RbxPlayerListToggle", Playerlist.ToggleVisibility, false, Enum.KeyCode.Tab)
-		else
-			ContextActionService:UnbindAction("RbxPlayerListToggle")
-		end
-	end
-end
-
-Playerlist.TopbarEnabledChanged = function(enabled)
-	topbarEnabled = enabled
-	-- Update coregui to reflect new topbar status
-	onCoreGuiChanged(Enum.CoreGuiType.PlayerList, StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType.PlayerList))
-end
-
-onCoreGuiChanged(Enum.CoreGuiType.PlayerList, StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType.PlayerList))
--- CoreGuiChangedSignal is no longer a public experience-script event.
-
-resizePlayerList()
-
-local blockStatusChanged = function(userId, isBlocked)
-	if userId < 0 then return end
-
-	for _,playerEntry in ipairs(PlayerEntries) do
-		if playerEntry.Player.UserId == userId then
-			playerEntry.Frame.BGFrame.MembershipIcon.Image = getMembershipIcon(playerEntry.Player)
-			return
-		end
-	end
-end
-
-blockingUtility:GetBlockedStatusChangedEvent():Connect(blockStatusChanged)
-
-return Playerlist
-
-end;
-};
-G2L_MODULES[G2L["9"]] = {
-Closure = function()
-    local script = G2L["9"];--[[
-    // FileName: PlayerDropDown.lua
-    // 2026 compatibility port of the 2016 CoreScript module (v2).
-    // Keeps the old dropdown UI/API while replacing private Roblox services
-    // with public experience APIs.
-]]
-
-local moduleApiTable = {}
-
-local PlayersService = game:GetService("Players")
-local StarterGui = game:GetService("StarterGui")
-
-local LocalPlayer = PlayersService.LocalPlayer
-while not LocalPlayer do
-	PlayersService:GetPropertyChangedSignal("LocalPlayer"):Wait()
-	LocalPlayer = PlayersService.LocalPlayer
-end
-
-local POPUP_ENTRY_SIZE_Y = 24
-local ENTRY_PAD = 2
-local BG_TRANSPARENCY = 0.5
-local BG_COLOR = Color3.new(31/255, 31/255, 31/255)
-local TEXT_STROKE_TRANSPARENCY = 0.75
-local TEXT_COLOR = Color3.new(1, 1, 243/255)
-local TEXT_STROKE_COLOR = Color3.new(34/255, 34/255, 34/255)
-local TWEEN_TIME = 0.15
-
-local function createSignal()
-	local bindable = Instance.new("BindableEvent")
-	local signal = {}
-
-	function signal:fire(...)
-		bindable:Fire(...)
-	end
-
-	signal.Fire = signal.fire
-
-	function signal:connect(callback)
-		assert(type(callback) == "function", "connect expects a function")
-		return bindable.Event:Connect(callback)
-	end
-
-	signal.Connect = signal.connect
-
-	function signal:wait()
-		return bindable.Event:Wait()
-	end
-
-	signal.Wait = signal.wait
-
-	function signal:destroy()
-		bindable:Destroy()
-	end
-
-	return signal
-end
-
-local BlockStatusChanged = createSignal()
-local BlockedList = {}
-local MutedList = {}
-
-local function safeSetCore(name, value)
-	local lastError
-	for _ = 1, 20 do
-		local ok, err = pcall(function()
-			StarterGui:SetCore(name, value)
-		end)
-		if ok then
-			return true
-		end
-		lastError = err
-		task.wait(0.1)
-	end
-	warn(("PlayerDropDown: SetCore(%s) failed after retries: %s"):format(name, tostring(lastError)))
-	return false
-end
-
-local function safeGetCore(name)
-	local lastError
-	for _ = 1, 20 do
-		local ok, result = pcall(function()
-			return StarterGui:GetCore(name)
-		end)
-		if ok then
-			return true, result
-		end
-		lastError = result
-		task.wait(0.1)
-	end
-	return false, lastError
-end
-
-local function sendNotification(title, text, image, duration)
-	safeSetCore("SendNotification", {
-		Title = title or "",
-		Text = text or "",
-		Icon = image or "",
-		Duration = duration or 5,
-	})
-end
-
-local function refreshBlockedList()
-	local ok, result = safeGetCore("GetBlockedUserIds")
-
-	if ok and type(result) == "table" then
-		table.clear(BlockedList)
-		for _, userId in ipairs(result) do
-			BlockedList[tonumber(userId) or userId] = true
-		end
-	end
-end
-
-task.spawn(refreshBlockedList)
-
-local function hookCoreEvent(coreName, callback)
-	task.spawn(function()
-		local ok, event = safeGetCore(coreName)
-		if ok and event then
-			if event:IsA("BindableEvent") then
-				event.Event:Connect(callback)
-			elseif event.Event then
-				event.Event:Connect(callback)
-			end
-		end
-	end)
-end
-
-hookCoreEvent("PlayerBlockedEvent", function(playerOrUserId)
-	local userId = typeof(playerOrUserId) == "Instance" and playerOrUserId.UserId or tonumber(playerOrUserId)
-	if userId then
-		BlockedList[userId] = true
-		BlockStatusChanged:fire(userId, true)
-	else
-		refreshBlockedList()
-	end
-end)
-
-hookCoreEvent("PlayerUnblockedEvent", function(playerOrUserId)
-	local userId = typeof(playerOrUserId) == "Instance" and playerOrUserId.UserId or tonumber(playerOrUserId)
-	if userId then
-		BlockedList[userId] = nil
-		BlockStatusChanged:fire(userId, false)
-	else
-		refreshBlockedList()
-	end
-end)
-
-local function isBlocked(userId)
-	return BlockedList[userId] == true
-end
-
-local function isMuted(userId)
-	return MutedList[userId] == true
-end
-
-local function BlockPlayerAsync(playerToBlock)
-	if playerToBlock and playerToBlock ~= LocalPlayer and playerToBlock.UserId > 0 then
-		safeSetCore("PromptBlockPlayer", playerToBlock)
-	end
-end
-
-local function UnblockPlayerAsync(playerToUnblock)
-	if playerToUnblock and playerToUnblock.UserId > 0 then
-		safeSetCore("PromptUnblockPlayer", playerToUnblock)
-	end
-end
-
-local function MutePlayer(playerToMute)
-	if playerToMute and playerToMute ~= LocalPlayer and playerToMute.UserId > 0 then
-		MutedList[playerToMute.UserId] = true
-	end
-end
-
-local function UnmutePlayer(playerToUnmute)
-	if playerToUnmute then
-		MutedList[playerToUnmute.UserId] = nil
-	end
-end
-
-local function getFriendStatus(selectedPlayer)
-	if not selectedPlayer or selectedPlayer == LocalPlayer then
-		return Enum.FriendStatus.NotFriend
-	end
-
-	local success, isFriend = pcall(function()
-		return LocalPlayer:IsFriendsWithAsync(selectedPlayer.UserId)
-	end)
-
-	if success and isFriend then
-		return Enum.FriendStatus.Friend
-	end
-	return Enum.FriendStatus.NotFriend
-end
-
-
-local function openReportAbusePage(targetPlayer)
-	if not targetPlayer or targetPlayer == LocalPlayer then
-		return
-	end
-
-	local playerGui = LocalPlayer:WaitForChild("PlayerGui")
-
-	local old = playerGui:FindFirstChild("PlayerListReportAbuse")
-	if old then
-		old:Destroy()
-	end
-
-	local screen = Instance.new("ScreenGui")
-	screen.Name = "PlayerListReportAbuse"
-	screen.ResetOnSpawn = false
-	screen.IgnoreGuiInset = true
-	screen.DisplayOrder = 1000
-	screen.Parent = playerGui
-
-	local shield = Instance.new("TextButton")
-	shield.Name = "Shield"
-	shield.Text = ""
-	shield.AutoButtonColor = false
-	shield.Size = UDim2.fromScale(1, 1)
-	shield.BackgroundColor3 = Color3.fromRGB(41, 41, 41)
-	shield.BackgroundTransparency = 0.2
-	shield.BorderSizePixel = 0
-	shield.Parent = screen
-
-	local page = Instance.new("Frame")
-	page.Name = "ReportAbusePage"
-	page.AnchorPoint = Vector2.new(0.5, 0.5)
-	page.Position = UDim2.fromScale(0.5, 0.5)
-	page.Size = UDim2.fromOffset(520, 430)
-	page.BackgroundColor3 = Color3.fromRGB(31, 31, 31)
-	page.BorderSizePixel = 0
-	page.Parent = shield
-
-	local title = Instance.new("TextLabel")
-	title.Name = "Title"
-	title.BackgroundTransparency = 1
-	title.Position = UDim2.fromOffset(24, 18)
-	title.Size = UDim2.new(1, -48, 0, 42)
-	title.Font = Enum.Font.SourceSansBold
-	title.TextSize = 32
-	title.TextColor3 = Color3.new(1, 1, 1)
-	title.TextXAlignment = Enum.TextXAlignment.Left
-	title.Text = "Report Abuse"
-	title.Parent = page
-
-	local target = Instance.new("TextLabel")
-	target.BackgroundTransparency = 1
-	target.Position = UDim2.fromOffset(24, 68)
-	target.Size = UDim2.new(1, -48, 0, 30)
-	target.Font = Enum.Font.SourceSans
-	target.TextSize = 20
-	target.TextColor3 = Color3.new(1, 1, 1)
-	target.TextXAlignment = Enum.TextXAlignment.Left
-	target.Text = "Player: " .. targetPlayer.Name
-	target.Parent = page
-
-	local reasonLabel = Instance.new("TextLabel")
-	reasonLabel.BackgroundTransparency = 1
-	reasonLabel.Position = UDim2.fromOffset(24, 110)
-	reasonLabel.Size = UDim2.new(1, -48, 0, 26)
-	reasonLabel.Font = Enum.Font.SourceSans
-	reasonLabel.TextSize = 18
-	reasonLabel.TextColor3 = Color3.new(1, 1, 1)
-	reasonLabel.TextXAlignment = Enum.TextXAlignment.Left
-	reasonLabel.Text = "Reason:"
-	reasonLabel.Parent = page
-
-	local reasons = {
-		"Swearing",
-		"Bullying",
-		"Scamming",
-		"Dating",
-		"Cheating / Exploiting",
-		"Personal Questions",
-		"Offsite Links",
-		"Inappropriate Content",
-	}
-	local selectedReason = reasons[1]
-
-	local reasonButton = Instance.new("TextButton")
-	reasonButton.Name = "ReasonButton"
-	reasonButton.Position = UDim2.fromOffset(24, 140)
-	reasonButton.Size = UDim2.new(1, -48, 0, 38)
-	reasonButton.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-	reasonButton.BorderSizePixel = 0
-	reasonButton.Font = Enum.Font.SourceSans
-	reasonButton.TextSize = 18
-	reasonButton.TextColor3 = Color3.new(1, 1, 1)
-	reasonButton.TextXAlignment = Enum.TextXAlignment.Left
-	reasonButton.Text = "  " .. selectedReason .. "  ▼"
-	reasonButton.Parent = page
-
-	local reasonList = Instance.new("Frame")
-	reasonList.Name = "ReasonList"
-	reasonList.Position = UDim2.fromOffset(24, 178)
-	reasonList.Size = UDim2.new(1, -48, 0, #reasons * 28)
-	reasonList.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-	reasonList.BorderSizePixel = 0
-	reasonList.Visible = false
-	reasonList.ZIndex = 20
-	reasonList.Parent = page
-
-	for i, reason in ipairs(reasons) do
-		local option = Instance.new("TextButton")
-		option.Name = "Reason" .. i
-		option.Position = UDim2.new(0, 0, 0, (i - 1) * 28)
-		option.Size = UDim2.new(1, 0, 0, 28)
-		option.BackgroundTransparency = 1
-		option.Font = Enum.Font.SourceSans
-		option.TextSize = 17
-		option.TextColor3 = Color3.new(1, 1, 1)
-		option.TextXAlignment = Enum.TextXAlignment.Left
-		option.Text = "  " .. reason
-		option.ZIndex = 21
-		option.Parent = reasonList
-		option.Activated:Connect(function()
-			selectedReason = reason
-			reasonButton.Text = "  " .. selectedReason .. "  ▼"
-			reasonList.Visible = false
-		end)
-	end
-
-	reasonButton.Activated:Connect(function()
-		reasonList.Visible = not reasonList.Visible
-	end)
-
-	local descLabel = Instance.new("TextLabel")
-	descLabel.BackgroundTransparency = 1
-	descLabel.Position = UDim2.fromOffset(24, 194)
-	descLabel.Size = UDim2.new(1, -48, 0, 26)
-	descLabel.Font = Enum.Font.SourceSans
-	descLabel.TextSize = 18
-	descLabel.TextColor3 = Color3.new(1, 1, 1)
-	descLabel.TextXAlignment = Enum.TextXAlignment.Left
-	descLabel.Text = "Description:"
-	descLabel.Parent = page
-
-	local description = Instance.new("TextBox")
-	description.Name = "Description"
-	description.Position = UDim2.fromOffset(24, 224)
-	description.Size = UDim2.new(1, -48, 0, 100)
-	description.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-	description.BorderSizePixel = 0
-	description.ClearTextOnFocus = false
-	description.MultiLine = true
-	description.TextWrapped = true
-	description.TextXAlignment = Enum.TextXAlignment.Left
-	description.TextYAlignment = Enum.TextYAlignment.Top
-	description.Font = Enum.Font.SourceSans
-	description.TextSize = 18
-	description.TextColor3 = Color3.new(1, 1, 1)
-	description.PlaceholderText = "Describe what happened..."
-	description.Text = ""
-	description.Parent = page
-
-	local cancel = Instance.new("TextButton")
-	cancel.Name = "Cancel"
-	cancel.Position = UDim2.new(0.5, -204, 1, -72)
-	cancel.Size = UDim2.fromOffset(198, 50)
-	cancel.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-	cancel.BorderSizePixel = 0
-	cancel.Font = Enum.Font.SourceSansBold
-	cancel.TextSize = 22
-	cancel.TextColor3 = Color3.new(1, 1, 1)
-	cancel.Text = "Cancel"
-	cancel.Parent = page
-
-	local submit = Instance.new("TextButton")
-	submit.Name = "Submit"
-	submit.Position = UDim2.new(0.5, 6, 1, -72)
-	submit.Size = UDim2.fromOffset(198, 50)
-	submit.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
-	submit.BorderSizePixel = 0
-	submit.Font = Enum.Font.SourceSansBold
-	submit.TextSize = 22
-	submit.TextColor3 = Color3.new(1, 1, 1)
-	submit.Text = "Submit"
-	submit.Parent = page
-
-	local function closePage()
-		screen:Destroy()
-	end
-
-	cancel.Activated:Connect(closePage)
-
-	submit.Activated:Connect(function()
-		submit.Active = false
-		submit.Text = "Submitting..."
-
-		local ok, err = pcall(function()
-			PlayersService:ReportAbuse(targetPlayer, selectedReason, description.Text)
-		end)
-
-		if ok then
-			sendNotification("Report submitted", "Thank you for your report.", "", 5)
-			closePage()
-		else
-			submit.Active = true
-			submit.Text = "Submit"
-			warn("Report failed: " .. tostring(err))
-			sendNotification(
-				"Report failed",
-				"Unable to submit report.",
-				"",
-				7
-			)
-		end
-	end)
-
-	shield.Activated:Connect(function()
-		-- Clicking outside the page closes it.
-		if not reasonList.Visible then
-			closePage()
-		else
-			reasonList.Visible = false
-		end
-	end)
-
-	return screen
-end
-
-local function createPlayerDropDown()
-	local playerDropDown = {
-		Player = nil,
-		PopupFrame = nil,
-		HidePopupImmediately = false,
-		PopupFrameOffScreenPosition = nil,
-		HiddenSignal = createSignal(),
-	}
-
-	local function onFriendButtonPressed()
-		local target = playerDropDown.Player
-		if not target then return end
-
-		local status = getFriendStatus(target)
-		if status == Enum.FriendStatus.Friend then
-			safeSetCore("PromptUnfriend", target)
-		else
-			safeSetCore("PromptSendFriendRequest", target)
-		end
-
-		playerDropDown:Hide()
-	end
-
-	local function onBlockButtonPressed()
-		local target = playerDropDown.Player
-		if not target then return end
-
-		if isBlocked(target.UserId) then
-			UnblockPlayerAsync(target)
-		else
-			BlockPlayerAsync(target)
-		end
-
-		playerDropDown:Hide()
-	end
-
-	local function onReportButtonPressed()
-		local target = playerDropDown.Player
-		if not target then
-			return
-		end
-
-		playerDropDown:Hide()
-
-		-- Use the real 2016 SettingsHub Report Abuse page.
-		-- Keep the rest of PlayerDropDown completely untouched.
-		local playerGui = LocalPlayer:WaitForChild("PlayerGui")
-		local robloxGui = playerGui:WaitForChild("RobloxGui")
-		local settingsHubModule = robloxGui
-			:WaitForChild("Modules")
-			:WaitForChild("Settings")
-			:WaitForChild("SettingsHub")
-
-		local ok, settingsHub = pcall(require, settingsHubModule)
-		if not ok or type(settingsHub) ~= "table" then
-			warn("PlayerDropDown: failed to load SettingsHub:", settingsHub)
-			return
-		end
-
-		if type(settingsHub.ReportPlayer) == "function" then
-			local reportOk, reportErr = pcall(function()
-				settingsHub:ReportPlayer(target)
-			end)
-
-			if not reportOk then
-				warn("PlayerDropDown: SettingsHub:ReportPlayer failed:", reportErr)
-			end
-		else
-			warn("PlayerDropDown: SettingsHub.ReportPlayer is missing")
-		end
-	end
-
-	local function createPopupFrame(buttons)
-		local frame = Instance.new("Frame")
-		frame.Name = "PopupFrame"
-		frame.Size = UDim2.new(1, 0, 0, (POPUP_ENTRY_SIZE_Y * #buttons) + math.max(0, (#buttons - 1) * ENTRY_PAD))
-		frame.Position = UDim2.new(1, 1, 0, 0)
-		frame.BackgroundTransparency = 1
-
-		for i, button in ipairs(buttons) do
-			local btn = Instance.new("TextButton")
-			btn.Name = button.Name
-			btn.Size = UDim2.new(1, 0, 0, POPUP_ENTRY_SIZE_Y)
-			btn.Position = UDim2.new(0, 0, 0, (POPUP_ENTRY_SIZE_Y + ENTRY_PAD) * (i - 1))
-			btn.BackgroundTransparency = BG_TRANSPARENCY
-			btn.BackgroundColor3 = BG_COLOR
-			btn.BorderSizePixel = 0
-			btn.Text = button.Text
-			btn.Font = Enum.Font.SourceSans
-			btn.TextSize = 14
-			btn.TextColor3 = TEXT_COLOR
-			btn.TextStrokeTransparency = TEXT_STROKE_TRANSPARENCY
-			btn.TextStrokeColor3 = TEXT_STROKE_COLOR
-			btn.AutoButtonColor = true
-			btn.Parent = frame
-			btn.Activated:Connect(button.OnPress)
-		end
-
-		return frame
-	end
-
-	function playerDropDown:Hide()
-		local popup = self.PopupFrame
-		if popup then
-			local offscreenPosition = self.PopupFrameOffScreenPosition
-				or UDim2.new(1, 1, 0, popup.Position.Y.Offset)
-
-			if self.HidePopupImmediately then
-				popup:Destroy()
-				self.PopupFrame = nil
-			else
-				popup:TweenPosition(
-					offscreenPosition,
-					Enum.EasingDirection.InOut,
-					Enum.EasingStyle.Quad,
-					TWEEN_TIME,
-					true,
-					function()
-						if self.PopupFrame == popup then
-							popup:Destroy()
-							self.PopupFrame = nil
-						end
-					end
-				)
-			end
-		end
-
-		self.Player = nil
-		self.HiddenSignal:fire()
-	end
-
-	function playerDropDown:CreatePopup(player)
-		self.Player = player
-
-		if self.PopupFrame then
-			self.PopupFrame:Destroy()
-			self.PopupFrame = nil
-		end
-
-		local status = getFriendStatus(player)
-		local blocked = isBlocked(player.UserId)
-		local buttons = {}
-
-		if not blocked then
-			table.insert(buttons, {
-				Name = "FriendButton",
-				Text = status == Enum.FriendStatus.Friend and "Unfriend Player" or "Send Friend Request",
-				OnPress = onFriendButtonPressed,
-			})
-		end
-
-		table.insert(buttons, {
-			Name = "BlockButton",
-			Text = blocked and "Unblock Player" or "Block Player",
-			OnPress = onBlockButtonPressed,
-		})
-
-		table.insert(buttons, {
-			Name = "ReportButton",
-			Text = "Report Abuse",
-			OnPress = onReportButtonPressed,
-		})
-
-		-- Roblox's 2016 follower REST endpoints and NewFollower remote were
-		-- experience API, so the obsolete Follow/Unfollow row is intentionally
-		-- omitted instead of leaving a broken button.
-		self.PopupFrame = createPopupFrame(buttons)
-		return self.PopupFrame
-	end
-
-	PlayersService.PlayerRemoving:Connect(function(leavingPlayer)
-		if playerDropDown.Player == leavingPlayer then
-			playerDropDown:Hide()
-		end
-	end)
-
-	return playerDropDown
-end
-
-moduleApiTable.FollowerStatusChanged = createSignal()
-
-function moduleApiTable:CreatePlayerDropDown()
-	return createPlayerDropDown()
-end
-
-function moduleApiTable:CreateBlockingUtility()
-	local blockingUtility = {}
-
-	function blockingUtility:BlockPlayerAsync(player)
-		return BlockPlayerAsync(player)
-	end
-
-	function blockingUtility:UnblockPlayerAsync(player)
-		return UnblockPlayerAsync(player)
-	end
-
-	function blockingUtility:MutePlayer(player)
-		return MutePlayer(player)
-	end
-
-	function blockingUtility:UnmutePlayer(player)
-		return UnmutePlayer(player)
-	end
-
-	function blockingUtility:IsPlayerBlockedByUserId(userId)
-		return isBlocked(userId)
-	end
-
-	function blockingUtility:GetBlockedStatusChangedEvent()
-		return BlockStatusChanged
-	end
-
-	function blockingUtility:IsPlayerMutedByUserId(userId)
-		return isMuted(userId)
-	end
-
-	return blockingUtility
-end
-
-return moduleApiTable
-end;
-};
-G2L_MODULES[G2L["a"]] = {
-Closure = function()
-    local script = G2L["a"];--[[
 	// FileName: Chat.lua
 	// Written by: SolarCrane
 	// Description: Code for lua side chat on ROBLOX.
@@ -8080,6 +5715,2371 @@ return moduleApiTable
 
 end;
 };
+G2L_MODULES[G2L["9"]] = {
+Closure = function()
+    local script = G2L["9"];--[[
+    // FileName: PlayerDropDown.lua
+    // 2026 compatibility port of the 2016 CoreScript module (v2).
+    // Keeps the old dropdown UI/API while replacing private Roblox services
+    // with public experience APIs.
+]]
+
+local moduleApiTable = {}
+
+local PlayersService = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+
+local LocalPlayer = PlayersService.LocalPlayer
+while not LocalPlayer do
+	PlayersService:GetPropertyChangedSignal("LocalPlayer"):Wait()
+	LocalPlayer = PlayersService.LocalPlayer
+end
+
+local POPUP_ENTRY_SIZE_Y = 24
+local ENTRY_PAD = 2
+local BG_TRANSPARENCY = 0.5
+local BG_COLOR = Color3.new(31/255, 31/255, 31/255)
+local TEXT_STROKE_TRANSPARENCY = 0.75
+local TEXT_COLOR = Color3.new(1, 1, 243/255)
+local TEXT_STROKE_COLOR = Color3.new(34/255, 34/255, 34/255)
+local TWEEN_TIME = 0.15
+
+local function createSignal()
+	local bindable = Instance.new("BindableEvent")
+	local signal = {}
+
+	function signal:fire(...)
+		bindable:Fire(...)
+	end
+
+	signal.Fire = signal.fire
+
+	function signal:connect(callback)
+		assert(type(callback) == "function", "connect expects a function")
+		return bindable.Event:Connect(callback)
+	end
+
+	signal.Connect = signal.connect
+
+	function signal:wait()
+		return bindable.Event:Wait()
+	end
+
+	signal.Wait = signal.wait
+
+	function signal:destroy()
+		bindable:Destroy()
+	end
+
+	return signal
+end
+
+local BlockStatusChanged = createSignal()
+local BlockedList = {}
+local MutedList = {}
+
+local function safeSetCore(name, value)
+	local lastError
+	for _ = 1, 20 do
+		local ok, err = pcall(function()
+			StarterGui:SetCore(name, value)
+		end)
+		if ok then
+			return true
+		end
+		lastError = err
+		task.wait(0.1)
+	end
+	warn(("PlayerDropDown: SetCore(%s) failed after retries: %s"):format(name, tostring(lastError)))
+	return false
+end
+
+local function safeGetCore(name)
+	local lastError
+	for _ = 1, 20 do
+		local ok, result = pcall(function()
+			return StarterGui:GetCore(name)
+		end)
+		if ok then
+			return true, result
+		end
+		lastError = result
+		task.wait(0.1)
+	end
+	return false, lastError
+end
+
+local function sendNotification(title, text, image, duration)
+	safeSetCore("SendNotification", {
+		Title = title or "",
+		Text = text or "",
+		Icon = image or "",
+		Duration = duration or 5,
+	})
+end
+
+local function refreshBlockedList()
+	local ok, result = safeGetCore("GetBlockedUserIds")
+
+	if ok and type(result) == "table" then
+		table.clear(BlockedList)
+		for _, userId in ipairs(result) do
+			BlockedList[tonumber(userId) or userId] = true
+		end
+	end
+end
+
+task.spawn(refreshBlockedList)
+
+local function hookCoreEvent(coreName, callback)
+	task.spawn(function()
+		local ok, event = safeGetCore(coreName)
+		if ok and event then
+			if event:IsA("BindableEvent") then
+				event.Event:Connect(callback)
+			elseif event.Event then
+				event.Event:Connect(callback)
+			end
+		end
+	end)
+end
+
+hookCoreEvent("PlayerBlockedEvent", function(playerOrUserId)
+	local userId = typeof(playerOrUserId) == "Instance" and playerOrUserId.UserId or tonumber(playerOrUserId)
+	if userId then
+		BlockedList[userId] = true
+		BlockStatusChanged:fire(userId, true)
+	else
+		refreshBlockedList()
+	end
+end)
+
+hookCoreEvent("PlayerUnblockedEvent", function(playerOrUserId)
+	local userId = typeof(playerOrUserId) == "Instance" and playerOrUserId.UserId or tonumber(playerOrUserId)
+	if userId then
+		BlockedList[userId] = nil
+		BlockStatusChanged:fire(userId, false)
+	else
+		refreshBlockedList()
+	end
+end)
+
+local function isBlocked(userId)
+	return BlockedList[userId] == true
+end
+
+local function isMuted(userId)
+	return MutedList[userId] == true
+end
+
+local function BlockPlayerAsync(playerToBlock)
+	if playerToBlock and playerToBlock ~= LocalPlayer and playerToBlock.UserId > 0 then
+		safeSetCore("PromptBlockPlayer", playerToBlock)
+	end
+end
+
+local function UnblockPlayerAsync(playerToUnblock)
+	if playerToUnblock and playerToUnblock.UserId > 0 then
+		safeSetCore("PromptUnblockPlayer", playerToUnblock)
+	end
+end
+
+local function MutePlayer(playerToMute)
+	if playerToMute and playerToMute ~= LocalPlayer and playerToMute.UserId > 0 then
+		MutedList[playerToMute.UserId] = true
+	end
+end
+
+local function UnmutePlayer(playerToUnmute)
+	if playerToUnmute then
+		MutedList[playerToUnmute.UserId] = nil
+	end
+end
+
+local function getFriendStatus(selectedPlayer)
+	if not selectedPlayer or selectedPlayer == LocalPlayer then
+		return Enum.FriendStatus.NotFriend
+	end
+
+	local success, isFriend = pcall(function()
+		return LocalPlayer:IsFriendsWithAsync(selectedPlayer.UserId)
+	end)
+
+	if success and isFriend then
+		return Enum.FriendStatus.Friend
+	end
+	return Enum.FriendStatus.NotFriend
+end
+
+
+local function openReportAbusePage(targetPlayer)
+	if not targetPlayer or targetPlayer == LocalPlayer then
+		return
+	end
+
+	local playerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+	local old = playerGui:FindFirstChild("PlayerListReportAbuse")
+	if old then
+		old:Destroy()
+	end
+
+	local screen = Instance.new("ScreenGui")
+	screen.Name = "PlayerListReportAbuse"
+	screen.ResetOnSpawn = false
+	screen.IgnoreGuiInset = true
+	screen.DisplayOrder = 1000
+	screen.Parent = playerGui
+
+	local shield = Instance.new("TextButton")
+	shield.Name = "Shield"
+	shield.Text = ""
+	shield.AutoButtonColor = false
+	shield.Size = UDim2.fromScale(1, 1)
+	shield.BackgroundColor3 = Color3.fromRGB(41, 41, 41)
+	shield.BackgroundTransparency = 0.2
+	shield.BorderSizePixel = 0
+	shield.Parent = screen
+
+	local page = Instance.new("Frame")
+	page.Name = "ReportAbusePage"
+	page.AnchorPoint = Vector2.new(0.5, 0.5)
+	page.Position = UDim2.fromScale(0.5, 0.5)
+	page.Size = UDim2.fromOffset(520, 430)
+	page.BackgroundColor3 = Color3.fromRGB(31, 31, 31)
+	page.BorderSizePixel = 0
+	page.Parent = shield
+
+	local title = Instance.new("TextLabel")
+	title.Name = "Title"
+	title.BackgroundTransparency = 1
+	title.Position = UDim2.fromOffset(24, 18)
+	title.Size = UDim2.new(1, -48, 0, 42)
+	title.Font = Enum.Font.SourceSansBold
+	title.TextSize = 32
+	title.TextColor3 = Color3.new(1, 1, 1)
+	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.Text = "Report Abuse"
+	title.Parent = page
+
+	local target = Instance.new("TextLabel")
+	target.BackgroundTransparency = 1
+	target.Position = UDim2.fromOffset(24, 68)
+	target.Size = UDim2.new(1, -48, 0, 30)
+	target.Font = Enum.Font.SourceSans
+	target.TextSize = 20
+	target.TextColor3 = Color3.new(1, 1, 1)
+	target.TextXAlignment = Enum.TextXAlignment.Left
+	target.Text = "Player: " .. targetPlayer.Name
+	target.Parent = page
+
+	local reasonLabel = Instance.new("TextLabel")
+	reasonLabel.BackgroundTransparency = 1
+	reasonLabel.Position = UDim2.fromOffset(24, 110)
+	reasonLabel.Size = UDim2.new(1, -48, 0, 26)
+	reasonLabel.Font = Enum.Font.SourceSans
+	reasonLabel.TextSize = 18
+	reasonLabel.TextColor3 = Color3.new(1, 1, 1)
+	reasonLabel.TextXAlignment = Enum.TextXAlignment.Left
+	reasonLabel.Text = "Reason:"
+	reasonLabel.Parent = page
+
+	local reasons = {
+		"Swearing",
+		"Bullying",
+		"Scamming",
+		"Dating",
+		"Cheating / Exploiting",
+		"Personal Questions",
+		"Offsite Links",
+		"Inappropriate Content",
+	}
+	local selectedReason = reasons[1]
+
+	local reasonButton = Instance.new("TextButton")
+	reasonButton.Name = "ReasonButton"
+	reasonButton.Position = UDim2.fromOffset(24, 140)
+	reasonButton.Size = UDim2.new(1, -48, 0, 38)
+	reasonButton.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+	reasonButton.BorderSizePixel = 0
+	reasonButton.Font = Enum.Font.SourceSans
+	reasonButton.TextSize = 18
+	reasonButton.TextColor3 = Color3.new(1, 1, 1)
+	reasonButton.TextXAlignment = Enum.TextXAlignment.Left
+	reasonButton.Text = "  " .. selectedReason .. "  ▼"
+	reasonButton.Parent = page
+
+	local reasonList = Instance.new("Frame")
+	reasonList.Name = "ReasonList"
+	reasonList.Position = UDim2.fromOffset(24, 178)
+	reasonList.Size = UDim2.new(1, -48, 0, #reasons * 28)
+	reasonList.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+	reasonList.BorderSizePixel = 0
+	reasonList.Visible = false
+	reasonList.ZIndex = 20
+	reasonList.Parent = page
+
+	for i, reason in ipairs(reasons) do
+		local option = Instance.new("TextButton")
+		option.Name = "Reason" .. i
+		option.Position = UDim2.new(0, 0, 0, (i - 1) * 28)
+		option.Size = UDim2.new(1, 0, 0, 28)
+		option.BackgroundTransparency = 1
+		option.Font = Enum.Font.SourceSans
+		option.TextSize = 17
+		option.TextColor3 = Color3.new(1, 1, 1)
+		option.TextXAlignment = Enum.TextXAlignment.Left
+		option.Text = "  " .. reason
+		option.ZIndex = 21
+		option.Parent = reasonList
+		option.Activated:Connect(function()
+			selectedReason = reason
+			reasonButton.Text = "  " .. selectedReason .. "  ▼"
+			reasonList.Visible = false
+		end)
+	end
+
+	reasonButton.Activated:Connect(function()
+		reasonList.Visible = not reasonList.Visible
+	end)
+
+	local descLabel = Instance.new("TextLabel")
+	descLabel.BackgroundTransparency = 1
+	descLabel.Position = UDim2.fromOffset(24, 194)
+	descLabel.Size = UDim2.new(1, -48, 0, 26)
+	descLabel.Font = Enum.Font.SourceSans
+	descLabel.TextSize = 18
+	descLabel.TextColor3 = Color3.new(1, 1, 1)
+	descLabel.TextXAlignment = Enum.TextXAlignment.Left
+	descLabel.Text = "Description:"
+	descLabel.Parent = page
+
+	local description = Instance.new("TextBox")
+	description.Name = "Description"
+	description.Position = UDim2.fromOffset(24, 224)
+	description.Size = UDim2.new(1, -48, 0, 100)
+	description.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+	description.BorderSizePixel = 0
+	description.ClearTextOnFocus = false
+	description.MultiLine = true
+	description.TextWrapped = true
+	description.TextXAlignment = Enum.TextXAlignment.Left
+	description.TextYAlignment = Enum.TextYAlignment.Top
+	description.Font = Enum.Font.SourceSans
+	description.TextSize = 18
+	description.TextColor3 = Color3.new(1, 1, 1)
+	description.PlaceholderText = "Describe what happened..."
+	description.Text = ""
+	description.Parent = page
+
+	local cancel = Instance.new("TextButton")
+	cancel.Name = "Cancel"
+	cancel.Position = UDim2.new(0.5, -204, 1, -72)
+	cancel.Size = UDim2.fromOffset(198, 50)
+	cancel.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+	cancel.BorderSizePixel = 0
+	cancel.Font = Enum.Font.SourceSansBold
+	cancel.TextSize = 22
+	cancel.TextColor3 = Color3.new(1, 1, 1)
+	cancel.Text = "Cancel"
+	cancel.Parent = page
+
+	local submit = Instance.new("TextButton")
+	submit.Name = "Submit"
+	submit.Position = UDim2.new(0.5, 6, 1, -72)
+	submit.Size = UDim2.fromOffset(198, 50)
+	submit.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
+	submit.BorderSizePixel = 0
+	submit.Font = Enum.Font.SourceSansBold
+	submit.TextSize = 22
+	submit.TextColor3 = Color3.new(1, 1, 1)
+	submit.Text = "Submit"
+	submit.Parent = page
+
+	local function closePage()
+		screen:Destroy()
+	end
+
+	cancel.Activated:Connect(closePage)
+
+	submit.Activated:Connect(function()
+		submit.Active = false
+		submit.Text = "Submitting..."
+
+		local ok, err = pcall(function()
+			PlayersService:ReportAbuse(targetPlayer, selectedReason, description.Text)
+		end)
+
+		if ok then
+			sendNotification("Report submitted", "Thank you for your report.", "", 5)
+			closePage()
+		else
+			submit.Active = true
+			submit.Text = "Submit"
+			warn("Report failed: " .. tostring(err))
+			sendNotification(
+				"Report failed",
+				"Unable to submit report.",
+				"",
+				7
+			)
+		end
+	end)
+
+	shield.Activated:Connect(function()
+		-- Clicking outside the page closes it.
+		if not reasonList.Visible then
+			closePage()
+		else
+			reasonList.Visible = false
+		end
+	end)
+
+	return screen
+end
+
+local function createPlayerDropDown()
+	local playerDropDown = {
+		Player = nil,
+		PopupFrame = nil,
+		HidePopupImmediately = false,
+		PopupFrameOffScreenPosition = nil,
+		HiddenSignal = createSignal(),
+	}
+
+	local function onFriendButtonPressed()
+		local target = playerDropDown.Player
+		if not target then return end
+
+		local status = getFriendStatus(target)
+		if status == Enum.FriendStatus.Friend then
+			safeSetCore("PromptUnfriend", target)
+		else
+			safeSetCore("PromptSendFriendRequest", target)
+		end
+
+		playerDropDown:Hide()
+	end
+
+	local function onBlockButtonPressed()
+		local target = playerDropDown.Player
+		if not target then return end
+
+		if isBlocked(target.UserId) then
+			UnblockPlayerAsync(target)
+		else
+			BlockPlayerAsync(target)
+		end
+
+		playerDropDown:Hide()
+	end
+
+	local function onReportButtonPressed()
+		local target = playerDropDown.Player
+		if not target then
+			return
+		end
+
+		playerDropDown:Hide()
+
+		-- Use the real 2016 SettingsHub Report Abuse page.
+		-- Keep the rest of PlayerDropDown completely untouched.
+		local playerGui = LocalPlayer:WaitForChild("PlayerGui")
+		local robloxGui = playerGui:WaitForChild("RobloxGui")
+		local settingsHubModule = robloxGui
+			:WaitForChild("Modules")
+			:WaitForChild("Settings")
+			:WaitForChild("SettingsHub")
+
+		local ok, settingsHub = pcall(require, settingsHubModule)
+		if not ok or type(settingsHub) ~= "table" then
+			warn("PlayerDropDown: failed to load SettingsHub:", settingsHub)
+			return
+		end
+
+		if type(settingsHub.ReportPlayer) == "function" then
+			local reportOk, reportErr = pcall(function()
+				settingsHub:ReportPlayer(target)
+			end)
+
+			if not reportOk then
+				warn("PlayerDropDown: SettingsHub:ReportPlayer failed:", reportErr)
+			end
+		else
+			warn("PlayerDropDown: SettingsHub.ReportPlayer is missing")
+		end
+	end
+
+	local function createPopupFrame(buttons)
+		local frame = Instance.new("Frame")
+		frame.Name = "PopupFrame"
+		frame.Size = UDim2.new(1, 0, 0, (POPUP_ENTRY_SIZE_Y * #buttons) + math.max(0, (#buttons - 1) * ENTRY_PAD))
+		frame.Position = UDim2.new(1, 1, 0, 0)
+		frame.BackgroundTransparency = 1
+
+		for i, button in ipairs(buttons) do
+			local btn = Instance.new("TextButton")
+			btn.Name = button.Name
+			btn.Size = UDim2.new(1, 0, 0, POPUP_ENTRY_SIZE_Y)
+			btn.Position = UDim2.new(0, 0, 0, (POPUP_ENTRY_SIZE_Y + ENTRY_PAD) * (i - 1))
+			btn.BackgroundTransparency = BG_TRANSPARENCY
+			btn.BackgroundColor3 = BG_COLOR
+			btn.BorderSizePixel = 0
+			btn.Text = button.Text
+			btn.Font = Enum.Font.SourceSans
+			btn.TextSize = 14
+			btn.TextColor3 = TEXT_COLOR
+			btn.TextStrokeTransparency = TEXT_STROKE_TRANSPARENCY
+			btn.TextStrokeColor3 = TEXT_STROKE_COLOR
+			btn.AutoButtonColor = true
+			btn.Parent = frame
+			btn.Activated:Connect(button.OnPress)
+		end
+
+		return frame
+	end
+
+	function playerDropDown:Hide()
+		local popup = self.PopupFrame
+		if popup then
+			local offscreenPosition = self.PopupFrameOffScreenPosition
+				or UDim2.new(1, 1, 0, popup.Position.Y.Offset)
+
+			if self.HidePopupImmediately then
+				popup:Destroy()
+				self.PopupFrame = nil
+			else
+				popup:TweenPosition(
+					offscreenPosition,
+					Enum.EasingDirection.InOut,
+					Enum.EasingStyle.Quad,
+					TWEEN_TIME,
+					true,
+					function()
+						if self.PopupFrame == popup then
+							popup:Destroy()
+							self.PopupFrame = nil
+						end
+					end
+				)
+			end
+		end
+
+		self.Player = nil
+		self.HiddenSignal:fire()
+	end
+
+	function playerDropDown:CreatePopup(player)
+		self.Player = player
+
+		if self.PopupFrame then
+			self.PopupFrame:Destroy()
+			self.PopupFrame = nil
+		end
+
+		local status = getFriendStatus(player)
+		local blocked = isBlocked(player.UserId)
+		local buttons = {}
+
+		if not blocked then
+			table.insert(buttons, {
+				Name = "FriendButton",
+				Text = status == Enum.FriendStatus.Friend and "Unfriend Player" or "Send Friend Request",
+				OnPress = onFriendButtonPressed,
+			})
+		end
+
+		table.insert(buttons, {
+			Name = "BlockButton",
+			Text = blocked and "Unblock Player" or "Block Player",
+			OnPress = onBlockButtonPressed,
+		})
+
+		table.insert(buttons, {
+			Name = "ReportButton",
+			Text = "Report Abuse",
+			OnPress = onReportButtonPressed,
+		})
+
+		-- Roblox's 2016 follower REST endpoints and NewFollower remote were
+		-- experience API, so the obsolete Follow/Unfollow row is intentionally
+		-- omitted instead of leaving a broken button.
+		self.PopupFrame = createPopupFrame(buttons)
+		return self.PopupFrame
+	end
+
+	PlayersService.PlayerRemoving:Connect(function(leavingPlayer)
+		if playerDropDown.Player == leavingPlayer then
+			playerDropDown:Hide()
+		end
+	end)
+
+	return playerDropDown
+end
+
+moduleApiTable.FollowerStatusChanged = createSignal()
+
+function moduleApiTable:CreatePlayerDropDown()
+	return createPlayerDropDown()
+end
+
+function moduleApiTable:CreateBlockingUtility()
+	local blockingUtility = {}
+
+	function blockingUtility:BlockPlayerAsync(player)
+		return BlockPlayerAsync(player)
+	end
+
+	function blockingUtility:UnblockPlayerAsync(player)
+		return UnblockPlayerAsync(player)
+	end
+
+	function blockingUtility:MutePlayer(player)
+		return MutePlayer(player)
+	end
+
+	function blockingUtility:UnmutePlayer(player)
+		return UnmutePlayer(player)
+	end
+
+	function blockingUtility:IsPlayerBlockedByUserId(userId)
+		return isBlocked(userId)
+	end
+
+	function blockingUtility:GetBlockedStatusChangedEvent()
+		return BlockStatusChanged
+	end
+
+	function blockingUtility:IsPlayerMutedByUserId(userId)
+		return isMuted(userId)
+	end
+
+	return blockingUtility
+end
+
+return moduleApiTable
+end;
+};
+G2L_MODULES[G2L["a"]] = {
+Closure = function()
+    local script = G2L["a"];--[[
+  // FileName: PlayerlistModule.lua
+  // Version 1.3
+  // Written by: jmargh
+  // Description: Implementation of in game player list and leaderboard
+]]
+
+local GuiService = game:GetService("GuiService")
+local UserInputService = game:GetService("UserInputService")
+local TeamsService = game:GetService("Teams")
+local ContextActionService = game:GetService("ContextActionService")
+local GroupService = game:GetService("GroupService")
+local StarterGui = game:GetService("StarterGui")
+local PlayersService = game:GetService("Players")
+
+local Player = PlayersService.LocalPlayer
+while not Player do
+	PlayersService:GetPropertyChangedSignal("LocalPlayer"):Wait()
+	Player = PlayersService.LocalPlayer
+end
+
+-- 2026 compatibility: these modules now live under the experience's RobloxGui
+-- instead of protected CoreGui.
+local RobloxGui = script:FindFirstAncestor("RobloxGui")
+if not RobloxGui then
+	RobloxGui = Player:WaitForChild("PlayerGui"):WaitForChild("RobloxGui")
+end
+local Modules = RobloxGui:WaitForChild("Modules")
+
+local StatsUtils = { ButtonHeight = 0 }
+local statsFolder = Modules:FindFirstChild("Stats")
+if statsFolder and statsFolder:FindFirstChild("StatsUtils") then
+	local ok, result = pcall(require, statsFolder.StatsUtils)
+	if ok and type(result) == "table" then
+		StatsUtils = result
+	end
+end
+
+local TenFootInterface = nil
+local tenFootModule = Modules:FindFirstChild("TenFootInterface")
+if tenFootModule then
+	local ok, result = pcall(require, tenFootModule)
+	if ok then
+		TenFootInterface = result
+	end
+end
+local isTenFootInterface = false
+if TenFootInterface and type(TenFootInterface.IsEnabled) == "function" then
+	local ok, result = pcall(function() return TenFootInterface:IsEnabled() end)
+	isTenFootInterface = ok and result or false
+else
+	local ok, result = pcall(function() return GuiService:IsTenFootInterface() end)
+	isTenFootInterface = ok and result or false
+end
+
+local playerDropDownModule = require(Modules:WaitForChild("PlayerDropDown"))
+local blockingUtility = playerDropDownModule:CreateBlockingUtility()
+local playerDropDown = playerDropDownModule:CreatePlayerDropDown()
+
+local PlayerPermissionsModule = require(Modules:WaitForChild("PlayerPermissionsModule"))
+
+--[[ Remotes ]]--
+local RemoveEvent_OnFollowRelationshipChanged = nil
+local RemoteFunc_GetFollowRelationships = nil
+
+--[[ Start Module ]]--
+local Playerlist = {}
+
+--[[ Public Event API ]]--
+-- Parameters: Sorted Array - see GameStats below
+Playerlist.OnLeaderstatsChanged = Instance.new('BindableEvent')
+-- Parameters: nameOfStat(string), formatedStringOfStat(string)
+Playerlist.OnStatChanged = Instance.new('BindableEvent')
+
+--[[ Client Stat Table ]]--
+-- Sorted Array of tables
+local GameStats = {}
+-- Fields
+-- Name: String the developer has given the stat
+-- Text: Formated string of the stat value
+-- AddId: Child add order id
+-- IsPrimary: Is this the primary stat
+-- Priority: Sorting priority
+-- NOTE: IsPrimary and Priority are unofficially supported. They are left over legacy from the old player list.
+-- They can be un-supported at anytime. You should prefer using child add order to order your stats in the leader board.
+
+--[[ Script Variables ]]--
+local topbarEnabled = true
+local playerlistCoreGuiEnabled = true
+local MyPlayerEntryTopFrame = nil
+local PlayerEntries = {}
+local StatAddId = 0
+local TeamEntries = {}
+local TeamAddId = 0
+local NeutralTeam = nil
+local IsShowingNeutralFrame = false
+local LastSelectedFrame = nil
+local LastSelectedPlayer = nil
+local MinContainerSize = UDim2.new(0, 165, 0.5, 0)
+if isTenFootInterface then
+	MinContainerSize = UDim2.new(0, 1000, 0, 720)
+end
+local TempHideKeys = {}
+
+local PlayerEntrySizeY = 24
+if isTenFootInterface then
+	PlayerEntrySizeY = 80
+end
+
+local TeamEntrySizeY = 18
+
+if isTenFootInterface then
+	TeamEntrySizeY = 32
+end
+
+local NameEntrySizeX = 170
+if isTenFootInterface then
+	NameEntrySizeX = 350
+end
+
+local StatEntrySizeX = 75
+if isTenFootInterface then
+	StatEntrySizeX = 250
+end
+
+local function getViewportSize()
+	local camera = workspace.CurrentCamera
+	return camera and camera.ViewportSize or Vector2.new(1280, 720)
+end
+-- The original 2016 module intentionally disabled the playerlist on small touch screens.
+-- OldRobloxify wants the classic playerlist to remain available on mobile.
+local IsSmallScreenDevice = false
+
+
+--[[ Constants ]]--
+local ENTRY_PAD = 2
+local BG_TRANSPARENCY = 0.5
+local BG_COLOR = Color3.new(31/255, 31/255, 31/255)
+local BG_COLOR_TOP = Color3.new(106/255, 106/255, 106/255)
+local TEXT_STROKE_TRANSPARENCY = 0.75
+local TEXT_COLOR = Color3.new(1, 1, 243/255)
+local TEXT_STROKE_COLOR = Color3.new(34/255, 34/255, 34/255)
+local TWEEN_TIME = 0.15
+local MAX_LEADERSTATS = 4
+local MAX_STR_LEN = 12
+local TILE_SPACING = 2
+if isTenFootInterface then
+	BG_COLOR_TOP = Color3.new(25/255, 25/255, 25/255)
+	BG_COLOR = Color3.new(60/255, 60/255, 60/255)
+	BG_TRANSPARENCY = 0.25
+	TEXT_STROKE_TRANSPARENCY = 1
+	TILE_SPACING = 5
+end
+local SHADOW_IMAGE = 'rbxasset://textures/ui/PlayerList/TileShadowMissingTop.png'--'http://www.roblox.com/asset?id=286965900'
+local SHADOW_SLICE_SIZE = 5
+local SHADOW_SLICE_RECT = Rect.new(SHADOW_SLICE_SIZE+1, SHADOW_SLICE_SIZE+1, SHADOW_SLICE_SIZE*2-1, SHADOW_SLICE_SIZE*2-1)
+
+local CUSTOM_ICONS = {	-- Admins with special icons
+	['7210880'] = 'rbxassetid://134032333', -- Jeditkacheff
+	['13268404'] = 'rbxassetid://113059239', -- Sorcus
+	['261'] = 'rbxassetid://105897927', -- shedlestky
+	['20396599'] = 'rbxassetid://161078086', -- Robloxsai
+}
+
+local ABUSES = {
+	"Swearing",
+	"Bullying",
+	"Scamming",
+	"Dating",
+	"Cheating/Exploiting",
+	"Personal Questions",
+	"Offsite Links",
+	"Bad Username",
+}
+
+--[[ Images ]]--
+local CHAT_ICON = 'rbxasset://textures/ui/chat_teamButton.png'
+local ADMIN_ICON = 'rbxasset://textures/ui/icon_admin-16.png'
+local INTERN_ICON = 'rbxasset://textures/ui/icon_intern-16.png'
+local PLACE_OWNER_ICON = 'rbxasset://textures/ui/icon_placeowner.png'
+local BC_ICON = 'rbxasset://textures/ui/icon_BC-16.png'
+local TBC_ICON = 'rbxasset://textures/ui/icon_TBC-16.png'
+local OBC_ICON = 'rbxasset://textures/ui/icon_OBC-16.png'
+local BLOCKED_ICON = 'rbxasset://textures/ui/PlayerList/BlockedIcon.png'
+local FRIEND_ICON = 'rbxasset://textures/ui/icon_friends_16.png'
+local FRIEND_REQUEST_ICON = 'rbxasset://textures/ui/icon_friendrequestsent_16.png'
+local FRIEND_RECEIVED_ICON = 'rbxasset://textures/ui/icon_friendrequestrecieved-16.png'
+
+local FOLLOWER_ICON = 'rbxasset://textures/ui/icon_follower-16.png'
+local FOLLOWING_ICON = 'rbxasset://textures/ui/icon_following-16.png'
+local MUTUAL_FOLLOWING_ICON = 'rbxasset://textures/ui/icon_mutualfollowing-16.png'
+
+local CHARACTER_BACKGROUND_IMAGE = 'rbxasset://textures/ui/PlayerList/CharacterBackgroundImage.png'
+
+--[[ Helper Functions ]]--
+local function clamp(value, min, max)
+	if value < min then
+		value = min
+	elseif value > max then
+		value = max
+	end
+
+	return value
+end
+
+local function getFriendStatusIcon(friendStatus)
+	if friendStatus == Enum.FriendStatus.Unknown or friendStatus == Enum.FriendStatus.NotFriend then
+		return nil
+	elseif friendStatus == Enum.FriendStatus.Friend then
+		return FRIEND_ICON
+	elseif friendStatus == Enum.FriendStatus.FriendRequestSent then
+		return FRIEND_REQUEST_ICON
+	elseif friendStatus == Enum.FriendStatus.FriendRequestReceived then
+		return FRIEND_RECEIVED_ICON
+	else
+		error("PlayerList: Unknown value for friendStatus: "..tostring(friendStatus))
+	end
+end
+
+local function getCustomPlayerIcon(player)
+	local userIdStr = tostring(player.UserId)
+	if CUSTOM_ICONS[userIdStr] then return nil end
+	--
+
+	if PlayerPermissionsModule.IsPlayerAdminAsync(player) then
+		return ADMIN_ICON
+	elseif PlayerPermissionsModule.IsPlayerInternAsync(player) then
+		return INTERN_ICON
+	end
+end
+
+local function setAvatarIconAsync(player, iconImage)
+	local ok, image = pcall(function()
+		return PlayersService:GetUserThumbnailAsync(
+			player.UserId,
+			Enum.ThumbnailType.HeadShot,
+			Enum.ThumbnailSize.Size100x100
+		)
+	end)
+	if ok and image then
+		iconImage.Image = image
+	else
+		iconImage.Image = "rbxasset://textures/ui/Shell/Icons/DefaultProfileIcon.png"
+	end
+end
+
+local function getMembershipIcon(player)
+	if isTenFootInterface then
+		return ""
+	end
+
+	if blockingUtility:IsPlayerBlockedByUserId(player.UserId) then
+		return BLOCKED_ICON
+	end
+
+	local userIdStr = tostring(player.UserId)
+	if CUSTOM_ICONS[userIdStr] then
+		return CUSTOM_ICONS[userIdStr]
+	elseif player.UserId == game.CreatorId and game.CreatorType == Enum.CreatorType.User then
+		return PLACE_OWNER_ICON
+	end
+
+	-- Builders Club / Turbo / OBC no longer exist. Premium deliberately does
+	-- not reuse those legacy icons.
+	return ""
+end
+
+local function isValidStat(obj)
+	return obj:IsA('StringValue') or obj:IsA('IntValue') or obj:IsA('BoolValue') or obj:IsA('NumberValue') or
+		obj:IsA('DoubleConstrainedValue') or obj:IsA('IntConstrainedValue')
+end
+
+local function sortPlayerEntries(a, b)
+	if a.PrimaryStat == b.PrimaryStat then
+		return a.Player.Name:upper() < b.Player.Name:upper()
+	end
+	if not a.PrimaryStat then return false end
+	if not b.PrimaryStat then return true end
+	local statA = a.PrimaryStat
+	local statB = b.PrimaryStat
+	statA = tonumber(statA) or statA
+	statB = tonumber(statB) or statB
+	if type(statA) ~= type(statB) then
+		statA = tostring(statA)
+		statB = tostring(statB)
+	end
+	return statA > statB
+end
+
+local function sortLeaderStats(a, b)
+	if a.IsPrimary ~= b.IsPrimary then
+		return a.IsPrimary
+	end
+	if a.Priority == b.Priority then
+		return a.AddId < b.AddId
+	end
+	return a.Priority < b.Priority
+end
+
+local function sortTeams(a, b)
+	if a.TeamScore == b.TeamScore then
+		return a.Id < b.Id
+	end
+	if not a.TeamScore then return false end
+	if not b.TeamScore then return true end
+	return a.TeamScore < b.TeamScore
+end
+
+-- Start of Gui Creation
+local Container = Instance.new('Frame')
+Container.Name = "PlayerListContainer"
+Container.Size = MinContainerSize
+
+if isTenFootInterface then
+	Container.Position = UDim2.new(0.5, -MinContainerSize.X.Offset/2, 0.25, 0)  
+else
+	Container.Position = UDim2.new(1, -167, 0, 38)
+end
+
+-- Every time Performance Stats toggles on/off we need to 
+-- reposition the main Container, so things don't overlap.
+-- Optimally I could just call an "UpdateContainerPosition" function 
+-- that takes into account everything that affects Container position 
+-- and recalculate things.
+-- 
+-- Unfortunately, the position of Container may be kind of hard to re-calculate
+-- on the fly when it's been shaped based on current leader board state.
+--
+-- So instead we do this: 
+-- We always track where we'd be putting the widget if there were no 
+-- position stats in targetContainerYOffset.
+-- Whenever we reposition Container, we first move it to the ignoring-stats
+-- location, (updating targetContainerYOffset), then call the 
+-- AdjustContainerPosition function to derive final position.
+local targetContainerYOffset = Container.Position.Y.Offset
+
+Container.BackgroundTransparency = 1
+Container.Visible = false
+Container.Parent = RobloxGui
+
+local function AdjustContainerPosition()
+	if Container == nil then
+		return
+	end
+	Container.Position = UDim2.new(
+		Container.Position.X.Scale,
+		Container.Position.X.Offset,
+		Container.Position.Y.Scale,
+		targetContainerYOffset
+	)
+end
+AdjustContainerPosition()
+
+-- Scrolling Frame
+local noSelectionObject = Instance.new("Frame")
+noSelectionObject.BackgroundTransparency = 1
+noSelectionObject.BorderSizePixel = 0
+
+local ScrollList = Instance.new('ScrollingFrame')
+ScrollList.Name = "ScrollList"
+ScrollList.Size = UDim2.new(1, -1, 0, 0)
+if isTenFootInterface then
+	ScrollList.Position = UDim2.new(0, 0, 0, PlayerEntrySizeY + TILE_SPACING)
+	ScrollList.Size = UDim2.new(1, 19, 0, 0)
+end
+ScrollList.BackgroundTransparency = 1
+ScrollList.BackgroundColor3 = Color3.new()
+ScrollList.BorderSizePixel = 0
+ScrollList.CanvasSize = UDim2.new(0, 0, 0, 0)	-- NOTE: Look into if x needs to be set to anything
+ScrollList.ScrollBarThickness = 6
+ScrollList.BottomImage = 'rbxasset://textures/ui/scroll-bottom.png'
+ScrollList.MidImage = 'rbxasset://textures/ui/scroll-middle.png'
+ScrollList.TopImage = 'rbxasset://textures/ui/scroll-top.png'
+ScrollList.SelectionImageObject = noSelectionObject
+ScrollList.Selectable = false
+ScrollList.Parent = Container
+
+-- PlayerDropDown clipping frame
+local PopupClipFrame = Instance.new('Frame')
+PopupClipFrame.Name = "PopupClipFrame"
+PopupClipFrame.Size = UDim2.new(0, 150, 1.5, 0)
+PopupClipFrame.Position = UDim2.new(0, -150 - ENTRY_PAD, 0, 0)
+PopupClipFrame.BackgroundTransparency = 1
+PopupClipFrame.ClipsDescendants = true
+PopupClipFrame.Parent = Container
+
+
+--[[ Creation Helper Functions ]]--
+local function createEntryFrame(name, sizeYOffset, isTopStat)
+	local containerFrame = Instance.new('Frame')
+	containerFrame.Name = name
+	containerFrame.Position = UDim2.new(0, 0, 0, 0)
+	containerFrame.Size = UDim2.new(1, 0, 0, sizeYOffset)
+	if isTenFootInterface then
+		containerFrame.Position = UDim2.new(0, 10, 0, 0)
+		containerFrame.Size = containerFrame.Size + UDim2.new(0, -20, 0, 0)
+	end
+	containerFrame.BackgroundTransparency = 1
+	containerFrame.ZIndex = isTenFootInterface and 2 or 1
+
+	local nameFrame = Instance.new('TextButton')
+	nameFrame.Name = "BGFrame"
+	nameFrame.Position = UDim2.new(0, 0, 0, 0)
+	nameFrame.Size = UDim2.new(0, NameEntrySizeX, 0, sizeYOffset)
+	nameFrame.BackgroundTransparency = isTopStat and 0 or BG_TRANSPARENCY
+	nameFrame.BackgroundColor3 = isTopStat and BG_COLOR_TOP or BG_COLOR
+	nameFrame.BorderSizePixel = 0
+	nameFrame.AutoButtonColor = false
+	nameFrame.Text = ""
+	nameFrame.Parent = containerFrame
+	nameFrame.ZIndex = isTenFootInterface and 2 or 1
+
+	return containerFrame, nameFrame
+end
+
+local function createEntryNameText(name, text, sizeXOffset, posXOffset)
+	local nameLabel = Instance.new('TextLabel')
+	nameLabel.Name = name
+	nameLabel.Size = UDim2.new(-0.01, sizeXOffset, 1, 0)
+	nameLabel.Position = UDim2.new(0.01, posXOffset, 0, 0)
+	nameLabel.BackgroundTransparency = 1
+	nameLabel.Font = Enum.Font.SourceSans
+	if isTenFootInterface then
+		nameLabel.TextSize = 32
+	else
+		nameLabel.TextSize = 14
+	end
+	nameLabel.TextColor3 = TEXT_COLOR
+	nameLabel.TextStrokeTransparency = TEXT_STROKE_TRANSPARENCY
+	nameLabel.TextStrokeColor3 = TEXT_STROKE_COLOR
+	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+	nameLabel.ClipsDescendants = true
+	nameLabel.Text = text
+	nameLabel.ZIndex = isTenFootInterface and 2 or 1
+
+	return nameLabel
+end
+
+local function createStatFrame(offset, parent, name, isTopStat)
+	local statFrame = Instance.new('Frame')
+	statFrame.Name = name
+	statFrame.Size = UDim2.new(0, StatEntrySizeX, 1, 0)
+	statFrame.Position = UDim2.new(0, offset + TILE_SPACING, 0, 0)
+	statFrame.BackgroundTransparency = isTopStat and 0 or BG_TRANSPARENCY
+	statFrame.BackgroundColor3 = isTopStat and BG_COLOR_TOP or BG_COLOR
+	statFrame.BorderSizePixel = 0
+	statFrame.Parent = parent
+
+	if isTenFootInterface then
+		statFrame.ZIndex = 2
+
+		local shadow = Instance.new("ImageLabel")
+		shadow.BackgroundTransparency = 1
+		shadow.Name = 'Shadow'
+		shadow.Image = SHADOW_IMAGE
+		shadow.Position = UDim2.new(0, -SHADOW_SLICE_SIZE, 0, 0)
+		shadow.Size = UDim2.new(1, SHADOW_SLICE_SIZE*2, 1, SHADOW_SLICE_SIZE)
+		shadow.ScaleType = Enum.ScaleType.Slice
+		shadow.SliceCenter = SHADOW_SLICE_RECT
+		shadow.Parent = statFrame
+	end
+
+	return statFrame
+end
+
+local function createStatText(parent, text, isTopStat, isTeamStat)
+	local statText = Instance.new('TextLabel')
+	statText.Name = "StatText"
+	statText.Size = isTopStat and UDim2.new(1, 0, 0.5, 0) or UDim2.new(1, 0, 1, 0)
+	statText.Position = isTopStat and UDim2.new(0, 0, 0.5, 0) or UDim2.new(0, 0, 0, 0)
+	statText.BackgroundTransparency = 1
+	statText.Font = isTopStat and Enum.Font.SourceSansBold or Enum.Font.SourceSans
+	if isTenFootInterface then
+		statText.TextSize = 32
+	else
+		statText.TextSize = 14
+	end
+	statText.TextColor3 = TEXT_COLOR
+	statText.TextStrokeColor3 = TEXT_STROKE_COLOR
+	statText.TextStrokeTransparency = TEXT_STROKE_TRANSPARENCY
+	statText.Text = text
+	statText.Active = true
+	statText.Parent = parent
+	if isTenFootInterface then
+		statText.ZIndex = 2
+	end
+
+	if isTopStat then
+		local statName = statText:Clone()
+		statName.Name = "StatName"
+		statName.Text = tostring(parent.Name)
+		statName.Position = UDim2.new(0,0,0,0)
+		statName.Font = Enum.Font.SourceSans
+		statName.ClipsDescendants = true
+		statName.Parent = parent
+		if isTenFootInterface then
+			statName.ZIndex = 2
+		end
+	end
+
+	if isTeamStat then
+		statText.Font = Enum.Font.SourceSansBold
+	end
+
+	return statText
+end
+
+local function createImageIcon(image, name, xOffset, parent)
+	local imageLabel = Instance.new('ImageLabel')
+	imageLabel.Name = name
+	if isTenFootInterface then
+		imageLabel.Size = UDim2.new(0, 64, 0, 64)
+		imageLabel.ZIndex = 2
+
+		local background = Instance.new("ImageLabel", imageLabel)
+		background.Name = 'Background'
+		background.BackgroundTransparency = 1
+		background.Image = CHARACTER_BACKGROUND_IMAGE
+		background.Size = UDim2.new(0, 66, 0, 66)
+		background.Position = UDim2.new(0.5, -66/2, 0.5, -66/2)
+		background.ZIndex = 2
+	else
+		imageLabel.Size = UDim2.new(0, 16, 0, 16)
+	end
+	imageLabel.Position = UDim2.new(0.01, xOffset, 0.5, -imageLabel.Size.Y.Offset/2)
+	imageLabel.BackgroundTransparency = 1
+	imageLabel.Image = image
+	imageLabel.BorderSizePixel = 0
+	imageLabel.Parent = parent
+
+	return imageLabel
+end
+
+local function getScoreValue(statObject)
+	if statObject:IsA('DoubleConstrainedValue') or statObject:IsA('IntConstrainedValue') then
+		return statObject.ConstrainedValue
+	elseif statObject:IsA('BoolValue') then
+		if statObject.Value then return 1 else return 0 end
+	else
+		return statObject.Value
+	end
+end
+
+local THIN_CHARS = "[^%[iIl\%.,']"
+local function strWidth(str)
+	return string.len(str) - math.floor(string.len(string.gsub(str, THIN_CHARS, "")) / 2)
+end
+
+local function formatNumber(value)
+	local _,_,minusSign, int, fraction = tostring(value):find('([-]?)(%d+)([.]?%d*)')
+	int = int:reverse():gsub("%d%d%d", "%1,")
+	return minusSign..int:reverse():gsub("^,", "")..fraction
+end
+
+local function formatStatString(text)
+	local numberValue = tonumber(text)
+	if numberValue then
+		text = formatNumber(numberValue)
+	end
+
+	if strWidth(text) <= MAX_STR_LEN then
+		return text
+	else
+		return string.sub(text, 1, MAX_STR_LEN - 3).."..."
+	end
+end
+
+--[[ Resize Functions ]]--
+local LastMaxScrollSize = 0
+local function setScrollListSize()
+	local teamSize = #TeamEntries * TeamEntrySizeY
+	local playerSize = #PlayerEntries * PlayerEntrySizeY
+	local spacing = #PlayerEntries * ENTRY_PAD + #TeamEntries * ENTRY_PAD
+	local canvasSize = teamSize + playerSize + spacing
+	if #TeamEntries > 0 and NeutralTeam and IsShowingNeutralFrame then
+		canvasSize = canvasSize + TeamEntrySizeY + ENTRY_PAD
+	end
+	ScrollList.CanvasSize = UDim2.new(0, 0, 0, canvasSize)
+	local newScrollListSize = math.min(canvasSize, Container.AbsoluteSize.Y)
+	if ScrollList.Size.Y.Offset == LastMaxScrollSize then
+		if isTenFootInterface then
+			ScrollList.Size = UDim2.new(1, 20, 0, newScrollListSize)
+		else
+			ScrollList.Size = UDim2.new(1, 0, 0, newScrollListSize)
+		end
+	end
+	LastMaxScrollSize = newScrollListSize
+end
+
+--[[ Re-position Functions ]]--
+local function setPlayerEntryPositions()
+	local position = 0
+	for i = 1, #PlayerEntries do
+		if isTenFootInterface and PlayerEntries[i].Frame ~= MyPlayerEntryTopFrame then
+			PlayerEntries[i].Frame.Position = UDim2.new(0, 10, 0, position)
+			position = position + PlayerEntrySizeY + TILE_SPACING
+		elseif PlayerEntries[i].Frame ~= MyPlayerEntryTopFrame then
+			PlayerEntries[i].Frame.Position = UDim2.new(0, 0, 0, position)
+			position = position + PlayerEntrySizeY + TILE_SPACING
+		end
+	end
+end
+
+local function setTeamEntryPositions()
+	local teams = {}
+	for _,teamEntry in ipairs(TeamEntries) do
+		local team = teamEntry.Team
+		teams[tostring(team.TeamColor)] = {}
+	end
+	if NeutralTeam then
+		teams.Neutral = {}
+	end
+
+	for _,playerEntry in ipairs(PlayerEntries) do
+		if playerEntry.Frame ~= MyPlayerEntryTopFrame then
+			local player = playerEntry.Player
+			if player.Neutral then
+				table.insert(teams.Neutral, playerEntry)
+			elseif teams[tostring(player.TeamColor)] then
+				table.insert(teams[tostring(player.TeamColor)], playerEntry)
+			else
+				table.insert(teams.Neutral, playerEntry)
+			end
+		end
+	end
+
+	local position = 0
+	for _,teamEntry in ipairs(TeamEntries) do
+		local team = teamEntry.Team
+		teamEntry.Frame.Position = UDim2.new(0, isTenFootInterface and 10 or 0, 0, position)
+		position = position + TeamEntrySizeY + TILE_SPACING
+		local players = teams[tostring(team.TeamColor)]
+		for _,playerEntry in ipairs(players) do
+			playerEntry.Frame.Position = UDim2.new(0, isTenFootInterface and 10 or 0, 0, position)
+			position = position + PlayerEntrySizeY + TILE_SPACING
+		end
+	end
+	if NeutralTeam then
+		NeutralTeam.Frame.Position = UDim2.new(0, isTenFootInterface and 10 or 0, 0, position)
+		position = position + TeamEntrySizeY + TILE_SPACING
+		if #teams.Neutral > 0 then
+			IsShowingNeutralFrame = true
+			local players = teams.Neutral
+			for _,playerEntry in ipairs(players) do
+				playerEntry.Frame.Position = UDim2.new(0, isTenFootInterface and 10 or 0, 0, position)
+				position = position + PlayerEntrySizeY + TILE_SPACING
+			end
+		else
+			IsShowingNeutralFrame = false
+		end
+	end
+end
+
+local function setEntryPositions()
+	table.sort(PlayerEntries, sortPlayerEntries)
+	if #TeamEntries > 0 then
+		setTeamEntryPositions()
+	else
+		setPlayerEntryPositions()
+	end
+end
+
+local function updateSocialIcon(newIcon, bgFrame)
+	local socialIcon = bgFrame:FindFirstChild('SocialIcon')
+	local nameFrame = bgFrame:FindFirstChild('PlayerName')
+	local offset = 19
+	if socialIcon then
+		if newIcon then
+			socialIcon.Image = newIcon
+		else
+			if nameFrame then
+				local newSize = nameFrame.Size.X.Offset + socialIcon.Size.X.Offset + 2
+				nameFrame.Size = UDim2.new(-0.01, newSize, 0.5, 0)
+				nameFrame.Position = UDim2.new(0.01, offset, 0.245, 0)
+			end
+			socialIcon:Destroy()
+		end
+	elseif newIcon and bgFrame then
+		socialIcon = createImageIcon(newIcon, "SocialIcon", offset, bgFrame)
+		offset = offset + socialIcon.Size.X.Offset + 2
+		if nameFrame then
+			local newSize = bgFrame.Size.X.Offset - offset
+			nameFrame.Size = UDim2.new(-0.01, newSize, 0.5, 0)
+			nameFrame.Position = UDim2.new(0.01, offset, 0.245, 0)
+		end
+	end
+end
+
+local function getFriendStatus(selectedPlayer)
+	if selectedPlayer == Player then
+		return Enum.FriendStatus.NotFriend
+	end
+
+	local success, isFriend = pcall(function()
+		return Player:IsFriendsWithAsync(selectedPlayer.UserId)
+	end)
+	if success and isFriend then
+		return Enum.FriendStatus.Friend
+	end
+	return Enum.FriendStatus.NotFriend
+end
+
+function popupHidden()
+	if LastSelectedFrame then
+		for _,childFrame in pairs(LastSelectedFrame:GetChildren()) do
+			if childFrame:IsA('TextButton') or childFrame:IsA('Frame') then
+				childFrame.BackgroundColor3 = BG_COLOR
+			end
+		end
+	end
+	ScrollList.ScrollingEnabled = true
+	LastSelectedFrame = nil
+	LastSelectedPlayer = nil
+end
+playerDropDown.HiddenSignal:Connect(popupHidden)
+
+local function openPlatformProfileUI(rbxUid)
+	if not rbxUid or rbxUid < 1 then return end
+	pcall(function()
+		GuiService:InspectPlayerFromUserId(rbxUid)
+	end)
+end
+
+local function onEntryFrameSelected(selectedFrame, selectedPlayer)
+	if isTenFootInterface then
+		openPlatformProfileUI(selectedPlayer.UserId)
+		return
+	end
+
+	-- Keep the original behavior of not opening a dropdown for yourself.
+	-- Studio local-server clients can use negative/non-production UserIds,
+	-- so do NOT reject them here.
+	if selectedPlayer == Player then
+		return
+	end
+
+	if LastSelectedFrame ~= selectedFrame then
+		if LastSelectedFrame then
+			for _,childFrame in pairs(LastSelectedFrame:GetChildren()) do
+				if childFrame:IsA('TextButton') or childFrame:IsA('Frame') then
+					childFrame.BackgroundColor3 = BG_COLOR
+				end
+			end
+		end
+
+		LastSelectedFrame = selectedFrame
+		LastSelectedPlayer = selectedPlayer
+
+		for _,childFrame in pairs(selectedFrame:GetChildren()) do
+			if childFrame:IsA('TextButton') or childFrame:IsA('Frame') then
+				childFrame.BackgroundColor3 = Color3.new(0, 1, 1)
+			end
+		end
+
+		ScrollList.ScrollingEnabled = false
+
+		local ok, PopupFrame = pcall(function()
+			return playerDropDown:CreatePopup(selectedPlayer)
+		end)
+
+		if not ok or not PopupFrame then
+			warn("[2016 PlayerList] PlayerDropDown failed:", PopupFrame)
+			popupHidden()
+			return
+		end
+
+		local y = selectedFrame.Position.Y.Offset - ScrollList.CanvasPosition.Y
+		PopupFrame.Position = UDim2.new(1, 1, 0, y)
+		PopupFrame.Parent = PopupClipFrame
+		PopupFrame:TweenPosition(
+			UDim2.new(0, 0, 0, y),
+			Enum.EasingDirection.InOut,
+			Enum.EasingStyle.Quad,
+			TWEEN_TIME,
+			true
+		)
+	else
+		playerDropDown:Hide()
+		LastSelectedFrame = nil
+		LastSelectedPlayer = nil
+	end
+end
+
+local function onFriendshipChanged(otherPlayer, newFriendStatus)
+	local entryToUpdate = nil
+	for _,entry in ipairs(PlayerEntries) do
+		if entry.Player == otherPlayer then
+			entryToUpdate = entry
+			break
+		end
+	end
+	if not entryToUpdate then
+		return
+	end
+	local newIcon = getFriendStatusIcon(newFriendStatus)
+	local frame = entryToUpdate.Frame
+	local bgFrame = frame:FindFirstChild('BGFrame')
+	if bgFrame then
+		--no longer friends, but might still be following
+		-- TODO: We need to get follow relationship here; we currently don't have a way
+		-- to get a single users result, so the server script will need to be updated
+		-- issue will be when unfriending a user, but still following them, the icon
+		-- will not show correctly.
+		updateSocialIcon(newIcon, bgFrame)
+	end
+end
+
+-- Modern public friendship notifications are exposed through StarterGui:GetCore.
+if not isTenFootInterface then
+	task.spawn(function()
+		local okFriended, friendedEvent = pcall(function()
+			return StarterGui:GetCore("PlayerFriendedEvent")
+		end)
+		if okFriended and friendedEvent then
+			friendedEvent.Event:Connect(function(otherPlayer)
+				onFriendshipChanged(otherPlayer, Enum.FriendStatus.Friend)
+			end)
+		end
+
+		local okUnfriended, unfriendedEvent = pcall(function()
+			return StarterGui:GetCore("PlayerUnfriendedEvent")
+		end)
+		if okUnfriended and unfriendedEvent then
+			unfriendedEvent.Event:Connect(function(otherPlayer)
+				onFriendshipChanged(otherPlayer, Enum.FriendStatus.NotFriend)
+			end)
+		end
+	end)
+end
+
+--[[ Begin New Server Followers ]]--
+local function setFollowRelationshipsView(relationshipTable)
+	if not relationshipTable then
+		return
+	end
+
+	for i = 1, #PlayerEntries do
+		local entry = PlayerEntries[i]
+		local player = entry.Player
+		local userId = tostring(player.UserId)
+
+		-- don't update icon if already friends
+		local friendStatus = getFriendStatus(player)
+		if friendStatus == Enum.FriendStatus.Friend then
+			return
+		end
+
+		local icon = nil
+		if relationshipTable[userId] then
+			local relationship = relationshipTable[userId]
+			if relationship.IsMutual == true then
+				icon = MUTUAL_FOLLOWING_ICON
+			elseif relationship.IsFollowing == true then
+				icon = FOLLOWING_ICON
+			elseif relationship.IsFollower == true then
+				icon = FOLLOWER_ICON
+			end
+		end
+
+		local frame = entry.Frame
+		local bgFrame = frame:FindFirstChild('BGFrame')
+		if bgFrame then
+			updateSocialIcon(icon, bgFrame)
+		end
+	end
+end
+
+local function getFollowRelationships()
+	local result = nil
+	if RemoteFunc_GetFollowRelationships then
+		result = RemoteFunc_GetFollowRelationships:InvokeServer()
+	end
+	return result
+end
+
+--[[ End New Server Followers ]]--
+
+local function updateAllTeamScores()
+	local teamScores = {}
+	for _,playerEntry in ipairs(PlayerEntries) do
+		local player = playerEntry.Player
+		local leaderstats = player:FindFirstChild('leaderstats')
+		local team = player.Neutral and 'Neutral' or tostring(player.TeamColor)
+		local isInValidColor = true
+		if team ~= 'Neutral' then
+			for _,teamEntry in ipairs(TeamEntries) do
+				local color = teamEntry.Team.TeamColor
+				if team == tostring(color) then
+					isInValidColor = false
+					break
+				end
+			end
+		end
+		if isInValidColor then
+			team = 'Neutral'
+		end
+		if not teamScores[team] then
+			teamScores[team] = {}
+		end
+		if playerEntry.Frame ~= MyPlayerEntryTopFrame then
+			if leaderstats then
+				for _,stat in ipairs(GameStats) do
+					local statObject = leaderstats:FindFirstChild(stat.Name)
+					if statObject and not statObject:IsA('StringValue') then
+						if not teamScores[team][stat.Name] then
+							teamScores[team][stat.Name] = 0
+						end
+						teamScores[team][stat.Name] = teamScores[team][stat.Name] + getScoreValue(statObject)
+					end
+				end
+			end
+		end
+	end
+
+	for _,teamEntry in ipairs(TeamEntries) do
+		local team = teamEntry.Team
+		local frame = teamEntry.Frame
+		local color = tostring(team.TeamColor)
+		local stats = teamScores[color]
+		if stats then
+			for statName,statValue in pairs(stats) do
+				local statFrame = frame:FindFirstChild(statName)
+				if statFrame then
+					local statText = statFrame:FindFirstChild('StatText')
+					if statText then
+						statText.Text = formatStatString(tostring(statValue))
+					end
+				end
+			end
+		else
+			for _,childFrame in pairs(frame:GetChildren()) do
+				local statText = childFrame:FindFirstChild('StatText')
+				if statText then
+					statText.Text = ''
+				end
+			end
+		end
+	end
+	if NeutralTeam then
+		local frame = NeutralTeam.Frame
+		local stats = teamScores['Neutral']
+		if stats then
+			frame.Visible = true
+			for statName,statValue in pairs(stats) do
+				local statFrame = frame:FindFirstChild(statName)
+				if statFrame then
+					local statText = statFrame:FindFirstChild('StatText')
+					if statText then
+						statText.Text = formatStatString(tostring(statValue))
+					end
+				end
+			end
+		else
+			frame.Visible = false
+		end
+	end
+end
+
+local function updateTeamEntry(entry)
+	local frame = entry.Frame
+	local team = entry.Team
+	local color = team.TeamColor.Color
+	local offset = NameEntrySizeX
+	for _,stat in ipairs(GameStats) do
+		local statFrame = frame:FindFirstChild(stat.Name)
+		if not statFrame then
+			statFrame = createStatFrame(offset, frame, stat.Name)
+			statFrame.BackgroundColor3 = color
+			createStatText(statFrame, "", false, true)
+		end
+		statFrame.Position = UDim2.new(0, offset + TILE_SPACING, 0, 0)
+		offset = offset + statFrame.Size.X.Offset + TILE_SPACING
+	end
+end
+
+local function updatePrimaryStats(statName)
+	for _,entry in ipairs(PlayerEntries) do
+		local player = entry.Player
+		local leaderstats = player:FindFirstChild('leaderstats')
+		entry.PrimaryStat = nil
+		if leaderstats then
+			local statObject = leaderstats:FindFirstChild(statName)
+			if statObject then
+				local scoreValue = getScoreValue(statObject)
+				entry.PrimaryStat = scoreValue
+			end
+		end
+	end
+end
+
+local updateLeaderstatFrames = nil
+-- TODO: fire event to top bar?
+local function initializeStatText(stat, statObject, entry, statFrame, index, isTopStat)
+	local player = entry.Player
+	local statValue = getScoreValue(statObject)
+	if statObject.Name == GameStats[1].Name then
+		entry.PrimaryStat = statValue
+	end
+	local statText = createStatText(statFrame, formatStatString(tostring(statValue)), isTopStat)
+	-- Top Bar insertion
+	if player == Player then
+		stat.Text = statText.Text
+	end
+
+	statObject.Changed:Connect(function(newValue)
+		local scoreValue = getScoreValue(statObject)
+		statText.Text = formatStatString(tostring(scoreValue))
+		if statObject.Name == GameStats[1].Name then
+			entry.PrimaryStat = scoreValue
+		end
+		-- Top bar changed event
+		if player == Player then
+			stat.Text = statText.Text
+			Playerlist.OnStatChanged:Fire(stat.Name, stat.Text)
+		end
+		updateAllTeamScores()
+		setEntryPositions()
+	end)
+	statObject.ChildAdded:Connect(function(child)
+		if child.Name == "IsPrimary" then
+			GameStats[1].IsPrimary = false
+			stat.IsPrimary = true
+			updatePrimaryStats(stat.Name)
+			if updateLeaderstatFrames then updateLeaderstatFrames() end
+			Playerlist.OnLeaderstatsChanged:Fire(GameStats)
+		end
+	end)
+end
+
+updateLeaderstatFrames = function()
+	table.sort(GameStats, sortLeaderStats)
+	if #TeamEntries > 0 then
+		for _,entry in ipairs(TeamEntries) do
+			updateTeamEntry(entry)
+		end
+		if NeutralTeam then
+			updateTeamEntry(NeutralTeam)
+		end
+	end
+
+	for _,entry in ipairs(PlayerEntries) do
+		local player = entry.Player
+		local mainFrame = entry.Frame
+		local offset = NameEntrySizeX
+		local leaderstats = player:FindFirstChild('leaderstats')
+		local isTopStat = (entry.Frame == MyPlayerEntryTopFrame)
+
+		if leaderstats then
+			for _,stat in ipairs(GameStats) do
+				local statObject = leaderstats:FindFirstChild(stat.Name)
+				local statFrame = mainFrame:FindFirstChild(stat.Name)
+
+				if not statFrame then
+					statFrame = createStatFrame(offset, mainFrame, stat.Name, isTopStat)
+					if statObject then
+						initializeStatText(stat, statObject, entry, statFrame, _, isTopStat)
+					end
+				elseif statObject then
+					local statText = statFrame:FindFirstChild('StatText')
+					if not statText then
+						initializeStatText(stat, statObject, entry, statFrame, _, isTopStat)
+					end
+				end
+				statFrame.Position = UDim2.new(0, offset + TILE_SPACING, 0, 0)
+				offset = offset + statFrame.Size.X.Offset + TILE_SPACING
+			end
+		else
+			for _,stat in ipairs(GameStats) do
+				local statFrame = mainFrame:FindFirstChild(stat.Name)
+				if not statFrame then
+					statFrame = createStatFrame(offset, mainFrame, stat.Name, isTopStat)
+				end
+				offset = offset + statFrame.Size.X.Offset + TILE_SPACING
+			end
+		end
+
+		if entry.Frame ~= MyPlayerEntryTopFrame then
+			if isTenFootInterface then
+				Container.Position = UDim2.new(0.5, -offset/2, 0, 110)
+				Container.Size = UDim2.new(0, offset, 0.8, 0)
+			else
+				Container.Position = UDim2.new(1, -offset, 0, 38)
+				Container.Size = UDim2.new(0, offset, 0.5, 0)
+			end
+			targetContainerYOffset = Container.Position.Y.Offset
+			AdjustContainerPosition()
+
+			local newMinContainerOffset = offset
+			MinContainerSize = UDim2.new(0, newMinContainerOffset, 0.5, 0)
+		end
+	end
+	updateAllTeamScores()
+	setEntryPositions()
+	Playerlist.OnLeaderstatsChanged:Fire(GameStats)
+end
+
+local function addNewStats(leaderstats)
+	for i,stat in ipairs(leaderstats:GetChildren()) do
+		if isValidStat(stat) and #GameStats < MAX_LEADERSTATS then
+			local gameHasStat = false
+			for _,gStat in ipairs(GameStats) do
+				if stat.Name == gStat.Name then
+					gameHasStat = true
+					break
+				end
+			end
+
+			if not gameHasStat then
+				local newStat = {}
+				newStat.Name = stat.Name
+				newStat.Text = "-"
+				newStat.Priority = 0
+				local priority = stat:FindFirstChild('Priority')
+				if priority and priority:IsA("ValueBase") then newStat.Priority = tonumber(priority.Value) or 0 end
+				newStat.IsPrimary = false
+				local isPrimary = stat:FindFirstChild('IsPrimary')
+				if isPrimary then
+					newStat.IsPrimary = true
+				end
+				newStat.AddId = StatAddId
+				StatAddId = StatAddId + 1
+				table.insert(GameStats, newStat)
+				table.sort(GameStats, sortLeaderStats)
+				if #GameStats == 1 then
+					setScrollListSize()
+					setEntryPositions()
+				end
+			end
+		end
+	end
+end
+
+local function removeStatFrameFromEntry(stat, frame)
+	local statFrame = frame:FindFirstChild(stat.Name)
+	if statFrame then
+		statFrame:Destroy()
+	end
+end
+
+local function doesStatExists(stat)
+	local doesExists = false
+	for _,entry in ipairs(PlayerEntries) do
+		local player = entry.Player
+		if player then
+			local leaderstats = player:FindFirstChild('leaderstats')
+			if leaderstats and leaderstats:FindFirstChild(stat.Name) then
+				doesExists = true
+				break
+			end
+		end
+	end
+
+	return doesExists
+end
+
+local function onStatRemoved(oldStat, entry)
+	if isValidStat(oldStat) then
+		removeStatFrameFromEntry(oldStat, entry.Frame)
+		local statExists = doesStatExists(oldStat)
+		--
+		local toRemove = nil
+		for i, stat in ipairs(GameStats) do
+			if stat.Name == oldStat.Name then
+				toRemove = i
+				break
+			end
+		end
+		-- removed from player but not from game; another player still has this stat
+		if statExists then
+			if toRemove and entry.Player == Player then
+				GameStats[toRemove].Text = "-"
+				Playerlist.OnStatChanged:Fire(GameStats[toRemove].Name, GameStats[toRemove].Text)
+			end
+			-- removed from game
+		else
+			for _,playerEntry in ipairs(PlayerEntries) do
+				removeStatFrameFromEntry(oldStat, playerEntry.Frame)
+			end
+			for _,teamEntry in ipairs(TeamEntries) do
+				removeStatFrameFromEntry(oldStat, teamEntry.Frame)
+			end
+			if toRemove then
+				table.remove(GameStats, toRemove)
+				table.sort(GameStats, sortLeaderStats)
+			end
+		end
+		if GameStats[1] then
+			updatePrimaryStats(GameStats[1].Name)
+		end
+		updateLeaderstatFrames()
+	end
+end
+
+local function onStatAdded(leaderstats, entry)
+	leaderstats.ChildAdded:Connect(function(newStat)
+		if isValidStat(newStat) then
+			addNewStats(newStat.Parent)
+			updateLeaderstatFrames()
+		end
+	end)
+	leaderstats.ChildRemoved:Connect(function(child)
+		onStatRemoved(child, entry)
+	end)
+	addNewStats(leaderstats)
+	updateLeaderstatFrames()
+end
+
+local function setLeaderStats(entry)
+	local player = entry.Player
+	local leaderstats = player:FindFirstChild('leaderstats')
+
+	if leaderstats then
+		onStatAdded(leaderstats, entry)
+	end
+
+	local function onPlayerChildChanged(property, child)
+		if property == 'Name' and child.Name == 'leaderstats' then
+			onStatAdded(child, entry)
+		end
+	end
+
+	player.ChildAdded:Connect(function(child)
+		if child.Name == 'leaderstats' then
+			onStatAdded(child, entry)
+		end
+		child.Changed:Connect(function(property) onPlayerChildChanged(property, child) end)
+	end)
+	for _,child in pairs(player:GetChildren()) do
+		child.Changed:Connect(function(property) onPlayerChildChanged(property, child) end)
+	end
+
+	player.ChildRemoved:Connect(function(child)
+		if child.Name == 'leaderstats' then
+			for i,stat in ipairs(child:GetChildren()) do
+				onStatRemoved(stat, entry)
+			end
+			updateLeaderstatFrames()
+		end
+	end)
+end
+
+local offsetSize = 18
+if isTenFootInterface then offsetSize = 32 end
+
+local function createPlayerEntry(player, isTopStat)
+	local playerEntry = {}
+	local name = player.Name
+
+	local containerFrame, entryFrame = createEntryFrame(name, PlayerEntrySizeY, isTopStat)
+	entryFrame.Active = true
+
+	entryFrame.MouseButton1Click:Connect(function()
+		onEntryFrameSelected(containerFrame, player)
+	end)
+
+	local currentXOffset = 1
+
+	-- check membership
+	local membershipIconImage = getMembershipIcon(player)
+	local membershipIcon = nil
+	if membershipIconImage then
+		membershipIcon = createImageIcon(membershipIconImage, "MembershipIcon", currentXOffset, entryFrame)
+		currentXOffset = currentXOffset + membershipIcon.Size.X.Offset + 2
+	else
+		currentXOffset = currentXOffset + offsetSize
+	end
+
+	task.spawn(function()
+		if isTenFootInterface and membershipIcon then
+			setAvatarIconAsync(player, membershipIcon)
+		end
+	end)
+
+	-- Some functions yield, so we need to spawn off in order to not cause a race condition with other events like PlayersService.ChildRemoved
+	task.spawn(function()
+		local success, result = pcall(function()
+			if game.CreatorType ~= Enum.CreatorType.Group then return false end
+			local rolesResult = GroupService:GetRolesInGroupAsync(player.UserId, game.CreatorId)
+			if not rolesResult.IsMember then return false end
+			for _, role in ipairs(rolesResult.Roles or {}) do
+				if role.Rank >= 255 then return true end
+			end
+			return false
+		end)
+		if success then
+			if game.CreatorType == Enum.CreatorType.Group and result then
+				membershipIconImage = PLACE_OWNER_ICON
+				if not membershipIcon then
+					membershipIcon = createImageIcon(membershipIconImage, "MembershipIcon", 1, entryFrame)
+				else
+					membershipIcon.Image = membershipIconImage
+				end
+			end
+		else
+			print("PlayerList: GetRankInGroup failed because", result)
+		end
+		local iconImage = getCustomPlayerIcon(player)
+		if iconImage then
+			if not membershipIcon then
+				membershipIcon = createImageIcon(iconImage, "MembershipIcon", 1, entryFrame)
+			else
+				membershipIcon.Image = iconImage
+			end
+		end
+		-- Friendship and Follower status is checked by onFriendshipChanged, which is called by the FriendStatusChanged
+		-- event. This event is fired when any player joins the game. onFriendshipChanged will check Follower status in
+		-- the case that we are not friends with the new player who is joining.
+	end)
+
+	local playerNameXSize = entryFrame.Size.X.Offset - currentXOffset
+	local playerName = createEntryNameText("PlayerName", name, playerNameXSize, currentXOffset)
+	playerName.Parent = entryFrame
+	playerEntry.Player = player
+	playerEntry.Frame = containerFrame
+
+	if isTenFootInterface then
+		local shadow = Instance.new("ImageLabel")
+		shadow.BackgroundTransparency = 1
+		shadow.Name = 'Shadow'
+		shadow.Image = SHADOW_IMAGE
+		shadow.Position = UDim2.new(0, -SHADOW_SLICE_SIZE, 0, 0)
+		shadow.Size = UDim2.new(1, SHADOW_SLICE_SIZE*2, 1, SHADOW_SLICE_SIZE)
+		shadow.ScaleType = Enum.ScaleType.Slice
+		shadow.SliceCenter = SHADOW_SLICE_RECT
+		shadow.Parent = entryFrame
+	end
+
+	if isTopStat then
+		playerName.Font = Enum.Font.SourceSansBold
+	end
+
+	return playerEntry
+end
+
+local function createTeamEntry(team)
+	local teamEntry = {}
+	teamEntry.Team = team
+	teamEntry.TeamScore = 0
+
+	local containerFrame, entryFrame = createEntryFrame(team.Name, TeamEntrySizeY)
+	entryFrame.Selectable = false	-- dont allow gamepad selection of team frames
+	entryFrame.BackgroundColor3 = team.TeamColor.Color
+
+	local teamName = createEntryNameText("TeamName", team.Name, entryFrame.AbsoluteSize.X, 1)
+	teamName.Parent = entryFrame
+
+	teamEntry.Frame = containerFrame
+
+	if isTenFootInterface then
+		local shadow = Instance.new("ImageLabel")
+		shadow.BackgroundTransparency = 1
+		shadow.Name = 'Shadow'
+		shadow.Image = SHADOW_IMAGE
+		shadow.Position = UDim2.new(0, -SHADOW_SLICE_SIZE, 0, 0)
+		shadow.Size = UDim2.new(1, SHADOW_SLICE_SIZE*2, 1, SHADOW_SLICE_SIZE)
+		shadow.ScaleType = Enum.ScaleType.Slice
+		shadow.SliceCenter = SHADOW_SLICE_RECT
+		shadow.Parent = entryFrame
+	end
+
+	-- connections
+	team.Changed:Connect(function(property)
+		if property == 'Name' then
+			teamName.Text = team.Name
+		elseif property == 'TeamColor' then
+			for _,childFrame in pairs(containerFrame:GetChildren()) do
+				if childFrame:IsA('GuiObject') then
+					childFrame.BackgroundColor3 = team.TeamColor.Color
+				end
+			end
+
+			setTeamEntryPositions()
+			updateAllTeamScores()
+			setEntryPositions()
+			setScrollListSize()
+		end
+	end)
+
+	return teamEntry
+end
+
+local function createNeutralTeam()
+	if not NeutralTeam then
+		local team = Instance.new('Team')
+		team.Name = 'Neutral'
+		team.TeamColor = BrickColor.new('White')
+		NeutralTeam = createTeamEntry(team)
+		NeutralTeam.Frame.Parent = ScrollList
+	end
+end
+
+--[[ Insert/Remove Player Functions ]]--
+local function setupEntry(player, newEntry, isTopStat)
+	setLeaderStats(newEntry)
+
+	if isTopStat then
+		newEntry.Frame.Parent = Container
+		table.insert(PlayerEntries, newEntry)
+	else
+		newEntry.Frame.Parent = ScrollList
+		table.insert(PlayerEntries, newEntry)
+		setScrollListSize()
+	end
+
+	updateLeaderstatFrames()
+
+	player.Changed:Connect(function(property)
+		if #TeamEntries > 0 and (property == 'Neutral' or property == 'TeamColor') then
+			setTeamEntryPositions()
+			updateAllTeamScores()
+			setEntryPositions()
+			setScrollListSize()
+		end
+	end)
+end
+
+local function insertPlayerEntry(player)
+	local entry = createPlayerEntry(player)
+	setupEntry(player, entry)
+
+	-- create an entry on the top of the playerlist
+	if player == Player and isTenFootInterface then
+		local localEntry = createPlayerEntry(player, true)
+		MyPlayerEntryTopFrame = localEntry.Frame
+		MyPlayerEntryTopFrame.BackgroundTransparency = 1
+		MyPlayerEntryTopFrame.BorderSizePixel = 0
+		setupEntry(player, localEntry, true)
+	end
+end
+
+local function removePlayerEntry(player)
+	for i = 1, #PlayerEntries do
+		if PlayerEntries[i].Player == player then
+			PlayerEntries[i].Frame:Destroy()
+			table.remove(PlayerEntries, i)
+			break
+		end
+	end
+	setEntryPositions()
+	setScrollListSize()
+end
+
+--[[ Team Functions ]]--
+local function onTeamAdded(team)
+	for i = 1, #TeamEntries do
+		if TeamEntries[i].Team.TeamColor == team.TeamColor then
+			TeamEntries[i].Frame:Destroy()
+			table.remove(TeamEntries, i)
+			break
+		end
+	end
+	local entry = createTeamEntry(team)
+	entry.Id = TeamAddId
+	TeamAddId = TeamAddId + 1
+	if not NeutralTeam then
+		createNeutralTeam()
+	end
+	table.insert(TeamEntries, entry)
+	table.sort(TeamEntries, sortTeams)
+	setTeamEntryPositions()
+	updateLeaderstatFrames()
+	setScrollListSize()
+	entry.Frame.Parent = ScrollList
+end
+
+local function onTeamRemoved(removedTeam)
+	for i = 1, #TeamEntries do
+		local team = TeamEntries[i].Team
+		if team.Name == removedTeam.Name then
+			TeamEntries[i].Frame:Destroy()
+			table.remove(TeamEntries, i)
+			break
+		end
+	end
+	if #TeamEntries == 0 then
+		if NeutralTeam then
+			NeutralTeam.Frame:Destroy()
+			NeutralTeam.Team:Destroy()
+			NeutralTeam = nil
+			IsShowingNeutralFrame = false
+		end
+	end
+	setEntryPositions()
+	updateLeaderstatFrames()
+	setScrollListSize()
+end
+
+--[[ Resize/Position Functions ]]--
+local function clampCanvasPosition()
+	local maxCanvasPosition = ScrollList.CanvasSize.Y.Offset - ScrollList.Size.Y.Offset
+	if maxCanvasPosition >= 0 and ScrollList.CanvasPosition.Y > maxCanvasPosition then
+		ScrollList.CanvasPosition = Vector2.new(0, maxCanvasPosition)
+	end
+end
+
+local function resizePlayerList()
+	setScrollListSize()
+	clampCanvasPosition()
+end
+
+RobloxGui.Changed:Connect(function(property)
+	if property == 'AbsoluteSize' then
+		task.spawn(function()	-- must spawn because F11 delays when abs size is set
+			resizePlayerList()
+		end)
+	end
+end)
+
+UserInputService.InputBegan:Connect(function(inputObject, isProcessed)
+	if isProcessed then return end
+	local inputType = inputObject.UserInputType
+	if (inputType == Enum.UserInputType.Touch and  inputObject.UserInputState == Enum.UserInputState.Begin) or
+		inputType == Enum.UserInputType.MouseButton1 then
+		if LastSelectedFrame then
+			playerDropDown:Hide()
+		end
+	end
+end)
+
+-- NOTE: Core script only
+
+--[[ Player Add/Remove Connections ]]--
+PlayersService.PlayerAdded:Connect(insertPlayerEntry)
+for _,player in pairs(PlayersService:GetPlayers()) do
+	insertPlayerEntry(player)
+end
+
+--[[ Followers ]]
+-- The 2016 RobloxReplicatedStorage follower remotes were private CoreScript
+-- infrastructure and are no longer available to experience scripts.
+-- Friend icons still update through the supported friendship events above.
+
+PlayersService.PlayerRemoving:Connect(function(child)
+	if child:IsA('Player') then
+		if LastSelectedPlayer and child == LastSelectedPlayer then
+			playerDropDown:Hide()
+		end
+		removePlayerEntry(child)
+	end
+end)
+
+--[[ Teams ]]--
+local function initializeTeams(teams)
+	for _,team in pairs(teams:GetTeams()) do
+		onTeamAdded(team)
+	end
+
+	teams.ChildAdded:Connect(function(team)
+		if team:IsA("Team") then
+			onTeamAdded(team)
+		end
+	end)
+
+	teams.ChildRemoved:Connect(function(team)
+		if team:IsA("Team") then
+			onTeamRemoved(team)
+		end
+	end)
+end
+
+initializeTeams(TeamsService)
+
+--[[ Public API ]]--
+Playerlist.GetStats = function()
+	return GameStats
+end
+
+local noOpFunc = function ( )
+end
+
+local isOpen = not isTenFootInterface
+
+local closeListFunc = function(name, state, input)
+	if state ~= Enum.UserInputState.Begin then return end
+
+	isOpen = false
+	Container.Visible = false
+	ContextActionService:UnbindAction("CloseList")
+	ContextActionService:UnbindAction("StopAction")
+	GuiService.SelectedObject = nil
+	UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None
+end
+
+local setVisible = function(state, fromTemp)
+	Container.Visible = state
+
+	if state then
+		local children = ScrollList:GetChildren()
+		if children and #children > 0 then
+			local frame = children[1]
+			local frameChildren = frame:GetChildren()
+			for i = 1, #frameChildren do
+				if frameChildren[i]:IsA("TextButton") then
+					local lastInputType = UserInputService:GetLastInputType()
+					local isUsingGamepad = (lastInputType == Enum.UserInputType.Gamepad1 or lastInputType == Enum.UserInputType.Gamepad2 or
+						lastInputType == Enum.UserInputType.Gamepad3 or lastInputType == Enum.UserInputType.Gamepad4)
+
+					if isUsingGamepad and not fromTemp then
+						GuiService.SelectedObject = frameChildren[i]
+						GuiService:Select(ScrollList)
+						UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
+						ContextActionService:BindAction("StopAction", noOpFunc, false, Enum.UserInputType.Gamepad1)
+						ContextActionService:BindAction("CloseList", closeListFunc, false, Enum.KeyCode.ButtonB, Enum.KeyCode.ButtonStart)
+					end
+					break
+				end
+			end
+		end
+	else
+		UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None
+
+		ContextActionService:UnbindAction("CloseList")
+		ContextActionService:UnbindAction("StopAction")
+
+		if GuiService.SelectedObject and GuiService.SelectedObject:IsDescendantOf(Container) then
+			GuiService.SelectedObject = nil
+		end
+	end
+end
+
+Playerlist.ToggleVisibility = function(name, inputState, inputObject)
+	if inputState and inputState ~= Enum.UserInputState.Begin then return end
+	if IsSmallScreenDevice then return end
+	if not playerlistCoreGuiEnabled then return end
+
+	isOpen = not isOpen
+
+	if next(TempHideKeys) == nil then
+		setVisible(isOpen)
+	end
+end
+
+Playerlist.IsOpen = function()
+	return isOpen
+end
+
+Playerlist.HideTemp = function(self, key, hidden)
+	if not playerlistCoreGuiEnabled then return end
+	if IsSmallScreenDevice then return end
+
+	TempHideKeys[key] = hidden and true or nil
+
+	if next(TempHideKeys) == nil then
+		if isOpen then
+			setVisible(true, true)
+		end
+	else
+		if isOpen then
+			setVisible(false, true)
+		end
+	end
+end
+local topStat = nil
+if isTenFootInterface and TenFootInterface and type(TenFootInterface.SetupTopStat) == "function" then
+	local ok, result = pcall(function() return TenFootInterface:SetupTopStat() end)
+	if ok then topStat = result end
+end
+
+--[[ Core Gui Changed events ]]--
+-- NOTE: Core script only
+local function onCoreGuiChanged(coreGuiType, enabled)
+	if coreGuiType == Enum.CoreGuiType.All or coreGuiType == Enum.CoreGuiType.PlayerList then
+		-- on console we can always toggle on/off, ignore change
+		if isTenFootInterface then
+			playerlistCoreGuiEnabled = true
+			return
+		end
+
+		playerlistCoreGuiEnabled = enabled and topbarEnabled
+
+		-- not visible on small screen devices
+		if IsSmallScreenDevice then
+			Container.Visible = false
+			return
+		end
+
+		setVisible(playerlistCoreGuiEnabled and isOpen and next(TempHideKeys) == nil, true)
+
+		if isTenFootInterface and topStat then
+			topStat:SetTopStatEnabled(playerlistCoreGuiEnabled)
+		end
+
+		if playerlistCoreGuiEnabled then
+			ContextActionService:BindAction("RbxPlayerListToggle", Playerlist.ToggleVisibility, false, Enum.KeyCode.Tab)
+		else
+			ContextActionService:UnbindAction("RbxPlayerListToggle")
+		end
+	end
+end
+
+Playerlist.TopbarEnabledChanged = function(enabled)
+	topbarEnabled = enabled
+	-- Update coregui to reflect new topbar status
+	onCoreGuiChanged(Enum.CoreGuiType.PlayerList, StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType.PlayerList))
+end
+
+onCoreGuiChanged(Enum.CoreGuiType.PlayerList, StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType.PlayerList))
+-- CoreGuiChangedSignal is no longer a public experience-script event.
+
+resizePlayerList()
+
+local blockStatusChanged = function(userId, isBlocked)
+	if userId < 0 then return end
+
+	for _,playerEntry in ipairs(PlayerEntries) do
+		if playerEntry.Player.UserId == userId then
+			playerEntry.Frame.BGFrame.MembershipIcon.Image = getMembershipIcon(playerEntry.Player)
+			return
+		end
+	end
+end
+
+blockingUtility:GetBlockedStatusChangedEvent():Connect(blockStatusChanged)
+
+return Playerlist
+
+end;
+};
 G2L_MODULES[G2L["c"]] = {
 Closure = function()
     local script = G2L["c"];--[[
@@ -8885,29 +8885,20 @@ local function CreateDropDown(dropDownStringTable, startPosition, settingsHub)
 	local active = false
 	local hideDropDownSelection = function(name, inputState)
 		if name ~= nil and inputState ~= Enum.UserInputState.Begin then return end
+		this.DropDownFrame.Selectable = interactable
 
-		-- Do the critical recovery first. Nothing below is allowed to leave the hub frozen.
-		DropDownFullscreenFrame.Visible = false
-		active = false
-		pcall(function() ContextActionService:UnbindAction(guid .. "Action") end)
-		pcall(function() ContextActionService:UnbindAction(guid .. "FreezeAction") end)
-		pcall(function() settingsHub:SetActive(true) end)
-
-		pcall(function()
-			this.DropDownFrame.Selectable = interactable
-			dropDownButtonEnabled.Value = interactable
-		end)
-
-		pcall(function()
-			if usesSelectedObject() then
-				GuiService.SelectedObject = lastSelectedObject
-			end
-		end)
-
-		if guiServiceChangeCon then
-			pcall(function() guiServiceChangeCon:disconnect() end)
-			guiServiceChangeCon = nil
+		if DropDownFullscreenFrame.Visible and usesSelectedObject() then
+			GuiService.SelectedObject = lastSelectedObject
 		end
+		DropDownFullscreenFrame.Visible = false
+		if guiServiceChangeCon then guiServiceChangeCon:disconnect() end
+		ContextActionService:UnbindAction(guid .. "Action")
+		ContextActionService:UnbindAction(guid .. "FreezeAction")
+
+		settingsHub:SetActive(true)
+
+		dropDownButtonEnabled.Value = interactable
+		active = false
 	end
 	local noOpFunc = function() end
 
@@ -8935,13 +8926,10 @@ local function CreateDropDown(dropDownStringTable, startPosition, settingsHub)
 				end
 			end)
 		--]]
-		-- Old CoreGui code froze all keyboard/gamepad input and deactivated the hub.
-		-- In a PlayerGui recreation that can leave the menu permanently unresponsive
-		-- if any legacy dropdown callback fails. Keep only the explicit close action.
-		ContextActionService:UnbindAction(guid .. "FreezeAction")
+		ContextActionService:BindAction(guid .. "FreezeAction", noOpFunc, false, Enum.UserInputType.Keyboard, Enum.UserInputType.Gamepad1)
 		ContextActionService:BindAction(guid .. "Action", hideDropDownSelection, false, Enum.KeyCode.ButtonB, Enum.KeyCode.Escape)
 
-		pcall(function() settingsHub:SetActive(true) end)
+		settingsHub:SetActive(false)
 
 		dropDownButtonEnabled.Value = false
 	end
@@ -9160,17 +9148,6 @@ local function CreateDropDown(dropDownStringTable, startPosition, settingsHub)
 			hideDropDownSelection()
 		end
 	end)
-
-	-- DropDowns bind guid .. "FreezeAction". Always remove it when the hub closes.
-	if settingsHub.SettingsShowSignal then
-		pcall(function()
-			settingsHub.SettingsShowSignal:connect(function(visible)
-				if not visible then
-					hideDropDownSelection()
-				end
-			end)
-		end)
-	end
 
 	UserInputService.InputBegan:connect(processInput)
 	UserInputService.InputEnded:connect(processInput)
@@ -10519,6 +10496,27 @@ local function CreateSettingsHub()
 		end
 	end
 
+	local function enforceConfirmationPageState()
+		local isConfirmationPage =
+			this.Pages.CurrentPage == this.LeaveGamePage
+			or this.Pages.CurrentPage == this.ResetCharacterPage
+
+		if isConfirmationPage then
+			this.HubBar.Visible = false
+			if this.BottomButtonFrame then
+				this.BottomButtonFrame.Visible = false
+			end
+
+			-- Make sure the bottom hotkeys cannot fire while the confirmation
+			-- shield/page is active.
+			for _, hotKeyTable in pairs(this.BottomBarButtons) do
+				ContextActionService:UnbindAction(hotKeyTable[1])
+			end
+		end
+
+		return isConfirmationPage
+	end
+
 	local function addBottomBarButton(name, text, gamepadImage, keyboardImage, position, clickFunc, hotkeys)
 		local buttonName = name .. "Button"
 		local textName = name .. "Text"
@@ -10738,6 +10736,12 @@ local function CreateSettingsHub()
 				this.HubBar.Visible = false
 				removeBottomBarBindings()
 				this:SwitchToPage(this.LeaveGamePage, nil, 1, true)
+
+				-- Mobile can re-apply bottom bar state one frame later.
+				enforceConfirmationPageState()
+				task.defer(function()
+					enforceConfirmationPageState()
+				end)
 			end
 
 			local resetCharFunc = function()
@@ -10745,6 +10749,12 @@ local function CreateSettingsHub()
 				this.HubBar.Visible = false
 				removeBottomBarBindings()
 				this:SwitchToPage(this.ResetCharacterPage, nil, 1, true)
+
+				-- Mobile can re-apply bottom bar state one frame later.
+				enforceConfirmationPageState()
+				task.defer(function()
+					enforceConfirmationPageState()
+				end)
 			end
 
 			-- Xbox Only
@@ -11128,14 +11138,28 @@ local function CreateSettingsHub()
 		end
 
 		if this.BottomButtonFrame then
-			this.BottomButtonFrame.Visible = (pageToSwitchTo ~= this.ResetCharacterPage and pageToSwitchTo ~= this.LeaveGamePage)
-			this.HubBar.Visible = this.BottomButtonFrame.Visible
+			local isConfirmationPage =
+				pageToSwitchTo == this.ResetCharacterPage
+				or pageToSwitchTo == this.LeaveGamePage
+
+			this.BottomButtonFrame.Visible = not isConfirmationPage
+			this.HubBar.Visible = not isConfirmationPage
+
+			if isConfirmationPage then
+				removeBottomBarBindings()
+			end
 		end
 
 		-- make sure page is visible
 		this.Pages.CurrentPage = pageToSwitchTo
 		this.Pages.CurrentPage:Display(this.PageView, skipAnimation)
 		this.Pages.CurrentPage.Active = true
+
+		if enforceConfirmationPageState() then
+			task.defer(function()
+				enforceConfirmationPageState()
+			end)
+		end
 
 		local pageSize = this.Pages.CurrentPage:GetSize()
 		this.PageView.CanvasSize = UDim2.new(0,pageSize.X,0,pageSize.Y)
@@ -11176,36 +11200,13 @@ local function CreateSettingsHub()
 		end)
 	end
 
-	-- Compatibility cleanup for the old 2016 SettingsHub.
-	-- Some games can error while closing and leave input-blocking actions bound.
-	local function forceReleaseSettingsInput()
-		pcall(function() ContextActionService:UnbindAction("RbxSettingsHubSwitchTab") end)
-		pcall(function() ContextActionService:UnbindAction("RbxSettingsHubStopCharacter") end)
-		pcall(function() ContextActionService:UnbindAction("RbxSettingsScrollHotkey") end)
-		pcall(function() removeBottomBarBindings(0) end)
-		pcall(function() GuiService:SetMenuIsOpen(false) end)
-		pcall(function() GuiService.SelectedObject = nil end)
-		pcall(function() UserInputService.OverrideMouseIconEnabled = false end)
-		pcall(function() UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None end)
-		pcall(function() PlatformService.BlurIntensity = 0 end)
-		if lastInputChangedCon then
-			pcall(function() lastInputChangedCon:disconnect() end)
-			lastInputChangedCon = nil
-		end
-	end
-
 	function setVisibilityInternal(visible, noAnimation, customStartPage)
 		this.OpenStateChangedCount = this.OpenStateChangedCount + 1
 		local switchedFromGamepadInput = switchedFromGamepadInput or isTenFootInterface
 		this.Visible = visible
 
-		-- Never allow an old dropdown/page to leave the recreated hub inactive.
-		this:SetActive(true)
 
-		-- This recreation lives in PlayerGui, not Roblox's internal CoreGui.
-		-- Modal input capture can wedge controls/menu focus in modern experiences.
-		this.Modal.Visible = false
-		pcall(function() this.Modal.Modal = false end)
+		this.Modal.Visible = this.Visible
 
 		if this.TabConnection then
 			this.TabConnection:disconnect()
@@ -11215,7 +11216,7 @@ local function CreateSettingsHub()
 		if this.Visible then
 			this.SettingsShowSignal:fire(this.Visible)
 
-			-- Do not claim Roblox's internal menu-open state from a PlayerGui clone.
+			pcall(function() GuiService:SetMenuIsOpen(true) end)
 			this.Shield.Visible = this.Visible
 			if noAnimation then
 				this.Shield.Position = SETTINGS_SHIELD_ACTIVE_POSITION
@@ -11223,9 +11224,17 @@ local function CreateSettingsHub()
 				this.Shield:TweenPosition(SETTINGS_SHIELD_ACTIVE_POSITION, Enum.EasingDirection.InOut, Enum.EasingStyle.Quart, 0.5, true)
 			end
 
-			-- PlayerGui compatibility: do not sink character/keyboard/gamepad input.
-			-- The full-screen settings Shield already captures mouse/touch clicks.
-			ContextActionService:UnbindAction("RbxSettingsHubStopCharacter")
+			local noOpFunc = function() end
+			ContextActionService:BindAction("RbxSettingsHubStopCharacter", noOpFunc, false,
+				Enum.PlayerActions.CharacterForward, 
+				Enum.PlayerActions.CharacterBackward, 
+				Enum.PlayerActions.CharacterLeft,
+				Enum.PlayerActions.CharacterRight,
+				Enum.PlayerActions.CharacterJump, 
+				Enum.KeyCode.LeftShift,
+				Enum.KeyCode.RightShift,
+				Enum.KeyCode.Tab,
+				Enum.UserInputType.Gamepad1, Enum.UserInputType.Gamepad2, Enum.UserInputType.Gamepad3, Enum.UserInputType.Gamepad4)
 
 			ContextActionService:BindAction("RbxSettingsHubSwitchTab", switchTabFromBumpers, false, Enum.KeyCode.ButtonR1, Enum.KeyCode.ButtonL1)
 			ContextActionService:BindAction("RbxSettingsScrollHotkey", scrollHotkeyFunc, false, Enum.KeyCode.PageUp, Enum.KeyCode.PageDown)
@@ -11272,9 +11281,6 @@ local function CreateSettingsHub()
 				backpack:OpenClose()
 			end
 		else
-			-- Release controls BEFORE any fragile legacy cleanup runs.
-			forceReleaseSettingsInput()
-
 			pcall(function() UserInputService.OverrideMouseIconEnabled = false end)
 
 			if noAnimation then
@@ -11294,17 +11300,17 @@ local function CreateSettingsHub()
 				lastInputChangedCon:disconnect()
 			end
 
-			pcall(function() playerList:HideTemp('SettingsMenu', false) end)
+			playerList:HideTemp('SettingsMenu', false)
 
 			if chatWasVisible then
-				pcall(function() chat:ToggleVisibility() end)
+				chat:ToggleVisibility()
 				chatWasVisible = false
 			end
 
 			pcall(function() UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None end)
 			pcall(function() PlatformService.BlurIntensity = 0 end)
 
-			pcall(clearMenuStack)
+			clearMenuStack()
 			ContextActionService:UnbindAction("RbxSettingsHubSwitchTab") 
 			ContextActionService:UnbindAction("RbxSettingsHubStopCharacter")
 			ContextActionService:UnbindAction("RbxSettingsScrollHotkey")
@@ -11345,6 +11351,15 @@ local function CreateSettingsHub()
 
 			table.remove(this.MenuStack, #this.MenuStack)
 			this:SwitchToPage(this.MenuStack[#this.MenuStack], true, 1, skipAnimation)
+
+			-- Returning from Leave/Reset should restore the normal menu controls.
+			if this.Pages.CurrentPage ~= this.LeaveGamePage
+				and this.Pages.CurrentPage ~= this.ResetCharacterPage then
+				this.HubBar.Visible = true
+				if this.BottomButtonFrame then
+					this.BottomButtonFrame.Visible = true
+				end
+			end
 			if #this.MenuStack == 0 then
 				this:SetVisibility(false)
 				this.Pages.CurrentPage:Hide(0, 0)
@@ -11386,13 +11401,13 @@ local function CreateSettingsHub()
 	if not isTenFootInterface then
 		this.ReportAbusePage = require(RobloxGui.Modules.Settings.Pages.ReportAbuseMenu)
 		this.ReportAbusePage:SetHub(this)
-		
+
 		this.HelpPage = require(RobloxGui.Modules.Settings.Pages.Help)
 		this.HelpPage:SetHub(this)
-		
+
 		this.RecordPage = require(RobloxGui.Modules.Settings.Pages.Record)
 		this.RecordPage:SetHub(this)
-		
+
 		if useUserList then
 			this.PlayersPage = require(RobloxGui.Modules.Settings.Pages.Players)
 			this.PlayersPage:SetHub(this)
@@ -16612,35 +16627,11 @@ local script = G2L["3"];
 					end)
 				end
 			else
-				-- Kill any orphaned 2016 dropdown overlay before doing anything else.
-				pcall(function()
-					local rg = G2L["1"]
-					if rg then
-						for _, obj in ipairs(rg:GetDescendants()) do
-							if obj.Name == "DropDownFullscreenFrame" and obj:IsA("GuiObject") then
-								obj.Visible = false
-							end
-						end
-					end
-				end)
-				pcall(function()
-					if type(instance.SetActive) == "function" then instance:SetActive(true) end
-				end)
-
 				if type(instance.HideBar) == "function" then
 					pcall(function()
 						instance:HideBar()
 					end)
 				end
-
-				-- If the old close path failed, don't leave the player controls captured.
-				pcall(function() ContextActionService:UnbindAction("RbxSettingsHubSwitchTab") end)
-				pcall(function() ContextActionService:UnbindAction("RbxSettingsHubStopCharacter") end)
-				pcall(function() ContextActionService:UnbindAction("RbxSettingsScrollHotkey") end)
-				pcall(function() GuiService:SetMenuIsOpen(false) end)
-				pcall(function() GuiService.SelectedObject = nil end)
-				pcall(function() UserInputService.OverrideMouseIconEnabled = false end)
-				pcall(function() UserInputService.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None end)
 			end
 	
 			-- Keep the old SettingsShowSignal consumers synchronized.
