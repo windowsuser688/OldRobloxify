@@ -210,28 +210,191 @@ task.defer(function()
 	hideNativeSettingsMenu()
 end)
 
--- ChatBubble.client.lua
--- Place this single LocalScript in StarterPlayer > StarterPlayerScripts.
--- Custom bubble renderer driven by TextChatService.
+local ChatToggle = (function()
+local v1={};
+local v2=game:GetService("Players");
+local v_u_3=game:GetService("UserInputService");
+local v_u_4=game:GetService("StarterGui");
+local v_u_5=game:GetService("RunService");
+local v_u_6=v2.LocalPlayer;
 
-local Players = game:GetService("Players")
-local TextChatService = game:GetService("TextChatService")
-local TextService = game:GetService("TextService")
-local TweenService = game:GetService("TweenService")
-local Debris = game:GetService("Debris")
-local RunService = game:GetService("RunService")
+local _chatActive = false
 
-local LocalPlayer = Players.LocalPlayer
-
--- We draw our own bubbles, so prevent Roblox's stock bubble renderer from
--- drawing a second bubble for the same TextChatService message.
-local BubbleChatConfiguration = TextChatService:FindFirstChildOfClass("BubbleChatConfiguration")
-	or TextChatService:FindFirstChild("BubbleChatConfiguration")
-if BubbleChatConfiguration then
-	BubbleChatConfiguration.Enabled = false
+function v_u_10(p_u_7,...)
+	local v_u_8={...};
+	if p_u_7 == "GetCore" and v_u_8[1] == "ChatActive" then
+		return true, _chatActive
+	end
+	if p_u_7 == "SetCore" and v_u_8[1] == "ChatActive" then
+		_chatActive = v_u_8[2]
+		return true
+	end
+	return pcall(function()
+		local v9=v_u_8;
+		return v_u_4[p_u_7](v_u_4,table.unpack(v9));
+	end);
 end
 
-local MAX_BUBBLE_WIDTH = 400
+function v_u_13()
+	local v11=workspace.CurrentCamera or workspace:WaitForChild("CurrentCamera");
+	local v12=v11.ViewportSize;
+	if((v12.X==0)or(v12.Y==0))then
+		v_u_5.RenderStepped:Wait();
+		v12=v11.ViewportSize;
+		if((v12.X==0)or(v12.Y==0))then
+			v12=Vector2.new(1024,768);
+		end
+	end
+	return v12;
+end
+
+v1.init=function(p_u_14,obj)
+	local v15=v_u_13();
+	local v16=((v15.X<800)and true)or(v15.Y<600);
+	local v_u_17=v_u_3.TouchEnabled;
+	if v_u_17 then
+		v_u_17=not v_u_3.KeyboardEnabled or v16;
+	end
+	local v_u_18=obj;
+	if not v_u_18 then
+		v_u_18=v_u_6:FindFirstChildOfClass("PlayerGui")or v_u_6:WaitForChild("PlayerGui");
+		v_u_18=v_u_18:FindFirstChild("ZenosChat");
+	end
+	local v_u_19=0;
+	local v_u_20=false;
+	local v21=nil;
+	local v_u_22={};
+
+	function v_u_28(p23)
+		local v24=v_u_18 and v_u_18:FindFirstChild("appLayout");
+		if v24 then
+			v24.Visible=p23;
+			if(p_u_14 and p23)then
+				if p_u_14.isFadedOut then
+					local v25=p_u_14.cancelFade;
+					if(type(v25)=="function")then
+						p_u_14:cancelFade();
+					end
+				else
+					local v26=p_u_14.fadeIn;
+					if(type(v26)=="function")then
+						p_u_14:fadeIn();
+					end
+				end
+			end
+			if(not p23 and v_u_17)then
+				local v27=v24:FindFirstChild("MainFrame")and v24.MainFrame:FindFirstChild("InputBar");
+				if v27 then
+					v27=v24.MainFrame.InputBar:FindFirstChild("InputBox");
+				end
+				if v27 then
+					v27:ReleaseFocus();
+				end
+			end
+			if _G.setChatImmediate then
+				_G.setChatImmediate(not p23);
+			end
+			v_u_20=p23;
+			if p23 then
+				v_u_19=0;
+			end
+		end
+	end
+
+	function v30()
+		if not v_u_20 then
+			local v29=v_u_19+1;
+			v_u_19=math.min(v29,99);
+		end
+	end
+
+	if v21 then
+		task.cancel(v21);
+	end
+
+	local v_u_33=task.spawn(function()
+		while true do
+			local v31,v32=v_u_10("GetCore","ChatActive");
+			if(v31 and(type(v32)=="boolean")and(v32~=v_u_20))then
+				v_u_28(v32);
+			end
+			task.wait(0.05);
+		end
+	end);
+
+	local v36=v_u_3.InputBegan:Connect(function(p34,p35)
+		if not p35 then
+			if((p34.KeyCode==Enum.KeyCode.Slash)and not v_u_20)then
+				v_u_10("SetCore","ChatActive",true);
+			end
+		end
+	end);
+
+	table.insert(v_u_22,v36);
+
+	task.spawn(function()
+		local v37=0;
+		local v38=nil;
+		while true do
+			v38=(v37>=10)or(v_u_18 and v_u_18:FindFirstChild("appLayout"));
+			if v38 then
+				break;
+			end
+			task.wait(0.1);
+			v37=v37+0.1;
+		end
+		if v38 then
+			local v39=v_u_18 and v_u_18:FindFirstChild("appLayout");
+			if v39 then
+				v39.Visible=true;
+				if p_u_14 then
+					if p_u_14.isFadedOut then
+						local v40=p_u_14.cancelFade;
+						if(type(v40)=="function")then
+							p_u_14:cancelFade();
+						end
+					else
+						local v41=p_u_14.fadeIn;
+						if(type(v41)=="function")then
+							p_u_14:fadeIn();
+						end
+					end
+				end
+				if _G.setChatImmediate then
+					_G.setChatImmediate(false);
+				end
+				v_u_20=true;
+				v_u_19=0;
+			end
+			v_u_10("SetCore","ChatActive",true);
+		else
+			warn("oof");
+		end
+	end);
+
+	return function()
+		if v_u_33 then
+			task.cancel(v_u_33);
+			v_u_33=nil;
+		end
+		for _,v42 in ipairs(v_u_22)do
+			v42:Disconnect();
+		end
+		table.clear(v_u_22);
+	end,v30;
+end;
+
+return v1;
+end)()
+
+local BubbleChat = (function()
+local Players = game:GetService("Players")
+local TextService = game:GetService("TextService")
+local Debris = game:GetService("Debris")
+local TweenService = game:GetService("TweenService")
+
+local MAX_BUBBLE_WIDTH = 360
+local BUBBLE_HEIGHT_TEXT_SIZE = 20 -- preserve the shorter classic bubble height
 local MAX_TOTAL_BUBBLE_HEIGHT = 150
 local NEAR_BUBBLE_DISTANCE = 45
 local MAX_BUBBLE_DISTANCE = 80
@@ -240,16 +403,8 @@ local MAX_BUBBLE_LIFETIME = 20
 local MIN_BUBBLE_LIFETIME_SELF = 8
 local MAX_BUBBLE_LIFETIME_SELF = 15
 local BUBBLE_FADE_TIME = 1.5
-local MAX_CHAT_MESSAGE_LENGTH = 128
-local ELLIPSES = "..."
 
-local RESIZE_TWEEN_INFO = TweenInfo.new(0.1, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-local SHIFT_TWEEN_INFO = TweenInfo.new(0.07, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
-
-local bubbleQueues = {}
-local seenMessageIds = {}
-
-local function decodeRichTextEscapes(message)
+local function convertRichTextEscapeStrings(message: string): string
 	message = string.gsub(message, "&lt;", "<")
 	message = string.gsub(message, "&gt;", ">")
 	message = string.gsub(message, "&quot;", "\"")
@@ -258,139 +413,73 @@ local function decodeRichTextEscapes(message)
 	return message
 end
 
-local function messageLength(message)
+local function getMessageLength(message: string): number
 	return utf8.len(utf8.nfcnormalize(message)) or 0
 end
 
-local function truncateMessage(message)
-	local limit = MAX_CHAT_MESSAGE_LENGTH - messageLength(ELLIPSES)
-	if messageLength(message) <= MAX_CHAT_MESSAGE_LENGTH then
-		return message
-	end
+local ELLIPSES = "..."
+local MaxChatMessageLength = 128
+local MaxChatMessageLengthExclusive = MaxChatMessageLength - getMessageLength(ELLIPSES) - 1
 
-	local ok, result = pcall(function()
-		local endByte = utf8.offset(message, limit + 1)
-		if endByte then
-			return string.sub(message, 1, endByte - 1) .. ELLIPSES
-		end
-		return message
-	end)
-	return ok and result or message
+local resizeBubbleTweenInfo = TweenInfo.new(.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local shiftBubblesUpTweenInfo = TweenInfo.new(.07, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+
+local BubbleChat = {}
+local chatBubbleQueues = {}
+
+local function lerpLength(msg: string, min: number, max: number): number
+	return min + (max - min) * math.min(getMessageLength(msg) / 75.0, 1.0)
 end
 
-local function lerpLifetime(message, minimum, maximum)
-	return minimum + (maximum - minimum) * math.min(messageLength(message) / 75, 1)
+local function removeOldestFromQueue(adornee: PVInstance)
+	local queue = chatBubbleQueues[adornee]
+	if not queue then return end
+	local oldestBubble = queue[#queue]
+	if not oldestBubble then return end
+	oldestBubble:Destroy()
+	queue[#queue] = nil
 end
 
-local function removeBubbleFromQueue(adornee, bubbleGui)
-	local queue = bubbleQueues[adornee]
-	if not queue then
-		return
-	end
-
-	for index = #queue, 1, -1 do
-		if queue[index] == bubbleGui or not queue[index] or not queue[index].Parent then
-			table.remove(queue, index)
-		end
-	end
-
-	if #queue == 0 then
-		bubbleQueues[adornee] = nil
-	end
-end
-
-local function removeOldestBubble(adornee)
-	local queue = bubbleQueues[adornee]
-	if not queue or #queue == 0 then
-		return
-	end
-
-	local oldest = queue[#queue]
-	table.remove(queue, #queue)
-	if oldest and oldest.Parent then
-		oldest:Destroy()
-	end
-end
-
-local function addBubbleToQueue(adornee, bubbleGui, lifetime)
-	local queue = bubbleQueues[adornee]
-	if not queue then
+local function addBubbleToQueue(adornee: PVInstance, chatBubble: BillboardGui, lifetime: number)
+	local queue = chatBubbleQueues[adornee]
+	if queue == nil then
 		queue = {}
-		bubbleQueues[adornee] = queue
-
-		local destroyingConnection
-		destroyingConnection = adornee.Destroying:Connect(function()
-			bubbleQueues[adornee] = nil
-			if destroyingConnection then
-				destroyingConnection:Disconnect()
-			end
+		chatBubbleQueues[adornee] = queue
+		adornee.Destroying:Connect(function()
+			chatBubbleQueues[adornee] = nil
 		end)
 	end
 
-	local bubble = bubbleGui:FindFirstChild("BillboardFrame")
-	bubble = bubble and bubble:FindFirstChild("ChatBubble")
-	local newHeight = bubble and bubble.AbsoluteSize.Y or 0
-	local totalHeight = newHeight
 	local gap = 4
-
-	for _, oldGui in ipairs(queue) do
-		if oldGui and oldGui.Parent then
-			local oldFrame = oldGui:FindFirstChild("BillboardFrame")
-			local oldBubble = oldFrame and oldFrame:FindFirstChild("ChatBubble")
-			if oldFrame then
-				TweenService:Create(
-					oldFrame,
-					SHIFT_TWEEN_INFO,
-					{Position = oldFrame.Position - UDim2.fromOffset(0, newHeight + gap)}
-				):Play()
-			end
-			if oldBubble then
-				totalHeight += oldBubble.AbsoluteSize.Y
-				local oldText = oldBubble:FindFirstChild("BubbleText")
-				if oldText and oldText:IsA("TextLabel") then
-					oldText.TextTransparency = math.max(oldText.TextTransparency, 0.5)
-				end
-			end
-		end
+	local newChatBubbleSizeY = chatBubble.BillboardFrame.ChatBubble.AbsoluteSize.Y
+	local totalYSpaceUsed = newChatBubbleSizeY
+	for _,v in queue do
+		if v.Parent == nil then continue end
+		local shiftUp = newChatBubbleSizeY+gap
+		local newPosition = v.BillboardFrame.Position - UDim2.fromOffset(0, shiftUp)
+		TweenService:Create(v.BillboardFrame, shiftBubblesUpTweenInfo, {Position = newPosition}):Play()
+		totalYSpaceUsed += v.BillboardFrame.ChatBubble.AbsoluteSize.Y
+		v.BillboardFrame.ChatBubble.BubbleText.TextTransparency = 0.5
+	end
+	if totalYSpaceUsed > MAX_TOTAL_BUBBLE_HEIGHT then
+		removeOldestFromQueue(adornee)
 	end
 
-	if totalHeight > MAX_TOTAL_BUBBLE_HEIGHT then
-		removeOldestBubble(adornee)
-	end
+	table.insert(queue, 1, chatBubble)
 
-	table.insert(queue, 1, bubbleGui)
-
-	bubbleGui.Destroying:Connect(function()
-		removeBubbleFromQueue(adornee, bubbleGui)
-	end)
-
-	task.delay(lifetime + BUBBLE_FADE_TIME, function()
-		if bubbleGui.Parent then
-			bubbleGui:Destroy()
+	task.delay(lifetime+BUBBLE_FADE_TIME, function()
+		if chatBubble.Parent ~= nil then
+			removeOldestFromQueue(adornee)
 		end
 	end)
 end
 
-local function createBubble(adornee, rawMessage, sentBySelf)
-	if not adornee or not adornee.Parent then
-		return
-	end
-	if not adornee:IsA("BasePart") then
-		return
-	end
-
-	local message = truncateMessage(decodeRichTextEscapes(rawMessage))
-	if message == "" then
-		return
-	end
+function BubbleChat.createBubble(adornee: PVInstance, message: string, sentBySelf: boolean?)
+	if not adornee or not adornee.Parent then return end
 
 	local chatBubbleGui = Instance.new("BillboardGui")
 	chatBubbleGui.Name = "ChatBubbleGui"
 	chatBubbleGui.Size = UDim2.fromOffset(400, 250)
-	chatBubbleGui.AlwaysOnTop = false
-	chatBubbleGui.LightInfluence = 0
-	chatBubbleGui.MaxDistance = MAX_BUBBLE_DISTANCE
-	chatBubbleGui.Adornee = adornee
 
 	local billboardFrame = Instance.new("Frame")
 	billboardFrame.Name = "BillboardFrame"
@@ -398,7 +487,6 @@ local function createBubble(adornee, rawMessage, sentBySelf)
 	billboardFrame.BackgroundTransparency = 1
 	billboardFrame.Position = UDim2.fromScale(0.5, -0.5)
 	billboardFrame.Size = UDim2.fromScale(1, 1)
-	billboardFrame.Parent = chatBubbleGui
 
 	local smallTalkBubble = Instance.new("ImageLabel")
 	smallTalkBubble.Name = "SmallTalkBubble"
@@ -409,46 +497,47 @@ local function createBubble(adornee, rawMessage, sentBySelf)
 	smallTalkBubble.ImageColor3 = Color3.new(1, 1, 1)
 	smallTalkBubble.Position = UDim2.fromScale(0.5, 1)
 	smallTalkBubble.ScaleType = Enum.ScaleType.Slice
-	smallTalkBubble.Size = UDim2.fromOffset(40, 30)
+	smallTalkBubble.Size = UDim2.fromOffset(40, 28)
 	smallTalkBubble.SliceCenter = Rect.new(5, 5, 15, 15)
 	smallTalkBubble.Visible = false
+
+	local smallTalkBubbleText = Instance.new("TextLabel")
+	smallTalkBubbleText.Name = "BubbleText"
+	smallTalkBubbleText.BackgroundTransparency = 1
+	smallTalkBubbleText.ClipsDescendants = true
+	smallTalkBubbleText.Font = Enum.Font.SourceSans
+	smallTalkBubbleText.Size = UDim2.fromScale(1, 1)
+	smallTalkBubbleText.Text = "..."
+	smallTalkBubbleText.TextColor3 = Color3.fromRGB(55, 55, 55)
+	smallTalkBubbleText.TextSize = 20
+
+	local smallTalkBubbleUIPadding = Instance.new("UIPadding")
+	smallTalkBubbleUIPadding.Name = "UIPadding"
+	smallTalkBubbleUIPadding.PaddingBottom = UDim.new(0, 8)
+	smallTalkBubbleUIPadding.PaddingLeft = UDim.new(0, 12)
+	smallTalkBubbleUIPadding.PaddingRight = UDim.new(0, 12)
+	smallTalkBubbleUIPadding.PaddingTop = UDim.new(0, 8)
+	smallTalkBubbleUIPadding.Parent = smallTalkBubbleText
+	smallTalkBubbleText.Parent = smallTalkBubble
+
+	local chatBubbleTailFrame = Instance.new("Frame")
+	chatBubbleTailFrame.Name = "ChatBubbleTailFrame"
+	chatBubbleTailFrame.BackgroundTransparency = 1
+	chatBubbleTailFrame.Position = UDim2.fromScale(0.5, 1)
+	chatBubbleTailFrame.Size = UDim2.fromScale(0.5, 0.5)
+	chatBubbleTailFrame.SizeConstraint = Enum.SizeConstraint.RelativeXX
+
+	local chatBubbleTail = Instance.new("ImageLabel")
+	chatBubbleTail.Name = "ChatBubbleTail"
+	chatBubbleTail.BackgroundTransparency = 1
+	chatBubbleTail.BorderSizePixel = 0
+	chatBubbleTail.Image = "rbxasset://textures/ui/dialog_tail.png"
+	chatBubbleTail.ImageColor3 = Color3.new(1, 1, 1)
+	chatBubbleTail.Position = UDim2.fromScale(-0.5, 0)
+	chatBubbleTail.Size = UDim2.fromScale(1, 0.5)
+	chatBubbleTail.Parent = chatBubbleTailFrame
+	chatBubbleTailFrame.Parent = smallTalkBubble
 	smallTalkBubble.Parent = billboardFrame
-
-	local smallText = Instance.new("TextLabel")
-	smallText.Name = "BubbleText"
-	smallText.BackgroundTransparency = 1
-	smallText.ClipsDescendants = true
-	smallText.Font = Enum.Font.SourceSans
-	smallText.Size = UDim2.fromScale(1, 1)
-	smallText.Text = "..."
-	smallText.TextColor3 = Color3.fromRGB(27, 42, 53)
-	smallText.TextSize = 24
-	smallText.Parent = smallTalkBubble
-
-	local smallPadding = Instance.new("UIPadding")
-	smallPadding.PaddingBottom = UDim.new(0, 12)
-	smallPadding.PaddingLeft = UDim.new(0, 12)
-	smallPadding.PaddingRight = UDim.new(0, 12)
-	smallPadding.PaddingTop = UDim.new(0, 12)
-	smallPadding.Parent = smallText
-
-	local smallTailFrame = Instance.new("Frame")
-	smallTailFrame.Name = "ChatBubbleTailFrame"
-	smallTailFrame.BackgroundTransparency = 1
-	smallTailFrame.Position = UDim2.fromScale(0.5, 1)
-	smallTailFrame.Size = UDim2.fromScale(0.5, 0.5)
-	smallTailFrame.SizeConstraint = Enum.SizeConstraint.RelativeXX
-	smallTailFrame.Parent = smallTalkBubble
-
-	local smallTail = Instance.new("ImageLabel")
-	smallTail.Name = "ChatBubbleTail"
-	smallTail.BackgroundTransparency = 1
-	smallTail.BorderSizePixel = 0
-	smallTail.Image = "rbxasset://textures/ui/dialog_tail.png"
-	smallTail.ImageColor3 = Color3.new(1, 1, 1)
-	smallTail.Position = UDim2.fromScale(-0.5, 0)
-	smallTail.Size = UDim2.fromScale(1, 0.5)
-	smallTail.Parent = smallTailFrame
 
 	local chatBubble = Instance.new("ImageLabel")
 	chatBubble.Name = "ChatBubble"
@@ -461,87 +550,100 @@ local function createBubble(adornee, rawMessage, sentBySelf)
 	chatBubble.ScaleType = Enum.ScaleType.Slice
 	chatBubble.SliceCenter = Rect.new(5, 5, 15, 15)
 	chatBubble.Visible = false
-	chatBubble.Parent = billboardFrame
 
 	local bubbleText = Instance.new("TextLabel")
 	bubbleText.Name = "BubbleText"
 	bubbleText.BackgroundTransparency = 1
-	bubbleText.ClipsDescendants = true
+	bubbleText.ClipsDescendants = false
+	bubbleText.TextTruncate = Enum.TextTruncate.None
 	bubbleText.Font = Enum.Font.SourceSans
 	bubbleText.Size = UDim2.fromScale(1, 1)
 	bubbleText.Text = ""
-	bubbleText.TextColor3 = Color3.fromRGB(27, 42, 53)
-	bubbleText.TextSize = 24
+	bubbleText.TextColor3 = Color3.fromRGB(55, 55, 55)
+	bubbleText.TextSize = 25
 	bubbleText.TextWrapped = true
+
+	local uiPadding = Instance.new("UIPadding")
+	uiPadding.Name = "UIPadding"
+	uiPadding.PaddingBottom = UDim.new(0, 8)
+	uiPadding.PaddingLeft = UDim.new(0, 7)
+	uiPadding.PaddingRight = UDim.new(0, 7)
+	uiPadding.PaddingTop = UDim.new(0, 8)
+	uiPadding.Parent = bubbleText
 	bubbleText.Parent = chatBubble
+	chatBubble.Parent = billboardFrame
 
-	local padding = Instance.new("UIPadding")
-	padding.Name = "UIPadding"
-	padding.PaddingBottom = UDim.new(0, 12)
-	padding.PaddingLeft = UDim.new(0, 12)
-	padding.PaddingRight = UDim.new(0, 12)
-	padding.PaddingTop = UDim.new(0, 12)
-	padding.Parent = bubbleText
+	local chatBubbleTail1 = Instance.new("ImageLabel")
+	chatBubbleTail1.Name = "ChatBubbleTail"
+	chatBubbleTail1.BackgroundTransparency = 1
+	chatBubbleTail1.BorderSizePixel = 0
+	chatBubbleTail1.Image = "rbxasset://textures/ui/dialog_tail.png"
+	chatBubbleTail1.ImageColor3 = Color3.new(1, 1, 1)
+	chatBubbleTail1.Position = UDim2.new(0.5, -12, 1, -1)
+	chatBubbleTail1.Size = UDim2.fromOffset(24, 12)
+	chatBubbleTail1.Visible = false
+	chatBubbleTail1.Parent = billboardFrame
 
-	local tail = Instance.new("ImageLabel")
-	tail.Name = "ChatBubbleTail"
-	tail.BackgroundTransparency = 1
-	tail.BorderSizePixel = 0
-	tail.Image = "rbxasset://textures/ui/dialog_tail.png"
-	tail.ImageColor3 = Color3.new(1, 1, 1)
-	tail.Position = UDim2.new(0.5, -14, 1, 0)
-	tail.Size = UDim2.fromOffset(30, 14)
-	tail.Visible = false
-	tail.Parent = billboardFrame
+	billboardFrame.Parent = chatBubbleGui
+	message = convertRichTextEscapeStrings(message)
 
-	local bounds = TextService:GetTextSize(
+	local actualTextSize = bubbleText.TextSize
+	local horizontalPadding = uiPadding.PaddingLeft.Offset + uiPadding.PaddingRight.Offset
+	local glyphSafety = math.max(8, math.ceil(actualTextSize * 0.35))
+	local maxContentWidth = math.max(1, MAX_BUBBLE_WIDTH - glyphSafety)
+
+	local widthBounds = TextService:GetTextSize(
 		message,
-		bubbleText.TextSize,
+		actualTextSize,
 		bubbleText.Font,
-		Vector2.new(MAX_BUBBLE_WIDTH, 10000)
+		Vector2.new(maxContentWidth, math.huge)
 	)
 
-	if bounds.Y <= bubbleText.TextSize then
-		padding.PaddingTop = UDim.new(0, 6)
-		padding.PaddingBottom = UDim.new(0, 6)
+	-- Keep the classic short 2015M vertical proportions. Width follows the
+	-- real TextSize, while height intentionally stays based on the classic
+	-- layout size.
+	local heightBounds = TextService:GetTextSize(
+		message,
+		BUBBLE_HEIGHT_TEXT_SIZE,
+		bubbleText.Font,
+		Vector2.new(maxContentWidth, math.huge)
+	)
+
+	local multiline = widthBounds.Y > actualTextSize
+	if not multiline then
+		-- 2015M had less empty space above the text than the later bubble.
+		uiPadding.PaddingTop = UDim.new(0, 2)
+		uiPadding.PaddingBottom = UDim.new(0, 6)
 	end
 
-	local finalSize = UDim2.fromOffset(
-		math.min(MAX_BUBBLE_WIDTH, bounds.X) + padding.PaddingLeft.Offset + padding.PaddingRight.Offset + 1,
-		bounds.Y + padding.PaddingTop.Offset + padding.PaddingBottom.Offset
+	local chatBubbleSize = UDim2.fromOffset(
+		widthBounds.X + horizontalPadding + glyphSafety,
+		heightBounds.Y + uiPadding.PaddingTop.Offset + uiPadding.PaddingBottom.Offset
 	)
 
-	chatBubble.Size = UDim2.fromOffset(finalSize.X.Offset + 10, finalSize.Y.Offset + 10)
-	TweenService:Create(chatBubble, RESIZE_TWEEN_INFO, {Size = finalSize}):Play()
+	chatBubble.Size = UDim2.fromOffset(chatBubbleSize.X.Offset+8, chatBubbleSize.Y.Offset+8)
+	local resizeTween = TweenService:Create(chatBubble, resizeBubbleTweenInfo, {Size = chatBubbleSize})
+	resizeTween:Play()
 
-	task.delay(RESIZE_TWEEN_INFO.Time, function()
-		if bubbleText.Parent then
-			bubbleText.Text = message
-		end
+	task.delay(resizeBubbleTweenInfo.Time, function()
+		bubbleText.Text = message
 	end)
 
-	chatBubbleGui.StudsOffset = sentBySelf and Vector3.new(0, 1.8, 0) or Vector3.new(0, 2.4, 0)
+	chatBubbleGui.Adornee = adornee
 	chatBubbleGui.Parent = adornee
 
-	local lifetime
-	if sentBySelf then
-		lifetime = lerpLifetime(message, MIN_BUBBLE_LIFETIME_SELF, MAX_BUBBLE_LIFETIME_SELF)
-	else
-		lifetime = lerpLifetime(message, MIN_BUBBLE_LIFETIME, MAX_BUBBLE_LIFETIME)
-	end
+	local lifetime = sentBySelf and lerpLength(bubbleText.Text, MIN_BUBBLE_LIFETIME_SELF, MAX_BUBBLE_LIFETIME_SELF) or lerpLength(bubbleText.Text, MIN_BUBBLE_LIFETIME, MAX_BUBBLE_LIFETIME)
+	chatBubbleGui.StudsOffset = sentBySelf and Vector3.new(0, 1.8, 0) or Vector3.new(0, 2.4, 0)
 
-	Debris:AddItem(chatBubbleGui, lifetime + BUBBLE_FADE_TIME + 0.25)
+	Debris:AddItem(chatBubbleGui, lifetime + BUBBLE_FADE_TIME + 0.1)
 
 	task.delay(lifetime, function()
-		if not chatBubbleGui.Parent then
-			return
-		end
-		local fadeInfo = TweenInfo.new(BUBBLE_FADE_TIME, Enum.EasingStyle.Linear)
-		for _, descendant in ipairs(chatBubbleGui:GetDescendants()) do
-			if descendant:IsA("ImageLabel") then
-				TweenService:Create(descendant, fadeInfo, {ImageTransparency = 1}):Play()
-			elseif descendant:IsA("TextLabel") then
-				TweenService:Create(descendant, fadeInfo, {TextTransparency = 1}):Play()
+		local tweenInfo = TweenInfo.new(BUBBLE_FADE_TIME, Enum.EasingStyle.Linear)
+		for _,v in chatBubbleGui:GetDescendants() do
+			if v:IsA("ImageLabel") then
+				TweenService:Create(v, tweenInfo, {ImageTransparency = 1}):Play()
+			elseif v:IsA("TextLabel") then
+				TweenService:Create(v, tweenInfo, {TextTransparency = 1}):Play()
 			end
 		end
 	end)
@@ -549,112 +651,97 @@ local function createBubble(adornee, rawMessage, sentBySelf)
 	addBubbleToQueue(adornee, chatBubbleGui, lifetime)
 end
 
-local function getSpeakerAdornee(player)
-	local character = player.Character
-	if not character then
-		return nil
-	end
-	return character:FindFirstChild("Head") or character:FindFirstChild("HumanoidRootPart")
-end
-
-local function onMessageReceived(message)
-	-- MessageReceived provides the final TextChatService message on the client.
-	if message.Status ~= Enum.TextChatMessageStatus.Success then
-		return
-	end
-
-	local source = message.TextSource
-	if not source then
-		return -- Ignore system messages for player bubbles.
-	end
-
-	local text = message.Text
-	if not text or text == "" then
-		return
-	end
-
-	-- MessageReceived may be observed more than once for the sending client.
-	-- MessageId is the safest way to avoid drawing duplicate bubbles.
-	local messageId = message.MessageId
-	if messageId and messageId ~= "" then
-		if seenMessageIds[messageId] then
-			return
-		end
-		seenMessageIds[messageId] = true
-		task.delay(30, function()
-			seenMessageIds[messageId] = nil
-		end)
-	end
-
-	local speaker = Players:GetPlayerByUserId(source.UserId)
-	if not speaker then
-		return
-	end
-
-	local adornee = getSpeakerAdornee(speaker)
-	if not adornee then
-		return
-	end
-
-	createBubble(adornee, text, speaker == LocalPlayer)
-end
-
-TextChatService.MessageReceived:Connect(onMessageReceived)
-
--- Update distance presentation at a modest rate; no need to do this every frame.
-local accumulator = 0
-RunService.RenderStepped:Connect(function(deltaTime)
-	accumulator += deltaTime
-	if accumulator < 0.05 then
-		return
-	end
-	accumulator = 0
-
+task.spawn(function()
 	local camera = workspace.CurrentCamera
-	if not camera then
-		return
-	end
+	while true do
+		task.wait()
+		for adornee, queue in chatBubbleQueues do
+			if #queue == 0 or not adornee or not adornee.Parent then continue end
 
-	for adornee, queue in pairs(bubbleQueues) do
-		if not adornee or not adornee.Parent or #queue == 0 then
-			bubbleQueues[adornee] = nil
-			continue
-		end
+			local mostRecentChatBubble = queue[1]
+			if not mostRecentChatBubble or not mostRecentChatBubble.Parent then continue end
 
-		local distance = (camera.CFrame.Position - adornee.Position).Magnitude
+			local success, dist = pcall(function()
+				return (camera.CFrame.Position - adornee:GetPivot().Position).Magnitude
+			end)
 
-		for index = #queue, 1, -1 do
-			local bubbleGui = queue[index]
-			if not bubbleGui or not bubbleGui.Parent then
-				table.remove(queue, index)
-				continue
-			end
+			if not success or not dist then continue end
 
-			local frame = bubbleGui:FindFirstChild("BillboardFrame")
-			if not frame then
-				continue
-			end
+			for i = 1, #queue do
+				local bubbleGui = queue[i]
+				if not bubbleGui or bubbleGui.Parent == nil then continue end
+				local billboardFrame = bubbleGui:FindFirstChild("BillboardFrame")
+				if not billboardFrame then continue end
 
-			local fullBubble = frame:FindFirstChild("ChatBubble")
-			local fullTail = frame:FindFirstChild("ChatBubbleTail")
-			local smallBubble = frame:FindFirstChild("SmallTalkBubble")
-
-			if distance < NEAR_BUBBLE_DISTANCE then
-				if fullBubble then fullBubble.Visible = true end
-				if fullTail then fullTail.Visible = index == 1 end
-				if smallBubble then smallBubble.Visible = false end
-				bubbleGui.Enabled = true
-			elseif distance < MAX_BUBBLE_DISTANCE and index == 1 then
-				if fullBubble then fullBubble.Visible = false end
-				if fullTail then fullTail.Visible = false end
-				if smallBubble then smallBubble.Visible = true end
-				bubbleGui.Enabled = true
-			else
-				bubbleGui.Enabled = false
+				if dist < NEAR_BUBBLE_DISTANCE then
+					billboardFrame.ChatBubble.Visible = true
+					billboardFrame.ChatBubbleTail.Visible = (i == 1)
+					billboardFrame.SmallTalkBubble.Visible = false
+					bubbleGui.Enabled = true
+				elseif dist < MAX_BUBBLE_DISTANCE and i == 1 then
+					billboardFrame.ChatBubble.Visible = false
+					billboardFrame.ChatBubbleTail.Visible = false
+					billboardFrame.SmallTalkBubble.Visible = true
+					bubbleGui.Enabled = true
+				else
+					bubbleGui.Enabled = false
+				end
 			end
 		end
 	end
 end)
+
+return BubbleChat
+end)()
+
+local Players = game:GetService("Players")
+local TextChatService = game:GetService("TextChatService")
+
+local player = Players.LocalPlayer
+
+-- Disable built-in bubble chat since we use a custom BubbleChat module
+local bubbleChatConfig = TextChatService:FindFirstChild("BubbleChatConfiguration")
+if bubbleChatConfig then
+	bubbleChatConfig.Enabled = false
+end
+
+TextChatService.MessageReceived:Connect(function(message)
+	if message.Status ~= Enum.TextChatMessageStatus.Success then return end
+
+	local textSource = message.TextSource
+	if not textSource then return end
+
+	-- Don't create bubbles for empty messages
+	if not message.Text or message.Text == "" then return end
+
+	-- Find the sender's player and character
+	local senderPlayer = Players:GetPlayerByUserId(textSource.UserId)
+	if not senderPlayer then return end
+
+	local character = senderPlayer.Character
+	if not character then return end
+
+	-- Prefer Head as adornee, fallback to HumanoidRootPart
+	local adornee = character:FindFirstChild("Head")
+	if not adornee then
+		adornee = character:FindFirstChild("HumanoidRootPart")
+	end
+	if not adornee then return end
+
+	local sentBySelf = (senderPlayer == player)
+	BubbleChat.createBubble(adornee, message.Text, sentBySelf)
+end)
+
+local playerGui = player:FindFirstChildOfClass("PlayerGui")
+if not playerGui then
+	playerGui = player:WaitForChild("PlayerGui", 5)
+end
+if playerGui then
+	local zenosChat = playerGui:FindFirstChild("ZenosChat")
+	if zenosChat and ChatToggle then
+		ChatToggle.init(nil, zenosChat)
+	end
+end
 
 local G2L = {};
 
