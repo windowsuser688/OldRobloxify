@@ -493,6 +493,7 @@ if bubbleChatConfig then
 	bubbleChatConfig.Enabled = false
 end
 
+TextChatService.MessageReceived:Connect(function(message)
 	if message.Status ~= Enum.TextChatMessageStatus.Success then return end
 
 	local textSource = message.TextSource
@@ -741,7 +742,6 @@ hideNativeSettingsMenu()
 task.defer(function()
 	hideNativeSettingsMenu()
 end)
-
 
 local G2L = {};
 
