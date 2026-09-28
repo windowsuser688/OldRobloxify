@@ -32,5 +32,8 @@ if option == "true" then
     print("Cursor initialized")
 elseif option == "false" then
     print("Cursor not initialized")
+else
+    print("Unknown option")
+end
 ```
 If loadstring doesn't work, try using the source.
