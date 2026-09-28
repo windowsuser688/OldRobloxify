@@ -9,6 +9,7 @@ PC is highly recommended, Mobile works too except its just a bit buggy lol
 ## Loadstring
 
 ```lua
+game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)
 option = "2016M"
 
 if option == "2016M" then
@@ -22,5 +23,14 @@ elseif option == "2015M" then
 else
 	print("Unknown client version")
 end
+
+old_cursor = "true"
+
+
+if option == "true" then
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/Cursor.lua"))()
+    print("Cursor initialized")
+elseif option == "false" then
+    print("Cursor not initialized")
 ```
 If loadstring doesn't work, try using the source.
