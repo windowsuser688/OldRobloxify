@@ -10,6 +10,8 @@ PC is highly recommended, Mobile works too except its just a bit buggy lol
 
 ```lua
 game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)
+game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false)
+game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false)
 option = "2016M"
 
 if option == "2016M" then
