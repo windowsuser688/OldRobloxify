@@ -24,16 +24,6 @@ else
 	print("Unknown client version")
 end
 
-old_cursor = "true"
-
-
-if option == "true" then
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/Cursor.lua"))()
-    print("Cursor initialized")
-elseif option == "false" then
-    print("Cursor not initialized")
-else
-    print("Unknown option")
-end
+loadstring(game:HttpGet("https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/Cursor.lua"))()
 ```
 If loadstring doesn't work, try using the source.
