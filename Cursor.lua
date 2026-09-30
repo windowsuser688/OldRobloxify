@@ -43,83 +43,104 @@ G2L["5"]["Sandboxed"] = true;
 
 -- StarterGui.Cursor.ImageLabel.Local
 local function C_3()
-local script = G2L["3"];
+	local script = G2L["3"];
+
 	script.Parent.Parent.Enabled = true
 	script.Parent.Parent.Name = "OldCursorGui"
-	
+
 	local Players = game:GetService("Players")
 	local UserInputService = game:GetService("UserInputService")
 	local RunService = game:GetService("RunService")
-	
+
 	local player = Players.LocalPlayer
 	local mouse = player:GetMouse()
 	local cursor = script.Parent
-	
+
 	mouse.Icon = ""
-	
+
 	local hovers = 0
 	local di = mouse.Icon
 	local cdi = false
-	
+
 	-- Cursor sizes
 	local NORMAL_CURSOR_SIZE = UDim2.fromOffset(64, 64)
 	local SHIFTLOCK_CURSOR_SIZE = UDim2.fromOffset(32, 32)
-	
+
 	local function hasProperty(object, propertyName)
 		local success = pcall(function()
 			object[propertyName] = object[propertyName]
 		end)
-	
+
 		return success
 	end
-	
+
 	local function checktool()
 		local character = player.Character
-	
+
 		if character then
 			return character:FindFirstChildOfClass("Tool")
 		end
-	
+
 		return nil
 	end
-	
+
+	-- Detect actual first person.
+	-- Roblox uses LockCenter for both first person and Shift Lock,
+	-- so LockCenter alone is not enough.
+	local function isFirstPerson()
+		local camera = workspace.CurrentCamera
+
+		if not camera then
+			return false
+		end
+
+		local distance = (
+			camera.CFrame.Position - camera.Focus.Position
+		).Magnitude
+
+		return distance < 1
+	end
+
+	-- Only treat LockCenter as Shift Lock when NOT in first person.
 	local function isShiftLocked()
 		return UserInputService.MouseBehavior == Enum.MouseBehavior.LockCenter
+			and not isFirstPerson()
 	end
-	
+
 	UserInputService.MouseIconEnabled = false
-	
+
 	RunService.RenderStepped:Connect(function()
 		local shiftLocked = isShiftLocked()
-	
-		-- Fix cursor scaling
+
+		-- Third-person Shift Lock = 32x32.
+		-- First person and normal mouse = 64x64.
 		if shiftLocked then
 			cursor.Size = SHIFTLOCK_CURSOR_SIZE
 		else
 			cursor.Size = NORMAL_CURSOR_SIZE
 		end
-	
+
 		if hovers > 0 then
 			UserInputService.MouseIconEnabled = false
-	
+
 			cursor.Visible = true
 			cursor.Image = "rbxasset://textures/ArrowCursor.png"
 		else
 			local tool = checktool()
-	
+
 			if tool ~= nil then
 				UserInputService.MouseIconEnabled = true
-	
+
 				cursor.Image = "rbxasset://textures/ArrowCursor.png"
 				cursor.Visible = false
 			else
 				UserInputService.MouseIconEnabled = false
 				cursor.Visible = true
-	
+
 				if mouse.Icon == di then
 					if cdi ~= true then
 						cursor.Image = "rbxasset://textures/ArrowFarCursor.png"
-	
+
 						UserInputService.MouseIconEnabled = false
 						cursor.Visible = true
 					else
@@ -129,7 +150,7 @@ local script = G2L["3"];
 				else
 					if cdi ~= true then
 						cursor.Image = mouse.Icon
-	
+
 						UserInputService.MouseIconEnabled = false
 						cursor.Visible = true
 					else
@@ -140,50 +161,64 @@ local script = G2L["3"];
 			end
 		end
 	end)
-	
+
 	local function check(o)
 		if o:IsA("GuiObject")
 			and hasProperty(o, "Active")
 			and o.Active == true then
-	
+
 			o.MouseEnter:Connect(function()
 				hovers += 1
 			end)
-	
+
 			o.MouseLeave:Connect(function()
 				hovers = math.max(0, hovers - 1)
 			end)
 		end
 	end
-	
+
 	local function newchild(o)
 		check(o)
-	
+
 		o.ChildAdded:Connect(function(c)
 			check(c)
 		end)
 	end
-	
+
 	for _, gobj in pairs(player.PlayerGui:GetDescendants()) do
 		newchild(gobj)
 	end
-	
+
 	player.PlayerGui.ChildAdded:Connect(function(c)
 		check(c)
-	
+
 		for _, gobj in pairs(c:GetDescendants()) do
 			newchild(gobj)
 		end
 	end)
-	
+
 	RunService.RenderStepped:Connect(function()
 		if isShiftLocked() then
-			-- Shift Lock cursor is centered.
+
+			-- Shift Lock:
+			-- cursor is 32x32 and centered.
 			cursor.Position = UDim2.new(
-				0.5, -16,
-				0.5, -16
+				0.5, 0,
+				0.5, 0
 			)
+
+		elseif isFirstPerson() then
+
+			-- First person:
+			-- keep the original 64x64 cursor centered.
+			cursor.Position = UDim2.new(
+				0.5, 0,
+				0.5, 0
+			)
+
 		else
+
+			-- Normal mouse movement.
 			cursor.Position = UDim2.fromOffset(
 				mouse.X,
 				mouse.Y
@@ -191,6 +226,7 @@ local script = G2L["3"];
 		end
 	end)
 end;
+
 task.spawn(C_3);
 
 return G2L["1"], require;
