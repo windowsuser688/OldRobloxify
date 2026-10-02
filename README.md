@@ -26,6 +26,7 @@ else
 	print("Unknown client version")
 end
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/Cursor.lua"))()
 ```
 If loadstring doesn't work, try using the source.
+
+EDIT: Removed cursor loadstring because it’s insanely buggy lol
