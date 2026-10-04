@@ -655,16 +655,7 @@ RunService.RenderStepped:Connect(function(deltaTime)
 		end
 	end
 end)
---[=[
- d888b  db    db d888888b      .d888b.      db      db    db  .d8b.  
-88' Y8b 88    88   `88'        VP  `8D      88      88    88 d8' `8b 
-88      88    88    88            odD'      88      88    88 88ooo88 
-88  ooo 88    88    88          .88'        88      88    88 88~~~88 
-88. ~8~ 88b  d88   .88.        j88.         88booo. 88b  d88 88   88    @uniquadev
- Y888P  ~Y8888P' Y888888P      888888D      Y88888P ~Y8888P' YP   YP  CONVERTER 
-]=]
 
--- Instances: 25 | Scripts: 2 | Modules: 19 | Tags: 0
 local G2L = {};
 
 -- StarterGui.RobloxGui
@@ -12776,7 +12767,8 @@ end;
 };
 G2L_MODULES[G2L["14"]] = {
 Closure = function()
-    local script = G2L["14"];--[[
+    local script = G2L["14"];
+--[[
 	// FileName: Chat.lua
 	// Written by: SolarCrane
 	// Description: Code for lua side chat on ROBLOX.
@@ -14284,7 +14276,7 @@ local function CreateChatBarWidget(settings)
 			Font = Enum.Font.SourceSansBold;
 			FontSize = Enum.FontSize.Size18;
 			ClearTextOnFocus = false;
-			Visible = not Util.IsTouchDevice();
+			Visible = true;
 			Parent = chatBarContainer;
 			SelectionImageObject = emptySelectionImage;
 		}
@@ -14357,8 +14349,8 @@ local function CreateChatBarWidget(settings)
 					end
 				end
 
-				if Util.IsTouchDevice() or InputService.VREnabled then
-					-- Hide the chatbar on mobile and in VR so they can't see it.
+				if InputService.VREnabled then
+					-- Keep the old VR behavior, but leave the chatbar visible on mobile.
 					chatBarContainer.Position = UDim2.new(0,0,1,20);
 				end
 			end
@@ -15643,7 +15635,6 @@ do
 end
 
 return moduleApiTable
-
 end;
 };
 G2L_MODULES[G2L["15"]] = {
