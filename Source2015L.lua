@@ -7033,6 +7033,7 @@ local TEXT_STROKE_TRANSPARENCY = 0.75
 local TEXT_COLOR = Color3.new(1, 1, 243/255)
 local TEXT_STROKE_COLOR = Color3.new(34/255, 34/255, 34/255)
 local TWEEN_TIME = 0.15
+local DROPDOWN_CLOSE_TIME = 1.00 -- Closing only; opening stays at 0.15 seconds
 local MAX_LEADERSTATS = 4
 local MAX_STR_LEN = 12
 local TILE_SPACING = 2
@@ -7592,14 +7593,51 @@ local function getFriendStatus(selectedPlayer)
 	return Enum.FriendStatus.NotFriend
 end
 
-function popupHidden()
-	if LastSelectedFrame then
-		for _,childFrame in pairs(LastSelectedFrame:GetChildren()) do
-			if childFrame:IsA('TextButton') or childFrame:IsA('Frame') then
-				childFrame.BackgroundColor3 = BG_COLOR
-			end
+local activePopupFrame = nil
+local dropdownClosing = false
+local selectedOriginalColors = {}
+
+local function clearSelectionHighlight()
+	for frame, color in pairs(selectedOriginalColors) do
+		if frame and frame.Parent then
+			frame.BackgroundColor3 = color
 		end
 	end
+	table.clear(selectedOriginalColors)
+end
+
+local function hideDropDownAnimated()
+	if dropdownClosing then return end
+	clearSelectionHighlight()
+	local popup = activePopupFrame
+	if not popup or not popup.Parent then
+		playerDropDown:Hide()
+		return
+	end
+
+	dropdownClosing = true
+	local currentY = popup.Position.Y
+	popup:TweenPosition(
+		UDim2.new(1, 1, currentY.Scale, currentY.Offset),
+		Enum.EasingDirection.InOut,
+		Enum.EasingStyle.Quad,
+		DROPDOWN_CLOSE_TIME,
+		true,
+		function(playbackState)
+			if activePopupFrame == popup then
+				dropdownClosing = false
+				if playbackState == Enum.TweenStatus.Completed then
+					playerDropDown:Hide()
+				end
+			end
+		end
+	)
+end
+
+function popupHidden()
+	activePopupFrame = nil
+	dropdownClosing = false
+	clearSelectionHighlight()
 	ScrollList.ScrollingEnabled = true
 	LastSelectedFrame = nil
 	LastSelectedPlayer = nil
@@ -7627,19 +7665,14 @@ local function onEntryFrameSelected(selectedFrame, selectedPlayer)
 	end
 
 	if LastSelectedFrame ~= selectedFrame then
-		if LastSelectedFrame then
-			for _,childFrame in pairs(LastSelectedFrame:GetChildren()) do
-				if childFrame:IsA('TextButton') or childFrame:IsA('Frame') then
-					childFrame.BackgroundColor3 = BG_COLOR
-				end
-			end
-		end
+		clearSelectionHighlight()
 
 		LastSelectedFrame = selectedFrame
 		LastSelectedPlayer = selectedPlayer
 
 		for _,childFrame in pairs(selectedFrame:GetChildren()) do
 			if childFrame:IsA('TextButton') or childFrame:IsA('Frame') then
+				selectedOriginalColors[childFrame] = childFrame.BackgroundColor3
 				childFrame.BackgroundColor3 = Color3.new(0, 1, 1)
 			end
 		end
@@ -7659,6 +7692,8 @@ local function onEntryFrameSelected(selectedFrame, selectedPlayer)
 		local y = selectedFrame.Position.Y.Offset - ScrollList.CanvasPosition.Y
 		PopupFrame.Position = UDim2.new(1, 1, 0, y)
 		PopupFrame.Parent = PopupClipFrame
+		activePopupFrame = PopupFrame
+		dropdownClosing = false
 		PopupFrame:TweenPosition(
 			UDim2.new(0, 0, 0, y),
 			Enum.EasingDirection.InOut,
@@ -7667,9 +7702,7 @@ local function onEntryFrameSelected(selectedFrame, selectedPlayer)
 			true
 		)
 	else
-		playerDropDown:Hide()
-		LastSelectedFrame = nil
-		LastSelectedPlayer = nil
+		hideDropDownAnimated()
 	end
 end
 
@@ -8404,7 +8437,7 @@ UserInputService.InputBegan:Connect(function(inputObject, isProcessed)
 	if (inputType == Enum.UserInputType.Touch and  inputObject.UserInputState == Enum.UserInputState.Begin) or
 		inputType == Enum.UserInputType.MouseButton1 then
 		if LastSelectedFrame then
-			playerDropDown:Hide()
+			hideDropDownAnimated()
 		end
 	end
 end)
@@ -8425,7 +8458,7 @@ end
 PlayersService.PlayerRemoving:Connect(function(child)
 	if child:IsA('Player') then
 		if LastSelectedPlayer and child == LastSelectedPlayer then
-			playerDropDown:Hide()
+			hideDropDownAnimated()
 		end
 		removePlayerEntry(child)
 	end
