@@ -45,7 +45,11 @@ elseif option == "2015E" then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/OldLightning.lua"))()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/OldCamera.lua"))()
 else
-	print("Unknown client version")
+    print("Unknown client version, Defaulting to 2016M")
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/Source2016M.lua"))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/disable_playerlist.lua"))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/OldLightning.lua"))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/OldCamera.lua"))()
 end
 
 ```
