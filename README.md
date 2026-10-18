@@ -3,8 +3,6 @@ Do you like the charm of Old Roblox? Well now you can! OldRobloxify is an 2015M-
 
 PC is highly recommended, Mobile works too except its just a bit buggy lol
 
-[![Reviewed on ScriptBlox](https://scriptblox.com/badge/Universal-Script-OldRobloxify-(2015M-2016M-including-2019-client)-231618)](https://scriptblox.com/script/Universal-Script-OldRobloxify-(2015M-2016M-including-2019-client)-231618)
-
 # Preview
 ![Image](https://raw.githubusercontent.com/windowsuser688/OldRobloxify/refs/heads/main/preview.png)
 
