@@ -210,537 +210,659 @@ task.defer(function()
 	hideNativeSettingsMenu()
 end)
 
-local ChatToggle = (function()
-local v1={};
-local v2=game:GetService("Players");
-local v_u_3=game:GetService("UserInputService");
-local v_u_4=game:GetService("StarterGui");
-local v_u_5=game:GetService("RunService");
-local v_u_6=v2.LocalPlayer;
+--[[
+	// FileName: BubbleChat.lua
+	// Written by: jeditkacheff
+	// Description: Code for rendering bubble chat
+]]
 
-local _chatActive = false
-
-function v_u_10(p_u_7,...)
-	local v_u_8={...};
-	if p_u_7 == "GetCore" and v_u_8[1] == "ChatActive" then
-		return true, _chatActive
-	end
-	if p_u_7 == "SetCore" and v_u_8[1] == "ChatActive" then
-		_chatActive = v_u_8[2]
-		return true
-	end
-	return pcall(function()
-		local v9=v_u_8;
-		return v_u_4[p_u_7](v_u_4,table.unpack(v9));
-	end);
-end
-
-function v_u_13()
-	local v11=workspace.CurrentCamera or workspace:WaitForChild("CurrentCamera");
-	local v12=v11.ViewportSize;
-	if((v12.X==0)or(v12.Y==0))then
-		v_u_5.RenderStepped:Wait();
-		v12=v11.ViewportSize;
-		if((v12.X==0)or(v12.Y==0))then
-			v12=Vector2.new(1024,768);
-		end
-	end
-	return v12;
-end
-
-v1.init=function(p_u_14,obj)
-	local v15=v_u_13();
-	local v16=((v15.X<800)and true)or(v15.Y<600);
-	local v_u_17=v_u_3.TouchEnabled;
-	if v_u_17 then
-		v_u_17=not v_u_3.KeyboardEnabled or v16;
-	end
-	local v_u_18=obj;
-	if not v_u_18 then
-		v_u_18=v_u_6:FindFirstChildOfClass("PlayerGui")or v_u_6:WaitForChild("PlayerGui");
-		v_u_18=v_u_18:FindFirstChild("ZenosChat");
-	end
-	local v_u_19=0;
-	local v_u_20=false;
-	local v21=nil;
-	local v_u_22={};
-
-	function v_u_28(p23)
-		local v24=v_u_18 and v_u_18:FindFirstChild("appLayout");
-		if v24 then
-			v24.Visible=p23;
-			if(p_u_14 and p23)then
-				if p_u_14.isFadedOut then
-					local v25=p_u_14.cancelFade;
-					if(type(v25)=="function")then
-						p_u_14:cancelFade();
-					end
-				else
-					local v26=p_u_14.fadeIn;
-					if(type(v26)=="function")then
-						p_u_14:fadeIn();
-					end
-				end
-			end
-			if(not p23 and v_u_17)then
-				local v27=v24:FindFirstChild("MainFrame")and v24.MainFrame:FindFirstChild("InputBar");
-				if v27 then
-					v27=v24.MainFrame.InputBar:FindFirstChild("InputBox");
-				end
-				if v27 then
-					v27:ReleaseFocus();
-				end
-			end
-			if _G.setChatImmediate then
-				_G.setChatImmediate(not p23);
-			end
-			v_u_20=p23;
-			if p23 then
-				v_u_19=0;
-			end
-		end
-	end
-
-	function v30()
-		if not v_u_20 then
-			local v29=v_u_19+1;
-			v_u_19=math.min(v29,99);
-		end
-	end
-
-	if v21 then
-		task.cancel(v21);
-	end
-
-	local v_u_33=task.spawn(function()
-		while true do
-			local v31,v32=v_u_10("GetCore","ChatActive");
-			if(v31 and(type(v32)=="boolean")and(v32~=v_u_20))then
-				v_u_28(v32);
-			end
-			task.wait(0.05);
-		end
-	end);
-
-	local v36=v_u_3.InputBegan:Connect(function(p34,p35)
-		if not p35 then
-			if((p34.KeyCode==Enum.KeyCode.Slash)and not v_u_20)then
-				v_u_10("SetCore","ChatActive",true);
-			end
-		end
-	end);
-
-	table.insert(v_u_22,v36);
-
-	task.spawn(function()
-		local v37=0;
-		local v38=nil;
-		while true do
-			v38=(v37>=10)or(v_u_18 and v_u_18:FindFirstChild("appLayout"));
-			if v38 then
-				break;
-			end
-			task.wait(0.1);
-			v37=v37+0.1;
-		end
-		if v38 then
-			local v39=v_u_18 and v_u_18:FindFirstChild("appLayout");
-			if v39 then
-				v39.Visible=true;
-				if p_u_14 then
-					if p_u_14.isFadedOut then
-						local v40=p_u_14.cancelFade;
-						if(type(v40)=="function")then
-							p_u_14:cancelFade();
-						end
-					else
-						local v41=p_u_14.fadeIn;
-						if(type(v41)=="function")then
-							p_u_14:fadeIn();
-						end
-					end
-				end
-				if _G.setChatImmediate then
-					_G.setChatImmediate(false);
-				end
-				v_u_20=true;
-				v_u_19=0;
-			end
-			v_u_10("SetCore","ChatActive",true);
-		else
-			warn("oof");
-		end
-	end);
-
-	return function()
-		if v_u_33 then
-			task.cancel(v_u_33);
-			v_u_33=nil;
-		end
-		for _,v42 in ipairs(v_u_22)do
-			v42:Disconnect();
-		end
-		table.clear(v_u_22);
-	end,v30;
-end;
-
-return v1;
-end)()
-
-local BubbleChat = (function()
-local Players = game:GetService("Players")
+--[[ SERVICES ]]
+local RunService = game:GetService('RunService')
+local TextChatService = game:GetService('TextChatService')
+local PlayersService = game:GetService('Players')
+local ChatService = game:GetService("Chat")
 local TextService = game:GetService("TextService")
-local Debris = game:GetService("Debris")
-local TweenService = game:GetService("TweenService")
 
-local MAX_BUBBLE_WIDTH = 360
-local BUBBLE_HEIGHT_TEXT_SIZE = 20 -- preserve the shorter classic bubble height
-local MAX_TOTAL_BUBBLE_HEIGHT = 150
-local NEAR_BUBBLE_DISTANCE = 45
-local MAX_BUBBLE_DISTANCE = 80
-local MIN_BUBBLE_LIFETIME = 12
-local MAX_BUBBLE_LIFETIME = 20
-local MIN_BUBBLE_LIFETIME_SELF = 8
-local MAX_BUBBLE_LIFETIME_SELF = 15
-local BUBBLE_FADE_TIME = 1.5
+--[[ END OF SERVICES ]]
 
-local function convertRichTextEscapeStrings(message: string): string
-	message = string.gsub(message, "&lt;", "<")
-	message = string.gsub(message, "&gt;", ">")
-	message = string.gsub(message, "&quot;", "\"")
-	message = string.gsub(message, "&apos;", "'")
-	message = string.gsub(message, "&amp;", "&")
-	return message
+
+-- ReplicatedFirst runs before PlayerGui and the character necessarily exist.
+local localPlayer = PlayersService.LocalPlayer
+while not localPlayer do
+    PlayersService:GetPropertyChangedSignal("LocalPlayer"):Wait()
+    localPlayer = PlayersService.LocalPlayer
+end
+local playerGui = localPlayer:WaitForChild("PlayerGui")
+
+-- Disable only the built-in bubble renderer; leave normal chat window/input intact.
+local bubbleConfig = TextChatService:WaitForChild("BubbleChatConfiguration")
+bubbleConfig.Enabled = false
+
+-- Prevent duplicate copies of the renderer in the same PlayerGui.
+if playerGui:FindFirstChild("Classic2016BubbleRenderer") then return end
+local renderFolder = Instance.new("Folder")
+renderFolder.Name = "Classic2016BubbleRenderer"
+renderFolder.Parent = playerGui
+
+--[[ SCRIPT VARIABLES ]]
+local CHAT_BUBBLE_FONT = Enum.Font.SourceSans
+local CHAT_BUBBLE_FONT_SIZE = Enum.FontSize.Size24 -- if you change CHAT_BUBBLE_FONT_SIZE_INT please change this to match
+local CHAT_BUBBLE_FONT_SIZE_INT = 24 -- if you change CHAT_BUBBLE_FONT_SIZE please change this to match
+local CHAT_BUBBLE_LINE_HEIGHT = CHAT_BUBBLE_FONT_SIZE_INT + 10
+local CHAT_BUBBLE_TAIL_HEIGHT = 14
+local CHAT_BUBBLE_WIDTH_PADDING = 30
+local CHAT_BUBBLE_FADE_SPEED = 1.5
+
+local BILLBOARD_MAX_WIDTH = 400
+local BILLBOARD_MAX_HEIGHT = 250	--This limits the number of bubble chats that you see above characters
+
+local ELIPSES = "..."
+local CchMaxChatMessageLength = 128 -- max chat message length, including null terminator and elipses.
+local CchMaxChatMessageLengthExclusive = CchMaxChatMessageLength - string.len(ELIPSES) - 1
+
+local NEAR_BUBBLE_DISTANCE = 65	--previously 45
+local MAX_BUBBLE_DISTANCE = 100	--previously 80
+
+--[[ END OF SCRIPT VARIABLES ]]
+
+
+-- [[ SCRIPT ENUMS ]]
+local ChatType = {	PLAYER_CHAT = "pChat",
+					PLAYER_TEAM_CHAT = "pChatTeam",
+					PLAYER_WHISPER_CHAT = "pChatWhisper",
+					GAME_MESSAGE= "gMessage",
+					PLAYER_GAME_CHAT = "pGame",
+					BOT_CHAT = "bChat" }
+
+local BubbleColor = {	WHITE = "dub", 
+					BLUE = "blu", 
+					GREEN = "gre",
+					RED = "red" }
+
+--[[ END OF SCRIPT ENUMS ]]
+
+
+
+--[[ FUNCTIONS ]]
+
+local function lerpLength(msg, min, max)
+	return min + (max-min) * math.min(string.len(msg)/75.0, 1.0)
 end
 
-local function getMessageLength(message: string): number
-	return utf8.len(utf8.nfcnormalize(message)) or 0
+local function createFifo()
+	local this = {}
+	this.data = {}
+
+	local emptyEvent = Instance.new("BindableEvent")
+	this.Emptied = emptyEvent.Event
+
+	function this:Size()
+		return #this.data
+	end
+
+	function this:Empty()
+		return this:Size() <= 0
+	end
+
+	function this:PopFront()
+		table.remove(this.data, 1)
+		if this:Empty() then emptyEvent:Fire() end
+	end
+
+	function this:Front()
+		return this.data[1]
+	end
+
+	function this:Get(index)
+		return this.data[index]
+	end
+
+	function this:PushBack(value)
+		table.insert(this.data, value)
+	end
+
+	function this:GetData()
+		return this.data
+	end
+
+	return this
 end
 
-local ELLIPSES = "..."
-local MaxChatMessageLength = 128
-local MaxChatMessageLengthExclusive = MaxChatMessageLength - getMessageLength(ELLIPSES) - 1
+local function createCharacterChats()
+	local this = {}
 
-local resizeBubbleTweenInfo = TweenInfo.new(.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-local shiftBubblesUpTweenInfo = TweenInfo.new(.07, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+	this.Fifo = createFifo()
+	this.BillboardGui = nil
 
-local BubbleChat = {}
-local chatBubbleQueues = {}
-
-local function lerpLength(msg: string, min: number, max: number): number
-	return min + (max - min) * math.min(getMessageLength(msg) / 75.0, 1.0)
+	return this
 end
 
-local function removeOldestFromQueue(adornee: PVInstance)
-	local queue = chatBubbleQueues[adornee]
-	if not queue then return end
-	local oldestBubble = queue[#queue]
-	if not oldestBubble then return end
-	oldestBubble:Destroy()
-	queue[#queue] = nil
+local function createMap()
+	local this = {}
+	this.data = {}
+	local count = 0
+
+	function this:Size()
+		return count
+	end
+
+	function this:Erase(key)
+		if this.data[key] then count = count - 1 end
+		this.data[key] = nil
+	end
+
+	function this:Set(key, value)
+		if not this.data[key] and value then count = count + 1 end
+		this.data[key] = value
+	end
+
+	function this:Get(key)
+		if not key then return end
+		if not this.data[key] then
+			this.data[key] = createCharacterChats()
+			local emptiedCon = nil
+			emptiedCon = this.data[key].Fifo.Emptied:connect(function()
+				emptiedCon:disconnect()
+				this:Erase(key)
+			end)
+		end
+		return this.data[key]
+	end
+
+	function this:GetData()
+		return this.data
+	end
+
+	return this
 end
 
-local function addBubbleToQueue(adornee: PVInstance, chatBubble: BillboardGui, lifetime: number)
-	local queue = chatBubbleQueues[adornee]
-	if queue == nil then
-		queue = {}
-		chatBubbleQueues[adornee] = queue
-		adornee.Destroying:Connect(function()
-			chatBubbleQueues[adornee] = nil
+local function createChatLine(chatType, message, bubbleColor, isLocalPlayer)
+	local this = {}
+
+	function this:ComputeBubbleLifetime(msg, isSelf)
+		if isSelf then
+			return lerpLength(msg,8,15)
+		else
+			return lerpLength(msg,12,20)
+		end
+	end
+
+	function this:IsPlayerChat()
+		if not this.ChatType then return false end
+
+		if this.ChatType == ChatType.PLAYER_CHAT or 
+			this.ChatType == ChatType.PLAYER_WHISPER_CHAT or
+			this.ChatType == ChatType.PLAYER_TEAM_CHAT then
+				return true
+		end
+
+		return false
+	end
+
+	this.ChatType = chatType
+	this.Origin = nil
+	this.RenderBubble = nil
+	this.Message = message
+	this.BubbleDieDelay = this:ComputeBubbleLifetime(message, isLocalPlayer)
+	this.BubbleColor = bubbleColor
+	this.IsLocalPlayer = isLocalPlayer
+
+	return this
+end
+
+local function createPlayerChatLine(chatType, player, message, isLocalPlayer)
+	local this = createChatLine(chatType, message, BubbleColor.WHITE, isLocalPlayer)
+
+	if player then
+		this.User = player.Name
+		this.Origin = player.Character
+	end
+
+	return this
+end
+
+local function createGameChatLine(origin, message, isLocalPlayer, bubbleColor)
+	local this = createChatLine(origin and ChatType.PLAYER_GAME_CHAT or ChatType.BOT_CHAT, message, bubbleColor, isLocalPlayer)
+	this.Origin = origin
+
+	return this
+end
+
+function createChatBubbleMain(filePrefix, sliceRect)
+	local chatBubbleMain = Instance.new("ImageLabel")
+	chatBubbleMain.Name = "ChatBubble"
+	chatBubbleMain.ScaleType = Enum.ScaleType.Slice
+	chatBubbleMain.SliceCenter = sliceRect
+	chatBubbleMain.Image = "rbxasset://textures/" .. tostring(filePrefix) .. ".png"
+	chatBubbleMain.BackgroundTransparency = 1
+	chatBubbleMain.BorderSizePixel = 0
+	chatBubbleMain.Size = UDim2.new(1.0, 0, 1.0, 0)
+	chatBubbleMain.Position = UDim2.new(0,0,0,0)
+
+	return chatBubbleMain
+end
+
+function createChatBubbleTail(position, size)
+	local chatBubbleTail = Instance.new("ImageLabel")
+	chatBubbleTail.Name = "ChatBubbleTail"
+	chatBubbleTail.Image = "rbxasset://textures/ui/dialog_tail.png"
+	chatBubbleTail.BackgroundTransparency = 1
+	chatBubbleTail.BorderSizePixel = 0
+	chatBubbleTail.Position = position
+	chatBubbleTail.Size = size
+
+	return chatBubbleTail
+end
+
+function createChatBubbleWithTail(filePrefix, position, size, sliceRect)
+	local chatBubbleMain = createChatBubbleMain(filePrefix, sliceRect)
+	
+	local chatBubbleTail = createChatBubbleTail(position, size)
+	chatBubbleTail.Parent = chatBubbleMain
+
+	return chatBubbleMain
+end
+
+function createScaledChatBubbleWithTail(filePrefix, frameScaleSize, position, sliceRect)
+	local chatBubbleMain = createChatBubbleMain(filePrefix, sliceRect)
+	
+	local frame = Instance.new("Frame")
+	frame.Name = "ChatBubbleTailFrame"
+	frame.BackgroundTransparency = 1
+	frame.SizeConstraint = Enum.SizeConstraint.RelativeXX
+	frame.Position = UDim2.new(0.5, 0, 1, 0)
+	frame.Size = UDim2.new(frameScaleSize, 0, frameScaleSize, 0)
+	frame.Parent = chatBubbleMain
+
+	local chatBubbleTail = createChatBubbleTail(position, UDim2.new(1,0,0.5,0))
+	chatBubbleTail.Parent = frame
+
+	return chatBubbleMain
+end
+
+function createChatImposter(filePrefix, dotDotDot, yOffset)
+	local result = Instance.new("ImageLabel")
+	result.Name = "DialogPlaceholder"
+	result.Image = "rbxasset://textures/" .. tostring(filePrefix) .. ".png"
+	result.BackgroundTransparency = 1
+	result.BorderSizePixel = 0
+	result.Position = UDim2.new(0, 0, -1.25, 0)
+	result.Size = UDim2.new(1, 0, 1, 0)
+
+	local image = Instance.new("ImageLabel")
+	image.Name = "DotDotDot"
+	image.Image = "rbxasset://textures/" .. tostring(dotDotDot) .. ".png"
+	image.BackgroundTransparency = 1
+	image.BorderSizePixel = 0
+	image.Position = UDim2.new(0.001, 0, yOffset, 0)
+	image.Size = UDim2.new(1, 0, 0.7, 0)
+	image.Parent = result
+
+	return result
+end
+
+
+local function createChatOutput()
+
+	local this = {}
+	this.ChatBubble = {}
+	this.ChatBubbleWithTail = {}
+	this.ScalingChatBubbleWithTail = {}
+	this.CharacterSortedMsg = createMap()
+
+	-- init chat bubble tables
+	local function initChatBubbleType(chatBubbleType, fileName, imposterFileName, isInset, sliceRect)
+		this.ChatBubble[chatBubbleType] = createChatBubbleMain(fileName, sliceRect)
+		this.ChatBubbleWithTail[chatBubbleType] = createChatBubbleWithTail(fileName, UDim2.new(0.5, -CHAT_BUBBLE_TAIL_HEIGHT, 1, isInset and -1 or 0), UDim2.new(0, 30, 0, CHAT_BUBBLE_TAIL_HEIGHT), sliceRect)
+		this.ScalingChatBubbleWithTail[chatBubbleType] = createScaledChatBubbleWithTail(fileName, 0.5, UDim2.new(-0.5, 0, 0, isInset and -1 or 0), sliceRect)
+	end
+
+	initChatBubbleType(BubbleColor.WHITE,	"ui/dialog_white",	"ui/chatBubble_white_notify_bkg", 	false,	Rect.new(5,5,15,15))
+	initChatBubbleType(BubbleColor.BLUE,	"ui/dialog_blue",	"ui/chatBubble_blue_notify_bkg",	true, 	Rect.new(7,7,33,33))
+	initChatBubbleType(BubbleColor.RED,		"ui/dialog_red",	"ui/chatBubble_red_notify_bkg",		true,	Rect.new(7,7,33,33))
+	initChatBubbleType(BubbleColor.GREEN,	"ui/dialog_green",	"ui/chatBubble_green_notify_bkg",	true,	Rect.new(7,7,33,33))
+
+	function this:SanitizeChatLine(msg)
+		if string.len(msg) > CchMaxChatMessageLengthExclusive then
+			return string.sub(msg, 1, CchMaxChatMessageLengthExclusive) .. ELIPSES
+		else
+			return msg
+		end
+	end
+
+	local function createBillboardInstance(adornee)
+		local billboardGui = Instance.new("BillboardGui")
+		billboardGui.Adornee = adornee	
+		billboardGui.Name = "Classic2016BubbleBillboard"
+		billboardGui.Size = UDim2.new(0,BILLBOARD_MAX_WIDTH,0,BILLBOARD_MAX_HEIGHT)
+		billboardGui.StudsOffset = Vector3.new(0, 1.5, 2)
+		billboardGui.Parent = renderFolder
+
+		local billboardFrame = Instance.new("Frame")
+		billboardFrame.Name = "BillboardFrame"
+		billboardFrame.Size = UDim2.new(1,0,1,0)
+		billboardFrame.Position = UDim2.new(0,0,-0.5,0)
+		billboardFrame.BackgroundTransparency = 1
+		billboardFrame.Parent = billboardGui
+
+		local billboardChildRemovedCon = nil
+		billboardChildRemovedCon = billboardFrame.ChildRemoved:connect(function()
+			if #billboardFrame:GetChildren() <= 1 then
+				billboardChildRemovedCon:disconnect()
+				billboardGui:Destroy()
+			end
+		end)
+
+		this:CreateSmallTalkBubble(BubbleColor.WHITE).Parent = billboardFrame
+
+		return billboardGui
+	end
+
+	function this:CreateBillboardGuiHelper(instance, onlyCharacter)
+		if instance and not this.CharacterSortedMsg:Get(instance)["BillboardGui"] then
+			if not onlyCharacter then
+				if instance:IsA("BasePart") then
+					-- Create a new billboardGui object attached to this player
+					local billboardGui = createBillboardInstance(instance)
+					this.CharacterSortedMsg:Get(instance)["BillboardGui"] = billboardGui
+					return
+				end
+			end
+
+			if instance:IsA("Model") then
+				local head = instance:FindFirstChild("Head")
+				if head and head:IsA("BasePart") then
+					-- Create a new billboardGui object attached to this player
+					local billboardGui = createBillboardInstance(head)
+					this.CharacterSortedMsg:Get(instance)["BillboardGui"] = billboardGui
+				end
+			end
+		end
+	end
+
+	local function distanceToBubbleOrigin(origin)
+		if not origin then return 100000 end
+
+		local camera = workspace.CurrentCamera
+		if not camera or not origin:IsA("BasePart") then return 100000 end
+		return (origin.Position - camera.CFrame.Position).Magnitude
+	end
+
+	local function isPartOfLocalPlayer(adornee)
+		if adornee and PlayersService.LocalPlayer.Character then
+			return adornee:IsDescendantOf(PlayersService.LocalPlayer.Character)
+		end
+	end
+
+	function this:SetBillboardLODNear(billboardGui)
+		local isLocalPlayer = isPartOfLocalPlayer(billboardGui.Adornee)
+		billboardGui.Size = UDim2.new(0, BILLBOARD_MAX_WIDTH, 0, BILLBOARD_MAX_HEIGHT)
+		billboardGui.StudsOffset = Vector3.new(0, isLocalPlayer and 1.5 or 2.5, isLocalPlayer and 2 or 0)
+		billboardGui.Enabled = true
+		local billChildren = billboardGui.BillboardFrame:GetChildren()
+		for i = 1, #billChildren do
+			billChildren[i].Visible = true
+		end
+		billboardGui.BillboardFrame.SmallTalkBubble.Visible = false
+	end
+
+	function this:SetBillboardLODDistant(billboardGui)
+		local isLocalPlayer = isPartOfLocalPlayer(billboardGui.Adornee)
+		billboardGui.Size = UDim2.new(4,0,3,0)
+		billboardGui.StudsOffset = Vector3.new(0, 3, isLocalPlayer and 2 or 0)
+		billboardGui.Enabled = true
+		local billChildren = billboardGui.BillboardFrame:GetChildren()
+		for i = 1, #billChildren do
+			billChildren[i].Visible = false
+		end
+		billboardGui.BillboardFrame.SmallTalkBubble.Visible = true
+	end
+
+	function this:SetBillboardLODVeryFar(billboardGui)
+		billboardGui.Enabled = false
+	end
+
+	function this:SetBillboardGuiLOD(billboardGui, origin)
+		if not origin then return end
+
+		if origin:IsA("Model") then
+			local head = origin:FindFirstChild("Head")
+			if not head then origin = origin.PrimaryPart 
+			else origin = head end
+		end
+
+		local bubbleDistance = distanceToBubbleOrigin(origin)
+
+		if bubbleDistance < NEAR_BUBBLE_DISTANCE then
+			this:SetBillboardLODNear(billboardGui)
+		elseif bubbleDistance >= NEAR_BUBBLE_DISTANCE and bubbleDistance < MAX_BUBBLE_DISTANCE then
+			this:SetBillboardLODDistant(billboardGui)
+		else
+			this:SetBillboardLODVeryFar(billboardGui)
+		end
+	end
+
+	function this:CameraCFrameChanged()
+		for index, value in pairs(this.CharacterSortedMsg:GetData()) do
+			local playerBillboardGui = value["BillboardGui"]
+			if playerBillboardGui then this:SetBillboardGuiLOD(playerBillboardGui, index) end
+		end
+	end
+
+	function this:CreateBubbleText(message)
+		local bubbleText = Instance.new("TextLabel")
+		bubbleText.Name = "BubbleText"
+		bubbleText.BackgroundTransparency = 1
+		bubbleText.Position = UDim2.new(0,CHAT_BUBBLE_WIDTH_PADDING/2,0,0)
+		bubbleText.Size = UDim2.new(1,-CHAT_BUBBLE_WIDTH_PADDING,1,0)
+		bubbleText.Font = CHAT_BUBBLE_FONT
+		bubbleText.TextWrapped = true
+		bubbleText.FontSize = CHAT_BUBBLE_FONT_SIZE
+		bubbleText.Text = message
+		bubbleText.Visible = false
+
+		return bubbleText
+	end
+
+	function this:CreateSmallTalkBubble(chatBubbleType)
+		local smallTalkBubble = this.ScalingChatBubbleWithTail[chatBubbleType]:Clone()
+		smallTalkBubble.Name = "SmallTalkBubble"
+		smallTalkBubble.Position = UDim2.new(0,0,1,-40)
+		smallTalkBubble.Visible = false
+		local text = this:CreateBubbleText("...")
+		text.TextScaled = true
+		text.TextWrapped = false
+		text.Visible = true
+		text.Parent = smallTalkBubble
+
+		return smallTalkBubble
+	end
+
+	function this:UpdateChatLinesForOrigin(origin, currentBubbleYPos)
+		local bubbleQueue = this.CharacterSortedMsg:Get(origin).Fifo
+		local bubbleQueueSize = bubbleQueue:Size()
+		local bubbleQueueData = bubbleQueue:GetData()
+		if #bubbleQueueData <= 1 then return end
+
+		for index = (#bubbleQueueData - 1), 1, -1 do
+			local value = bubbleQueueData[index]
+			local bubble = value.RenderBubble
+			if not bubble then continue end
+			local bubblePos = bubbleQueueSize - index + 1
+
+			if bubblePos > 1 then
+				local tail = bubble:FindFirstChild("ChatBubbleTail")
+				if tail then tail:Destroy() end
+				local bubbleText = bubble:FindFirstChild("BubbleText")
+				if bubbleText then bubbleText.TextTransparency = 0.5 end
+			end
+
+			local udimValue = UDim2.new( bubble.Position.X.Scale, bubble.Position.X.Offset, 
+										1, currentBubbleYPos - bubble.Size.Y.Offset - CHAT_BUBBLE_TAIL_HEIGHT )
+			bubble:TweenPosition(udimValue, Enum.EasingDirection.Out, Enum.EasingStyle.Bounce, 0.1, true)
+			currentBubbleYPos = currentBubbleYPos - bubble.Size.Y.Offset - CHAT_BUBBLE_TAIL_HEIGHT
+		end
+	end
+
+	function this:DestroyBubble(bubbleQueue, bubbleToDestroy)
+		if not bubbleQueue then return end
+		if bubbleQueue:Empty() then return end
+
+		local bubble = bubbleQueue:Front().RenderBubble
+		if not bubble then
+			bubbleQueue:PopFront()
+		 	return
+		end
+
+		task.spawn(function()
+			while not bubbleQueue:Empty() and bubbleQueue:Front().RenderBubble ~= bubbleToDestroy do
+				task.wait()
+			end
+			if bubbleQueue:Empty() then return end
+
+			bubble = bubbleQueue:Front().RenderBubble
+
+			local timeBetween = 0
+			local bubbleText = bubble:FindFirstChild("BubbleText")
+			local bubbleTail = bubble:FindFirstChild("ChatBubbleTail")
+
+			while bubble and bubble.ImageTransparency < 1 do
+				timeBetween = task.wait()
+				if bubble then
+					local fadeAmount = timeBetween * CHAT_BUBBLE_FADE_SPEED
+					bubble.ImageTransparency = bubble.ImageTransparency + fadeAmount
+					if bubbleText then bubbleText.TextTransparency = bubbleText.TextTransparency + fadeAmount end
+					if bubbleTail then bubbleTail.ImageTransparency = bubbleTail.ImageTransparency + fadeAmount end
+				end
+			end
+
+			if bubble then 
+				bubble:Destroy()
+				bubbleQueue:PopFront()
+			end
 		end)
 	end
 
-	local gap = 4
-	local newChatBubbleSizeY = chatBubble.BillboardFrame.ChatBubble.AbsoluteSize.Y
-	local totalYSpaceUsed = newChatBubbleSizeY
-	for _,v in queue do
-		if v.Parent == nil then continue end
-		local shiftUp = newChatBubbleSizeY+gap
-		local newPosition = v.BillboardFrame.Position - UDim2.fromOffset(0, shiftUp)
-		TweenService:Create(v.BillboardFrame, shiftBubblesUpTweenInfo, {Position = newPosition}):Play()
-		totalYSpaceUsed += v.BillboardFrame.ChatBubble.AbsoluteSize.Y
-		v.BillboardFrame.ChatBubble.BubbleText.TextTransparency = 0.5
-	end
-	if totalYSpaceUsed > MAX_TOTAL_BUBBLE_HEIGHT then
-		removeOldestFromQueue(adornee)
-	end
+	function this:CreateChatLineRender(instance, line, onlyCharacter, fifo)
+		if not instance then return end
 
-	table.insert(queue, 1, chatBubble)
-
-	task.delay(lifetime+BUBBLE_FADE_TIME, function()
-		if chatBubble.Parent ~= nil then
-			removeOldestFromQueue(adornee)
+		if not this.CharacterSortedMsg:Get(instance)["BillboardGui"] then
+			this:CreateBillboardGuiHelper(instance, onlyCharacter)
 		end
-	end)
-end
 
-function BubbleChat.createBubble(adornee: PVInstance, message: string, sentBySelf: boolean?)
-	if not adornee or not adornee.Parent then return end
+		local billboardGui = this.CharacterSortedMsg:Get(instance)["BillboardGui"]
+		if billboardGui then
+			local chatBubbleRender = this.ChatBubbleWithTail[line.BubbleColor]:Clone()
+			chatBubbleRender.Visible = true
+			local bubbleText = this:CreateBubbleText(line.Message)
 
-	local chatBubbleGui = Instance.new("BillboardGui")
-	chatBubbleGui.Name = "ChatBubbleGui"
-	chatBubbleGui.Size = UDim2.fromOffset(400, 250)
+			bubbleText.Parent = chatBubbleRender
+			chatBubbleRender.Parent = billboardGui.BillboardFrame
 
-	local billboardFrame = Instance.new("Frame")
-	billboardFrame.Name = "BillboardFrame"
-	billboardFrame.AnchorPoint = Vector2.new(0.5, 0)
-	billboardFrame.BackgroundTransparency = 1
-	billboardFrame.Position = UDim2.fromScale(0.5, -0.5)
-	billboardFrame.Size = UDim2.fromScale(1, 1)
+			line.RenderBubble = chatBubbleRender
 
-	local smallTalkBubble = Instance.new("ImageLabel")
-	smallTalkBubble.Name = "SmallTalkBubble"
-	smallTalkBubble.AnchorPoint = Vector2.new(0.5, 1)
-	smallTalkBubble.BackgroundTransparency = 1
-	smallTalkBubble.BorderSizePixel = 0
-	smallTalkBubble.Image = "rbxasset://textures/ui/dialog_white.png"
-	smallTalkBubble.ImageColor3 = Color3.new(1, 1, 1)
-	smallTalkBubble.Position = UDim2.fromScale(0.5, 1)
-	smallTalkBubble.ScaleType = Enum.ScaleType.Slice
-	smallTalkBubble.Size = UDim2.fromOffset(40, 28)
-	smallTalkBubble.SliceCenter = Rect.new(5, 5, 15, 15)
-	smallTalkBubble.Visible = false
+			local currentTextBounds = TextService:GetTextSize(bubbleText.Text, CHAT_BUBBLE_FONT_SIZE_INT, CHAT_BUBBLE_FONT, 
+																Vector2.new(BILLBOARD_MAX_WIDTH, BILLBOARD_MAX_HEIGHT))
+			local bubbleWidthScale = math.clamp((currentTextBounds.x + CHAT_BUBBLE_WIDTH_PADDING)/BILLBOARD_MAX_WIDTH, 0.1, 1)
+			local numOflines = math.max(1, math.ceil(currentTextBounds.y/CHAT_BUBBLE_FONT_SIZE_INT))
 
-	local smallTalkBubbleText = Instance.new("TextLabel")
-	smallTalkBubbleText.Name = "BubbleText"
-	smallTalkBubbleText.BackgroundTransparency = 1
-	smallTalkBubbleText.ClipsDescendants = true
-	smallTalkBubbleText.Font = Enum.Font.SourceSans
-	smallTalkBubbleText.Size = UDim2.fromScale(1, 1)
-	smallTalkBubbleText.Text = "..."
-	smallTalkBubbleText.TextColor3 = Color3.fromRGB(55, 55, 55)
-	smallTalkBubbleText.TextSize = 20
+			-- prep chat bubble for tween
+			chatBubbleRender.Size = UDim2.new(0,0,0,0)
+			chatBubbleRender.Position = UDim2.new(0.5,0,1,0)
 
-	local smallTalkBubbleUIPadding = Instance.new("UIPadding")
-	smallTalkBubbleUIPadding.Name = "UIPadding"
-	smallTalkBubbleUIPadding.PaddingBottom = UDim.new(0, 8)
-	smallTalkBubbleUIPadding.PaddingLeft = UDim.new(0, 12)
-	smallTalkBubbleUIPadding.PaddingRight = UDim.new(0, 12)
-	smallTalkBubbleUIPadding.PaddingTop = UDim.new(0, 8)
-	smallTalkBubbleUIPadding.Parent = smallTalkBubbleText
-	smallTalkBubbleText.Parent = smallTalkBubble
+			local newChatBubbleOffsetSizeY = numOflines * CHAT_BUBBLE_LINE_HEIGHT
 
-	local chatBubbleTailFrame = Instance.new("Frame")
-	chatBubbleTailFrame.Name = "ChatBubbleTailFrame"
-	chatBubbleTailFrame.BackgroundTransparency = 1
-	chatBubbleTailFrame.Position = UDim2.fromScale(0.5, 1)
-	chatBubbleTailFrame.Size = UDim2.fromScale(0.5, 0.5)
-	chatBubbleTailFrame.SizeConstraint = Enum.SizeConstraint.RelativeXX
+			chatBubbleRender:TweenSizeAndPosition(UDim2.new(bubbleWidthScale, 0, 0, newChatBubbleOffsetSizeY),
+												 	UDim2.new( (1-bubbleWidthScale)/2, 0, 1, -newChatBubbleOffsetSizeY),
+												 	Enum.EasingDirection.Out, Enum.EasingStyle.Elastic, 0.1, true,
+												 	function() bubbleText.Visible = true end)
 
-	local chatBubbleTail = Instance.new("ImageLabel")
-	chatBubbleTail.Name = "ChatBubbleTail"
-	chatBubbleTail.BackgroundTransparency = 1
-	chatBubbleTail.BorderSizePixel = 0
-	chatBubbleTail.Image = "rbxasset://textures/ui/dialog_tail.png"
-	chatBubbleTail.ImageColor3 = Color3.new(1, 1, 1)
-	chatBubbleTail.Position = UDim2.fromScale(-0.5, 0)
-	chatBubbleTail.Size = UDim2.fromScale(1, 0.5)
-	chatBubbleTail.Parent = chatBubbleTailFrame
-	chatBubbleTailFrame.Parent = smallTalkBubble
-	smallTalkBubble.Parent = billboardFrame
+			-- todo: remove when over max bubbles
+			this:SetBillboardGuiLOD(billboardGui, line.Origin)
+			this:UpdateChatLinesForOrigin(line.Origin, -newChatBubbleOffsetSizeY)
 
-	local chatBubble = Instance.new("ImageLabel")
-	chatBubble.Name = "ChatBubble"
-	chatBubble.AnchorPoint = Vector2.new(0.5, 1)
-	chatBubble.BackgroundTransparency = 1
-	chatBubble.BorderSizePixel = 0
-	chatBubble.Image = "rbxasset://textures/ui/dialog_white.png"
-	chatBubble.ImageColor3 = Color3.new(1, 1, 1)
-	chatBubble.Position = UDim2.fromScale(0.5, 1)
-	chatBubble.ScaleType = Enum.ScaleType.Slice
-	chatBubble.SliceCenter = Rect.new(5, 5, 15, 15)
-	chatBubble.Visible = false
-
-	local bubbleText = Instance.new("TextLabel")
-	bubbleText.Name = "BubbleText"
-	bubbleText.BackgroundTransparency = 1
-	bubbleText.ClipsDescendants = false
-	bubbleText.TextTruncate = Enum.TextTruncate.None
-	bubbleText.Font = Enum.Font.SourceSans
-	bubbleText.Size = UDim2.fromScale(1, 1)
-	bubbleText.Text = ""
-	bubbleText.TextColor3 = Color3.fromRGB(55, 55, 55)
-	bubbleText.TextSize = 25
-	bubbleText.TextWrapped = true
-
-	local uiPadding = Instance.new("UIPadding")
-	uiPadding.Name = "UIPadding"
-	uiPadding.PaddingBottom = UDim.new(0, 8)
-	uiPadding.PaddingLeft = UDim.new(0, 7)
-	uiPadding.PaddingRight = UDim.new(0, 7)
-	uiPadding.PaddingTop = UDim.new(0, 8)
-	uiPadding.Parent = bubbleText
-	bubbleText.Parent = chatBubble
-	chatBubble.Parent = billboardFrame
-
-	local chatBubbleTail1 = Instance.new("ImageLabel")
-	chatBubbleTail1.Name = "ChatBubbleTail"
-	chatBubbleTail1.BackgroundTransparency = 1
-	chatBubbleTail1.BorderSizePixel = 0
-	chatBubbleTail1.Image = "rbxasset://textures/ui/dialog_tail.png"
-	chatBubbleTail1.ImageColor3 = Color3.new(1, 1, 1)
-	chatBubbleTail1.Position = UDim2.new(0.5, -12, 1, -1)
-	chatBubbleTail1.Size = UDim2.fromOffset(24, 12)
-	chatBubbleTail1.Visible = false
-	chatBubbleTail1.Parent = billboardFrame
-
-	billboardFrame.Parent = chatBubbleGui
-	message = convertRichTextEscapeStrings(message)
-
-	local actualTextSize = bubbleText.TextSize
-	local horizontalPadding = uiPadding.PaddingLeft.Offset + uiPadding.PaddingRight.Offset
-	local glyphSafety = math.max(8, math.ceil(actualTextSize * 0.35))
-	local maxContentWidth = math.max(1, MAX_BUBBLE_WIDTH - glyphSafety)
-
-	local widthBounds = TextService:GetTextSize(
-		message,
-		actualTextSize,
-		bubbleText.Font,
-		Vector2.new(maxContentWidth, math.huge)
-	)
-
-	-- Keep the classic short 2015M vertical proportions. Width follows the
-	-- real TextSize, while height intentionally stays based on the classic
-	-- layout size.
-	local heightBounds = TextService:GetTextSize(
-		message,
-		BUBBLE_HEIGHT_TEXT_SIZE,
-		bubbleText.Font,
-		Vector2.new(maxContentWidth, math.huge)
-	)
-
-	local multiline = widthBounds.Y > actualTextSize
-	if not multiline then
-		-- 2015M had less empty space above the text than the later bubble.
-		uiPadding.PaddingTop = UDim.new(0, 2)
-		uiPadding.PaddingBottom = UDim.new(0, 6)
-	end
-
-	local chatBubbleSize = UDim2.fromOffset(
-		widthBounds.X + horizontalPadding + glyphSafety,
-		heightBounds.Y + uiPadding.PaddingTop.Offset + uiPadding.PaddingBottom.Offset
-	)
-
-	chatBubble.Size = UDim2.fromOffset(chatBubbleSize.X.Offset+8, chatBubbleSize.Y.Offset+8)
-	local resizeTween = TweenService:Create(chatBubble, resizeBubbleTweenInfo, {Size = chatBubbleSize})
-	resizeTween:Play()
-
-	task.delay(resizeBubbleTweenInfo.Time, function()
-		bubbleText.Text = message
-	end)
-
-	chatBubbleGui.Adornee = adornee
-	chatBubbleGui.Parent = adornee
-
-	local lifetime = sentBySelf and lerpLength(bubbleText.Text, MIN_BUBBLE_LIFETIME_SELF, MAX_BUBBLE_LIFETIME_SELF) or lerpLength(bubbleText.Text, MIN_BUBBLE_LIFETIME, MAX_BUBBLE_LIFETIME)
-	chatBubbleGui.StudsOffset = sentBySelf and Vector3.new(0, 1.8, 0) or Vector3.new(0, 2.4, 0)
-
-	Debris:AddItem(chatBubbleGui, lifetime + BUBBLE_FADE_TIME + 0.1)
-
-	task.delay(lifetime, function()
-		local tweenInfo = TweenInfo.new(BUBBLE_FADE_TIME, Enum.EasingStyle.Linear)
-		for _,v in chatBubbleGui:GetDescendants() do
-			if v:IsA("ImageLabel") then
-				TweenService:Create(v, tweenInfo, {ImageTransparency = 1}):Play()
-			elseif v:IsA("TextLabel") then
-				TweenService:Create(v, tweenInfo, {TextTransparency = 1}):Play()
-			end
-		end
-	end)
-
-	addBubbleToQueue(adornee, chatBubbleGui, lifetime)
-end
-
-task.spawn(function()
-	local camera = workspace.CurrentCamera
-	while true do
-		task.wait()
-		for adornee, queue in chatBubbleQueues do
-			if #queue == 0 or not adornee or not adornee.Parent then continue end
-
-			local mostRecentChatBubble = queue[1]
-			if not mostRecentChatBubble or not mostRecentChatBubble.Parent then continue end
-
-			local success, dist = pcall(function()
-				return (camera.CFrame.Position - adornee:GetPivot().Position).Magnitude
+			task.delay(line.BubbleDieDelay, function()
+				this:DestroyBubble(fifo, chatBubbleRender)
 			end)
-
-			if not success or not dist then continue end
-
-			for i = 1, #queue do
-				local bubbleGui = queue[i]
-				if not bubbleGui or bubbleGui.Parent == nil then continue end
-				local billboardFrame = bubbleGui:FindFirstChild("BillboardFrame")
-				if not billboardFrame then continue end
-
-				if dist < NEAR_BUBBLE_DISTANCE then
-					billboardFrame.ChatBubble.Visible = true
-					billboardFrame.ChatBubbleTail.Visible = (i == 1)
-					billboardFrame.SmallTalkBubble.Visible = false
-					bubbleGui.Enabled = true
-				elseif dist < MAX_BUBBLE_DISTANCE and i == 1 then
-					billboardFrame.ChatBubble.Visible = false
-					billboardFrame.ChatBubbleTail.Visible = false
-					billboardFrame.SmallTalkBubble.Visible = true
-					bubbleGui.Enabled = true
-				else
-					bubbleGui.Enabled = false
-				end
-			end
 		end
 	end
-end)
 
-return BubbleChat
-end)()
+	-- Modern TextChatService delivers already-filtered messages to this client.
+	function this:OnPlayerChatMessage(sourcePlayer, message)
+		if not sourcePlayer or type(message) ~= "string" or message == "" then return end
+		if string.sub(message, 1, 1) == '/' then return end
 
-local Players = game:GetService("Players")
-local TextChatService = game:GetService("TextChatService")
+		local safeMessage = this:SanitizeChatLine(message)
+		local line = createPlayerChatLine(ChatType.PLAYER_CHAT, sourcePlayer, safeMessage, sourcePlayer == localPlayer)
+		if line.Origin and line.Origin:FindFirstChild("Head") then
+			local fifo = this.CharacterSortedMsg:Get(line.Origin).Fifo
+			fifo:PushBack(line)
+			this:CreateChatLineRender(line.Origin, line, true, fifo)
+		end
+	end
 
-local player = Players.LocalPlayer
+	function this:OnGameChatMessage(origin, message, color)
+		local localPlayer = PlayersService.LocalPlayer
+		local fromOthers = localPlayer ~= nil and (localPlayer.Character ~= origin)
 
--- Disable built-in bubble chat since we use a custom BubbleChat module
-local bubbleChatConfig = TextChatService:FindFirstChild("BubbleChatConfiguration")
-if bubbleChatConfig then
-	bubbleChatConfig.Enabled = false
+		local bubbleColor = BubbleColor.WHITE
+
+		if color == Enum.ChatColor.Blue then bubbleColor = BubbleColor.BLUE
+		elseif color == Enum.ChatColor.Green then bubbleColor = BubbleColor.GREEN
+		elseif color == Enum.ChatColor.Red then bubbleColor = BubbleColor.RED end
+
+		local safeMessage = this:SanitizeChatLine(message)
+		local line = createGameChatLine(origin, safeMessage, not fromOthers, bubbleColor)
+	
+		if not line.Origin then return end
+		local fifo = this.CharacterSortedMsg:Get(line.Origin).Fifo
+		fifo:PushBack(line)
+		this:CreateChatLineRender(origin, line, false, fifo)
+	end
+
+	function this:BubbleChatEnabled()
+		return true
+	end
+
+	function this:CameraChanged(prop)
+		if prop == "CoordinateFrame" then 
+			this:CameraCFrameChanged() 
+		end 
+	end
+
+	-- Filtered server-delivered messages only (not unfiltered Player.Chatted).
+	TextChatService.MessageReceived:Connect(function(textChatMessage)
+		if textChatMessage.Status ~= Enum.TextChatMessageStatus.Success then return end
+		local textSource = textChatMessage.TextSource
+		if not textSource then return end -- system messages are not player bubbles
+		local player = PlayersService:GetPlayerByUserId(textSource.UserId)
+		if player then
+			this:OnPlayerChatMessage(player, textChatMessage.Text)
+		end
+	end)
+
+	-- Preserve support for classic game/NPC Chat:Chat() bubble messages.
+	-- This legacy API can be absent or disabled in some experiences.
+	pcall(function()
+		ChatService.Chatted:Connect(function(origin, message, color)
+			if origin and origin.Parent then
+				-- Player bubble messages already come through TextChatService.
+				if origin:IsA("BasePart") and PlayersService:GetPlayerFromCharacter(origin.Parent) then return end
+				if origin:IsA("Model") and PlayersService:GetPlayerFromCharacter(origin) then return end
+				this:OnGameChatMessage(origin, message, color)
+			end
+		end)
+	end)
+
+	-- Keep the distance-dependent appearance updated when the camera moves.
+	RunService.RenderStepped:Connect(function()
+		this:CameraCFrameChanged()
+	end)
 end
 
-TextChatService.MessageReceived:Connect(function(message)
-	if message.Status ~= Enum.TextChatMessageStatus.Success then return end
 
-	local textSource = message.TextSource
-	if not textSource then return end
-
-	-- Don't create bubbles for empty messages
-	if not message.Text or message.Text == "" then return end
-
-	-- Find the sender's player and character
-	local senderPlayer = Players:GetPlayerByUserId(textSource.UserId)
-	if not senderPlayer then return end
-
-	local character = senderPlayer.Character
-	if not character then return end
-
-	-- Prefer Head as adornee, fallback to HumanoidRootPart
-	local adornee = character:FindFirstChild("Head")
-	if not adornee then
-		adornee = character:FindFirstChild("HumanoidRootPart")
-	end
-	if not adornee then return end
-
-	local sentBySelf = (senderPlayer == player)
-	BubbleChat.createBubble(adornee, message.Text, sentBySelf)
-end)
-
-local playerGui = player:FindFirstChildOfClass("PlayerGui")
-if not playerGui then
-	playerGui = player:WaitForChild("PlayerGui", 5)
-end
-if playerGui then
-	local zenosChat = playerGui:FindFirstChild("ZenosChat")
-	if zenosChat and ChatToggle then
-		ChatToggle.init(nil, zenosChat)
-	end
+if RunService:IsClient() then
+	createChatOutput()
 end
 
 local G2L = {};
@@ -3409,6 +3531,7 @@ end;
 G2L_MODULES[G2L["8"]] = {
 Closure = function()
     local script = G2L["8"];--[[
+--[[
 	// FileName: Chat.lua
 	// Written by: SolarCrane
 	// Description: Code for lua side chat on ROBLOX.
@@ -3422,22 +3545,8 @@ Closure = function()
 -- 3) IN THE LOCALSCRIPT require() THE CHAT MODULE YOU MADE IN STEP 1
 -- 4) CONFIGURE YOUR PLACE ON THE WEBSITE TO USE BUBBLE-CHAT
 -- 5) SET THE FOLLOWING TWO VARIABLES TO TRUE
-
-local TextChatService = game:GetService("TextChatService")
-local Lighting = game:GetService("Lighting")
-local RBXGeneral: TextChannel = TextChatService:WaitForChild("TextChannels"):WaitForChild("RBXGeneral")
-
--- This module draws its own legacy chat UI, so keep Roblox's modern chat UI out of the way.
-pcall(function() TextChatService.ChatWindowConfiguration.Enabled = false end)
-pcall(function() TextChatService.ChatInputBarConfiguration.Enabled = false end)
-
-local function LocalChatsAreUnfiltered()
-	local flag = Lighting:FindFirstChild("LocalChatsAreUnfiltered")
-	return flag and flag:IsA("BoolValue") and flag.Value or false
-end
-
-local FORCE_CHAT_GUI = false
-local NON_CORESCRIPT_MODE = false
+local FORCE_CHAT_GUI = true
+local NON_CORESCRIPT_MODE = false -- patched standalone LocalScript, retains chat bar
 -- 6) (OPTIONAL) PUT THE FOLLOWING LINE IN A SERVER SCRIPT TO MAKE CHAT PERSIST THROUGH RESPAWNING
 --  game:GetService('StarterGui').ResetPlayerGuiOnSpawn = false
 ---------------------------------
@@ -3466,6 +3575,8 @@ local CHAT_COLORS =
 		BrickColor.new("Brick yellow").Color,
 	}
 
+local thisModuleName = "Chat"
+
 local emptySelectionImage = Instance.new("ImageLabel")
 emptySelectionImage.ImageTransparency = 1
 emptySelectionImage.BackgroundTransparency = 1
@@ -3474,7 +3585,7 @@ emptySelectionImage.BackgroundTransparency = 1
 
 --[[ SERVICES ]]
 local RunService = game:GetService('RunService')
-local CoreGuiService = game.Players.LocalPlayer.PlayerGui
+local CoreGuiService = game:GetService('CoreGui')
 local PlayersService = game:GetService('Players')
 local DebrisService = game:GetService('Debris')
 local GuiService = game:GetService('GuiService')
@@ -3485,7 +3596,7 @@ local ContextActionService = game:GetService('ContextActionService')
 
 --[[ Fast Flags ]]--
 local playerDropDownEnabledSuccess, playerDropDownEnabledFlagValue = pcall(function() return settings():GetFFlag("PlayerDropDownEnabled") end)
-local IsPlayerDropDownEnabled = playerDropDownEnabledSuccess and playerDropDownEnabledFlagValue
+local IsPlayerDropDownEnabled = false
 
 local getMoveChatSuccess, moveChatActiveValue = pcall(function() return settings():GetFFlag("SetCoreMoveChat") end)
 local allowMoveChat = getMoveChatSuccess and moveChatActiveValue
@@ -3494,6 +3605,16 @@ local getDisableChatBarSuccess, disableChatBarValue = pcall(function() return se
 local allowDisableChatBar = getDisableChatBarSuccess and disableChatBarValue
 
 --[[ SCRIPT VARIABLES ]]
+local TextChatService = game:GetService("TextChatService")
+local TextChannels = TextChatService:WaitForChild("TextChannels")
+-- This is a standalone PlayerGui replacement; normal LocalScripts cannot replace Roblox CoreGui modules.
+local RobloxGui = nil
+local VRHub = nil
+pcall(function()
+	TextChatService.ChatWindowConfiguration.Enabled = false
+	TextChatService.ChatInputBarConfiguration.Enabled = false
+	TextChatService.ChannelTabsConfiguration.Enabled = false
+end)
 
 -- I am not fond of waiting at the top of the script here...
 while PlayersService.LocalPlayer == nil do PlayersService.ChildAdded:wait() end
@@ -3502,7 +3623,7 @@ local Player = PlayersService.LocalPlayer
 local GuiRoot = Instance.new('Frame')
 GuiRoot.Name = 'GuiRoot';
 GuiRoot.Size = UDim2.new(1,0,1,0);
-GuiRoot.Position = UDim2.new(0,0,0,37);
+GuiRoot.Position = UDim2.new(0, 0, 0, 0); -- Keep the full-screen layout rooted at zero
 GuiRoot.BackgroundTransparency = 1;
 
 
@@ -3521,8 +3642,8 @@ local topbarEnabled = true
 
 
 
-if not NON_CORESCRIPT_MODE and not InputService.VREnabled then
-	playerDropDownModule = require(CoreGuiService:WaitForChild('RobloxGui').Modules:WaitForChild("PlayerDropDown"))
+if false then -- CoreGui PlayerDropDown cannot be required by ordinary LocalScripts
+	playerDropDownModule = require(RobloxGui.Modules:WaitForChild("PlayerDropDown"))
 	playerDropDown = playerDropDownModule:CreatePlayerDropDown()
 	blockingUtility = playerDropDownModule:CreateBlockingUtility()
 end
@@ -4358,6 +4479,37 @@ local function CreatePlayerChatMessage(settings, playerChatType, sendingPlayer, 
 	return this
 end
 
+local function SendModernChat(message, mode, recipient)
+	task.spawn(function()
+		local channel
+		if mode == "Team" then
+			channel = TextChannels:FindFirstChild("RBXTeam"..tostring(Player.Team and Player.Team.Name or ""))
+			-- Never fall back to another team's channel.
+
+		elseif mode == "Whisper" and recipient then
+			local name = "RBXWhisper:" .. math.min(Player.UserId, recipient.UserId) .. "_" .. math.max(Player.UserId, recipient.UserId)
+			channel = TextChannels:FindFirstChild(name)
+			if not channel then
+				-- Request the built-in whisper target through the official command if available.
+				local whisperCommand = TextChatService:FindFirstChild("RBXWhisperCommand", true)
+				if whisperCommand and whisperCommand:IsA("TextChatCommand") then
+					local general = TextChannels:FindFirstChild("RBXGeneral")
+					if general then pcall(function() general:SendAsync("/w "..recipient.Name.." "..message) end) end
+					return
+				end
+			end
+		else
+			channel = TextChannels:FindFirstChild("RBXGeneral")
+		end
+		if channel and channel:IsA("TextChannel") then
+			local ok, err = pcall(function() channel:SendAsync(message) end)
+			if not ok then warn("2016Chat send failed: ",err) end
+		else
+			warn("2016Chat: no available TextChatService channel for ", mode)
+		end
+	end)
+end
+
 local function CreateChatBarWidget(settings)
 	local this = {}
 
@@ -4376,7 +4528,6 @@ local function CreateChatBarWidget(settings)
 	this.ChatBarFloodEvent = Util.Signal()
 
 	this.unfocusedAt = 0
-	this.SuppressNextSlashCharacter = false
 
 	local chatCoreGuiEnabled = true
 
@@ -4431,7 +4582,6 @@ local function CreateChatBarWidget(settings)
 
 	local function TearDownEvents()
 		this.ClickToChatButtonConn = Util.DisconnectEvent(this.ClickToChatButtonConn)
-		this.ChatBarContainerClickConn = Util.DisconnectEvent(this.ChatBarContainerClickConn)
 		this.ChatBarFocusLostConn = Util.DisconnectEvent(this.ChatBarFocusLostConn)
 		this.ChatBarLostFocusConn = Util.DisconnectEvent(this.ChatBarLostFocusConn)
 		this.SelectChatModeConn = Util.DisconnectEvent(this.SelectChatModeConn)
@@ -4444,22 +4594,7 @@ local function CreateChatBarWidget(settings)
 	local function HookUpEvents()
 		TearDownEvents() -- Cleanup old events
 
-		if this.ClickToChatButton then
-			this.ClickToChatButtonConn = this.ClickToChatButton.MouseButton1Click:connect(function()
-				this:FocusChatBar()
-			end)
-		end
-
-		-- Clicking/tapping anywhere on the old chat bar should open/focus it too.
-		if this.ChatBarContainer then
-			this.ChatBarContainer.Active = true
-			this.ChatBarContainerClickConn = this.ChatBarContainer.InputBegan:connect(function(inputObject)
-				if inputObject.UserInputType == Enum.UserInputType.MouseButton1
-					or inputObject.UserInputType == Enum.UserInputType.Touch then
-					this:FocusChatBar()
-				end
-			end)
-		end
+		if this.ClickToChatButton then this.ClickToChatButtonConn = this.ClickToChatButton.MouseButton1Click:connect(function() this:FocusChatBar() end) end
 
 		if this.ChatBar then
 			-- Use a count to check for double backspace out of a chatmode
@@ -4516,7 +4651,7 @@ local function CreateChatBarWidget(settings)
 
 	function this:CalculateVisibility()
 		if this.ChatBarContainer then
-			local enabled = self.WidgetVisible and chatCoreGuiEnabled and not NON_CORESCRIPT_MODE
+			local enabled = self.WidgetVisible and chatCoreGuiEnabled
 			if enabled then
 				HookUpEvents()
 			else
@@ -4531,7 +4666,7 @@ local function CreateChatBarWidget(settings)
 			self.WidgetVisible = visible
 			self:CalculateVisibility()
 		end
-		if NON_CORESCRIPT_MODE or chatBarDisabled then
+		if chatBarDisabled then
 			this.ChatBarContainer.Visible = false
 		end
 	end
@@ -4611,23 +4746,8 @@ local function CreateChatBarWidget(settings)
 	local previousText = ""
 	function this:OnChatBarTextChanged()
 		if not Util.IsTouchDevice() then
-			local originalText = this:GetChatBarText()
-
-			-- CaptureFocus() can cause the same "/" keypress that opened chat
-			-- to be inserted into the TextBox. Remove only that one hotkey slash.
-			if this.SuppressNextSlashCharacter then
-				if string.sub(originalText, 1, 1) == "/" then
-					this.SuppressNextSlashCharacter = false
-					this:SetChatBarText(string.sub(originalText, 2))
-					originalText = this:GetChatBarText()
-				elseif originalText ~= "" then
-					-- Some other character arrived first; don't suppress future slashes.
-					this.SuppressNextSlashCharacter = false
-				end
-			end
-
 			this:ProcessChatBarModes(true)
-			originalText = this:GetChatBarText()
+			local originalText = this:GetChatBarText()
 			local newText = Util.FilterUnprintableCharacters(originalText)
 			if newText ~= originalText then
 				previousText = newText
@@ -4716,8 +4836,6 @@ local function CreateChatBarWidget(settings)
 
 	function this:FocusChatBar()
 		if this.ChatBar and not chatBarDisabled then
-			-- The idle chat bar is hidden. Bring it back only when the user starts chatting.
-			self:FadeIn()
 			this.ChatBar.Visible = true
 			this.ChatBar:CaptureFocus()
 			if self.ClickToChatButton then
@@ -4801,23 +4919,20 @@ local function CreateChatBarWidget(settings)
 							if Player and Player.Neutral == true then
 								self.ChatErrorEvent:fire("You're not on a team.")
 							else
-								--pcall(function() PlayersService:TeamChat(cText) end)
+								SendModernChat(cText, "Team")
 							end
 						elseif currentMessageMode == 'Whisper' then
 							if self.TargetWhisperPlayer then
 								if self.TargetWhisperPlayer == Player then
 									self.ChatErrorEvent:fire("You cannot send a whisper to yourself.")
 								else
-									--pcall(function() PlayersService:WhisperChat(cText, self.TargetWhisperPlayer) end)
+									SendModernChat(cText, "Whisper", self.TargetWhisperPlayer)
 								end
 							else
 								self.ChatErrorEvent:fire("Invalid whisper target.")
 							end
 						elseif currentMessageMode == 'All' then
-							--pcall(function() PlayersService:Chat(cText) end)
-							spawn(function()
-								RBXGeneral:SendAsync(cText)
-							end)
+							SendModernChat(cText, "All")
 						else
 							spawn(function() error("ChatScript: Unknown Message Mode of " .. tostring(currentMessageMode)) end)
 						end
@@ -4957,7 +5072,7 @@ local function CreateChatBarWidget(settings)
 		local function RobloxClientScreenSizeChanged(newSize)
 			if chatBarContainer then
 				local chatbarVisible = this.ChatBar and this.ChatBar.Visible
-				local bubbleChatIsOn = not PlayersService.ClassicChat and PlayersService.BubbleChat
+				local bubbleChatIsOn = false
 				-- Phone
 				if newSize.X <= PHONE_SCREEN_WIDTH then
 					chatBarContainer.Size = UDim2.new(0.5, 0,0, chatbarVisible and 40 or 32)
@@ -5344,7 +5459,7 @@ local function CreateChatWindowWidget(settings)
 	end
 
 	function this:CalculateVisibility()
-		return this.WidgetVisible and ((chatCoreGuiEnabled and PlayersService.ClassicChat) or NON_CORESCRIPT_MODE)
+		return this.WidgetVisible and chatCoreGuiEnabled
 	end
 
 	function this:ToggleVisibility(visible)
@@ -5354,9 +5469,7 @@ local function CreateChatWindowWidget(settings)
 				this.ChatContainer.Visible = self:CalculateVisibility()
 			end
 		end
-		if NON_CORESCRIPT_MODE then
-			this.ChatContainer.Visible = true
-		end
+
 	end
 
 	function this:CoreGuiChanged(coreGuiType, enabled)
@@ -5381,7 +5494,7 @@ local function CreateChatWindowWidget(settings)
 			Text = "";
 			SelectionImageObject = emptySelectionImage;
 		};
-		container.Position = UDim2.new(0,0,0,37);
+		container.Position = UDim2.new(0,0,0,38);
 		container.BackgroundColor3 = Color3.new(31/255, 31/255, 31/255);
 		local scrollingFrame = Util.Create'ScrollingFrame'
 		{
@@ -5428,7 +5541,7 @@ local function CreateChatWindowWidget(settings)
 
 		local function RobloxClientScreenSizeChanged(newSize)
 			if container then
-				container.Position = UDim2.new(0,0,0,2);
+				container.Position = UDim2.new(0,0,0,38); -- Chat window below 38px topbar
 				if InputService.VREnabled then
 					container.Size = UDim2.new(1,0,1,0)
 					-- Phone
@@ -5608,59 +5721,10 @@ local function CreateChat()
 	this.Visible = false
 
 	function this:CoreGuiChanged(coreGuiType, enabled)
-		enabled = true --enabled and (topbarEnabled or InputService.VREnabled)
 		if coreGuiType == Enum.CoreGuiType.Chat or coreGuiType == Enum.CoreGuiType.All then
-			if enabled then
-				pcall(function()
-					self.SpecialKeyPressedConn = Util.DisconnectEvent(self.SpecialKeyPressedConn)
-					ContextActionService:UnbindAction("SlashToChat")
-
-					ContextActionService:BindActionAtPriority(
-						"SlashToChat",
-						function(actionName, inputState, inputObject)
-							if inputObject.KeyCode ~= Enum.KeyCode.Slash then
-								return Enum.ContextActionResult.Pass
-							end
-
-							-- If chat is already focused, "/" is normal text.
-							if self.ChatBarWidget and self.ChatBarWidget:IsFocused() then
-								return Enum.ContextActionResult.Pass
-							end
-
-							if inputState == Enum.UserInputState.Begin then
-								if self.ChatBarWidget then
-									self.ChatBarWidget.SuppressNextSlashCharacter = true
-									self.ChatBarWidget:FocusChatBar()
-								end
-							end
-
-							-- Consume the hotkey while chat was not already focused.
-							return Enum.ContextActionResult.Sink
-						end,
-						false,
-						3000,
-						Enum.KeyCode.Slash
-					)
-				end)
-			else
-				--pcall(function() GuiService:RemoveSpecialKey(Enum.SpecialKey.ChatHotkey) end)
-				ContextActionService:UnbindAction("SlashToChat")
-			end
-			if this.MobileChatButton then
-				if enabled == true then
-					this.MobileChatButton.Parent = GuiRoot
-					-- we need to set it to be visible in-case we missed a lost focus event while chat was turned off.
-					this.MobileChatButton.Visible = true
-				else
-					this.MobileChatButton.Parent = nil
-				end
-			end
-		end
-		if this.ChatWindowWidget then
-			this.ChatWindowWidget:CoreGuiChanged(coreGuiType, true)
-		end
-		if this.ChatBarWidget then
-			this.ChatBarWidget:CoreGuiChanged(coreGuiType, true)
+			if this.ChatWindowWidget then this.ChatWindowWidget:CoreGuiChanged(coreGuiType, enabled) end
+			if this.ChatBarWidget then this.ChatBarWidget:CoreGuiChanged(coreGuiType, enabled) end
+			if this.MobileChatButton then this.MobileChatButton.Visible = enabled end
 		end
 	end
 
@@ -5671,8 +5735,18 @@ local function CreateChat()
 			-- Don't add messages from blocked players, don't show message if is a debug command
 			local isDebugCommand = false
 			pcall(function()
-				if sendingPlayer == PlayersService.LocalPlayer then
-					--isDebugCommand = game:GetService("GuiService"):ShowStatsBasedOnInputString(chattedMessage)
+				if not NON_CORESCRIPT_MODE and sendingPlayer == PlayersService.LocalPlayer then
+					isDebugCommand = game:GetService("GuiService"):ShowStatsBasedOnInputString(chattedMessage)
+
+					-- allows dev console to be opened on mobile
+					-- NOTE: Removed ToggleDevConsole bindable event, so engine no longer handles this
+					if string.lower(chattedMessage) == "/console" then
+						local devConsoleModule = require(RobloxGui.Modules.DeveloperConsoleModule)
+						if devConsoleModule then
+							local devConsoleVisible = devConsoleModule:GetVisibility()
+							devConsoleModule:SetVisibility(not devConsoleVisible)
+						end
+					end
 				end
 			end)
 			if not (this:IsPlayerBlocked(sendingPlayer) or this:IsPlayerMuted(sendingPlayer) or isDebugCommand) then
@@ -5682,68 +5756,60 @@ local function CreateChat()
 	end
 
 	function this:OnPlayerAdded(newPlayer)
-		if newPlayer then
-			spawn(function() Util.IsPlayerAdminAsync(newPlayer) end)
-		end
-		--if NON_CORESCRIPT_MODE then
-		--	newPlayer.Chatted:connect(function(msg, recipient)
-		--		this:OnPlayerChatted(Enum.PlayerChatType.All, newPlayer, msg, recipient)
-		--	end)
-		--else
-		--	this.PlayerChattedConn = Util.DisconnectEvent(this.PlayerChattedConn)
-		--	this.PlayerChattedConn = PlayersService.PlayerChatted:connect(function(...)
-		--		this:OnPlayerChatted(...)
-		--	end)
-		--end
+		-- User chat is delivered by TextChatService.MessageReceived once per message.
 	end
 
 	function this:IsPlayerBlocked(player)
-		return false
+		if blockingUtility then
+			return player and blockingUtility:IsPlayerBlockedByUserId(player.userId)
+		else
+			return false
+		end
 	end
 
 	function this:BlockPlayerAsync(playerToBlock)
-		--if playerToBlock and Player ~= playerToBlock then
-		--	local blockUserId = playerToBlock.userId
-		--	local playerToBlockName = playerToBlock.Name
-		--	if blockUserId > 0 then
-		--		if not this:IsPlayerBlocked(playerToBlock) then
-		--			if blockingUtility then
-		--				blockingUtility:BlockPlayerAsync(playerToBlock)
-		--				this.ChatWindowWidget:AddSystemChatMessage(playerToBlockName .. " is now blocked.")
-		--			end
-		--		else
-		--			this.ChatWindowWidget:AddSystemChatMessage(playerToBlockName .. " is already blocked.")
-		--		end
-		--	else
-		--		this.ChatWindowWidget:AddSystemChatMessage("You cannot block guests.")
-		--	end
-		--else
-		--	this.ChatWindowWidget:AddSystemChatMessage("You cannot block yourself.")
-		--end
+		if playerToBlock and Player ~= playerToBlock then
+			local blockUserId = playerToBlock.userId
+			local playerToBlockName = playerToBlock.Name
+			if blockUserId > 0 then
+				if not this:IsPlayerBlocked(playerToBlock) then
+					if blockingUtility then
+						blockingUtility:BlockPlayerAsync(playerToBlock)
+						this.ChatWindowWidget:AddSystemChatMessage(playerToBlockName .. " is now blocked.")
+					end
+				else
+					this.ChatWindowWidget:AddSystemChatMessage(playerToBlockName .. " is already blocked.")
+				end
+			else
+				this.ChatWindowWidget:AddSystemChatMessage("You cannot block guests.")
+			end
+		else
+			this.ChatWindowWidget:AddSystemChatMessage("You cannot block yourself.")
+		end
 	end
 
 	function this:UnblockPlayerAsync(playerToUnblock)
-		--if playerToUnblock then
-		--	local unblockUserId = playerToUnblock.userId
-		--	local playerToUnblockName = playerToUnblock.Name
+		if playerToUnblock then
+			local unblockUserId = playerToUnblock.userId
+			local playerToUnblockName = playerToUnblock.Name
 
-		--	if this:IsPlayerBlocked(playerToUnblock) then
-		--		if blockingUtility then
-		--			this.ChatWindowWidget:AddSystemChatMessage(playerToUnblockName .. " is no longer blocked.")
-		--			blockingUtility:UnblockPlayerAsync(playerToUnblock)
-		--		end
-		--	else
-		--		this.ChatWindowWidget:AddSystemChatMessage(playerToUnblockName .. " is not blocked.")
-		--	end
-		--end
+			if this:IsPlayerBlocked(playerToUnblock) then
+				if blockingUtility then
+					this.ChatWindowWidget:AddSystemChatMessage(playerToUnblockName .. " is no longer blocked.")
+					blockingUtility:UnblockPlayerAsync(playerToUnblock)
+				end
+			else
+				this.ChatWindowWidget:AddSystemChatMessage(playerToUnblockName .. " is not blocked.")
+			end
+		end
 	end
 
 	function this:IsPlayerMuted(player)
-		--if blockingUtility then
-		--return player and blockingUtility:IsPlayerMutedByUserId(player.userId)
-		--else
-		return false
-		--end
+		if blockingUtility then
+			return player and blockingUtility:IsPlayerMutedByUserId(player.userId)
+		else
+			return false
+		end
 	end
 
 	function this:MutePlayer(playerToMute)
@@ -5785,7 +5851,7 @@ local function CreateChat()
 			Size = UDim2.new(0, 128, 0, 32);
 			Position = UDim2.new(0, 88, 0, 0);
 			BackgroundTransparency = 1.0;
-			Image = 'http://www.roblox.com/asset/?id=97078724';
+			Image = 'https://www.roblox.com/asset/?id=97078724';
 		};
 	end
 
@@ -5825,15 +5891,16 @@ local function CreateChat()
 
 	local focusCount = 0
 	function this:CreateGUI()
-		if	FORCE_CHAT_GUI or true
-			--game:GetService("UserInputService"):GetPlatform() ~= Enum.Platform.XBoxOne
+		if	FORCE_CHAT_GUI or Player.ChatMode == Enum.ChatMode.TextAndMenu and
+			game:GetService("UserInputService"):GetPlatform() ~= Enum.Platform.XBoxOne
 		then
-			if NON_CORESCRIPT_MODE then
-				local chatGui = Instance.new("ScreenGui")
-				chatGui.Name = "RobloxGui"
-				chatGui.Parent = Player:WaitForChild('PlayerGui')
-				GuiRoot.Parent = chatGui
-			end
+			local chatGui = Instance.new("ScreenGui")
+			chatGui.Name = "Classic2016ChatGui"
+			chatGui.ResetOnSpawn = false
+			chatGui.IgnoreGuiInset = true -- Exact screen pixel coordinates; custom 2016 topbar is already drawn
+			chatGui.DisplayOrder = 0 -- Keep the 2016 menu above chat
+			chatGui.Parent = Player:WaitForChild("PlayerGui")
+			GuiRoot.Parent = chatGui
 
 			-- NOTE: eventually we will make multiple chat window frames
 			this.ChatWindowWidget = CreateChatWindowWidget(this.Settings)
@@ -5927,58 +5994,16 @@ local function CreateChat()
 				end
 			end)
 
-			if not NON_CORESCRIPT_MODE then
-				local function onVREnabled()
-					if InputService.VREnabled then
-						self.Settings.TextStrokeTransparency = 1
-						self:PrintVRWelcome()
-						local Panel3D = require(CoreGuiService:WaitForChild('RobloxGui').Modules.VR.Panel3D)
-						local panel = Panel3D.Get("Chat")
-						panel:LinkTo("Keyboard")
-						panel:SetType(Panel3D.Type.Fixed)
-						panel:ResizePixels(300, 125)
-						GuiRoot.Parent = panel:GetGUI()
-
-						if this.ChatWindowWidget and this.ChatWindowWidget.ChatContainer then
-							this.ChatWindowWidget.ChatContainer.MouseButton1Click:connect(function()
-								if this.ChatBarWidget then
-									if this.ChatBarWidget:WasFocused() then
-										this.ChatBarWidget:RemoveFocus()
-									else
-										self:FocusChatBar()
-									end
-								end
-							end)
-						end
-
-						function panel:CalculateTransparency()
-							return 0
-						end
-					else
-						self.Settings.TextStrokeTransparency = 0.75
-						GuiRoot.Parent = CoreGuiService:WaitForChild('RobloxGui')
-					end
-				end
-				onVREnabled()
-				InputService.Changed:connect(function(prop)
-					if prop == 'VREnabled' then
-						onVREnabled()
-					end
-				end)
-			end
+			-- Legacy VRHub/CoreGui hooks deliberately omitted in PlayerGui mode.
 		end
 	end
 
 	local toggleCount = 0
-	local function SetVisbility(newVisibility, userInitiated)
+	local function SetVisbility(newVisibility)
 		this.Visible = newVisibility
 		if this.ChatWindowWidget then
 			this.ChatWindowWidget:ToggleVisibility(this.Visible)
-
-			-- SetVisible(true) is commonly called by the topbar during startup.
-			-- Do NOT pop the whole chat panel open just because chat was enabled.
-			-- Only animate the panel open when the user actually toggles it.
-			if this.Visible and userInitiated then
+			if this.Visible then
 				toggleCount = toggleCount + 1
 				local thisToggle = toggleCount
 				local thisFocusCount = focusCount
@@ -5989,24 +6014,12 @@ local function CreateChat()
 						this.ChatWindowWidget:SetFadeLock(false)
 					end
 				end)
-			elseif this.Visible then
-				-- Enabled by the topbar/startup, but stay in message-only mode.
-				-- This prevents the large empty panel from appearing on join.
-				this.ChatWindowWidget:SetFadeLock(false)
-				this.ChatWindowWidget:FadeOut(0)
-			else
-				this.ChatWindowWidget:SetFadeLock(false)
-				this.ChatWindowWidget:FadeOut(0)
 			end
 		end
-
 		if this.ChatBarWidget then
 			this.ChatBarWidget:ToggleVisibility(this.Visible)
-			if this.Visible and userInitiated then
+			if this.Visible then
 				this.ChatBarWidget:FadeIn()
-			elseif this.Visible then
-				-- Hide the input bar while idle; pressing / or clicking chat brings it back.
-				this.ChatBarWidget:FadeOut()
 			end
 			if InputService.VREnabled and not this.Visible then
 				this.ChatBarWidget:RemoveFocus()
@@ -6017,26 +6030,16 @@ local function CreateChat()
 				playerDropDown:Hide()
 			end
 		end
-		if InputService.VREnabled then
-			local Panel3D = require(CoreGuiService:WaitForChild('RobloxGui').Modules.VR.Panel3D)
-			local panel = Panel3D.Get("Chat")
-			if this.Visible then
-				local headLook = Panel3D.GetHeadLookXZ(true)
-				panel.localCF = headLook * CFrame.Angles(math.rad(5), 0, 0) * CFrame.new(0, 0, 6.5)
-				panel:ForceShowUntilLookedAt()
-			else
-				panel:SetVisible(this.Visible)
-			end
-		end
+
 		this.VisibilityStateChanged:fire(this.Visible)
 	end
 
 	function this:ToggleVisibility()
-		SetVisbility(not self.Visible, true)
+		SetVisbility(not self.Visible)
 	end
 
 	function this:SetVisible(visible)
-		SetVisbility(visible, false)
+		SetVisbility(visible)
 	end
 
 	function this:FocusChatBar()
@@ -6060,17 +6063,17 @@ local function CreateChat()
 	function this:TopbarEnabledChanged(enabled)
 		topbarEnabled = enabled
 		-- Update coregui to reflect new topbar status
-		self:CoreGuiChanged(Enum.CoreGuiType.Chat, true)
+		self:CoreGuiChanged(Enum.CoreGuiType.Chat, enabled)
 	end
 
 	function this:Initialize()
 		--[[ Developer Customization API ]]--
-		if not NON_CORESCRIPT_MODE then
-			--game:WaitForChild("StarterGui"):RegisterSetCore("ChatMakeSystemMessage", 	function(informationTable)
-			--																				if this.ChatWindowWidget then
-			--																					this.ChatWindowWidget:AddDeveloperSystemChatMessage(informationTable)
-			--																				end
-			--																			end)
+		if false then -- RegisterSetCore is reserved for CoreScripts
+			game:WaitForChild("StarterGui"):RegisterSetCore("ChatMakeSystemMessage", 	function(informationTable)
+				if this.ChatWindowWidget then
+					this.ChatWindowWidget:AddDeveloperSystemChatMessage(informationTable)
+				end
+			end)
 			local function isUDim2Value(value)
 				local success, value = pcall(function() return UDim2.new(value.X.Scale, value.X.Offset, value.Y.Scale, value.Y.Offset) end)
 				return success and value or nil
@@ -6081,66 +6084,66 @@ local function CreateChat()
 			end
 
 			if allowMoveChat then
-				--	game.StarterGui:RegisterSetCore("ChatWindowPosition", 	function(value)
-				--																if this.ChatWindowWidget and this.ChatBarWidget then
-				--																	value = isUDim2Value(value)
-				--																	if value ~= nil and not isBubbleChatOn() then
-				--																		chatRepositioned = true -- Prevent chat from moving back to the original position on screen resolution change
-				--																		this.ChatWindowWidget.ChatContainer.Position = value
-				--																		this.ChatBarWidget.ChatBarContainer.Position = value + UDim2.new(0, 0, this.ChatWindowWidget.ChatContainer.Size.Y.Scale, this.ChatWindowWidget.ChatContainer.Size.Y.Offset + 2)
-				--																	end
-				--																end
-				--															end)
+				game.StarterGui:RegisterSetCore("ChatWindowPosition", 	function(value)
+					if this.ChatWindowWidget and this.ChatBarWidget then
+						value = isUDim2Value(value)
+						if value ~= nil and not isBubbleChatOn() then
+							chatRepositioned = true -- Prevent chat from moving back to the original position on screen resolution change
+							this.ChatWindowWidget.ChatContainer.Position = value
+							this.ChatBarWidget.ChatBarContainer.Position = value + UDim2.new(0, 0, this.ChatWindowWidget.ChatContainer.Size.Y.Scale, this.ChatWindowWidget.ChatContainer.Size.Y.Offset + 2)
+						end
+					end
+				end)
 
-				--	game.StarterGui:RegisterSetCore("ChatWindowSize", 	function(value)
-				--																if this.ChatWindowWidget and this.ChatBarWidget then
-				--																	value = isUDim2Value(value)
-				--																if value ~= nil and not isBubbleChatOn() then
-				--																	chatRepositioned = true
-				--																	this.ChatWindowWidget.ChatContainer.Size = value
-				--																	this.ChatBarWidget.ChatBarContainer.Size = UDim2.new(this.ChatWindowWidget.ChatContainer.Size.X.Scale, this.ChatWindowWidget.ChatContainer.Size.X.Offset, this.ChatBarWidget.ChatBarContainer.Size.Y.Scale, this.ChatBarWidget.ChatBarContainer.Size.Y.Offset)
-				--																	this.ChatBarWidget.ChatBarContainer.Position = this.ChatWindowWidget.ChatContainer.Position + UDim2.new(0, 0, this.ChatWindowWidget.ChatContainer.Size.Y.Scale, this.ChatWindowWidget.ChatContainer.Size.Y.Offset + 2)
-				--																	end
-				--																end
-				--															end)
+				game.StarterGui:RegisterSetCore("ChatWindowSize", 	function(value)
+					if this.ChatWindowWidget and this.ChatBarWidget then
+						value = isUDim2Value(value)
+						if value ~= nil and not isBubbleChatOn() then
+							chatRepositioned = true
+							this.ChatWindowWidget.ChatContainer.Size = value
+							this.ChatBarWidget.ChatBarContainer.Size = UDim2.new(this.ChatWindowWidget.ChatContainer.Size.X.Scale, this.ChatWindowWidget.ChatContainer.Size.X.Offset, this.ChatBarWidget.ChatBarContainer.Size.Y.Scale, this.ChatBarWidget.ChatBarContainer.Size.Y.Offset)
+							this.ChatBarWidget.ChatBarContainer.Position = this.ChatWindowWidget.ChatContainer.Position + UDim2.new(0, 0, this.ChatWindowWidget.ChatContainer.Size.Y.Scale, this.ChatWindowWidget.ChatContainer.Size.Y.Offset + 2)
+						end
+					end
+				end)
 
-				--else
-				--	game.StarterGui:RegisterSetCore("ChatWindowPosition", 	function() end)
-				--	game.StarterGui:RegisterSetCore("ChatWindowSize",		function() end)
-				--end
-
-				--	game.StarterGui:RegisterGetCore("ChatWindowPosition", 	function()
-				--																if this.ChatWindowWidget then
-				--																	return this.ChatWindowWidget.ChatContainer.Position
-				--																else
-				--																	return nil
-				--																end
-				--														end)
-
-				--	game.StarterGui:RegisterGetCore("ChatWindowSize", 	function()
-				--														if this.ChatWindowWidget then
-				--															return this.ChatWindowWidget.ChatContainer.Size
-				--														else
-				--															return nil
-				--														end
-				--													end)
-
-				--if allowDisableChatBar then
-				--	game.StarterGui:RegisterSetCore("ChatBarDisabled", 	function(value)
-				--															if this.ChatBarWidget then
-				--																if type(value) == "boolean" then
-				--																	chatBarDisabled = value
-				--																	if value == true then
-				--																		this.ChatBarWidget:ToggleVisibility(false)
-				--																	end
-				--																end
-				--															end
-				--														end)
-				--else
-				--game.StarterGui:RegisterSetCore("ChatBarDisabled", 	function() end)
+			else
+				game.StarterGui:RegisterSetCore("ChatWindowPosition", 	function() end)
+				game.StarterGui:RegisterSetCore("ChatWindowSize",		function() end)
 			end
 
-			--game.StarterGui:RegisterGetCore("ChatBarDisabled", function() return chatBarDisabled end)
+			game.StarterGui:RegisterGetCore("ChatWindowPosition", 	function()
+				if this.ChatWindowWidget then
+					return this.ChatWindowWidget.ChatContainer.Position
+				else
+					return nil
+				end
+			end)
+
+			game.StarterGui:RegisterGetCore("ChatWindowSize", 	function()
+				if this.ChatWindowWidget then
+					return this.ChatWindowWidget.ChatContainer.Size
+				else
+					return nil
+				end
+			end)
+
+			if allowDisableChatBar then
+				game.StarterGui:RegisterSetCore("ChatBarDisabled", 	function(value)
+					if this.ChatBarWidget then
+						if type(value) == "boolean" then
+							chatBarDisabled = value
+							if value == true then
+								this.ChatBarWidget:ToggleVisibility(false)
+							end
+						end
+					end
+				end)
+			else
+				game.StarterGui:RegisterSetCore("ChatBarDisabled", 	function() end)
+			end
+
+			game.StarterGui:RegisterGetCore("ChatBarDisabled", function() return chatBarDisabled end)
 		end
 
 		this:OnPlayerAdded(Player)
@@ -6153,44 +6156,13 @@ local function CreateChat()
 		end)
 		this:CreateGUI()
 
-		RBXGeneral.MessageReceived:Connect(function(msg)
-			if not msg.TextSource then return end
-			if msg.Status and msg.Status ~= Enum.TextChatMessageStatus.Success then return end
-
-			-- TextSource.Name is not a reliable Player lookup key on modern TextChatService.
-			-- UserId is the stable way to resolve the sender.
-			local ok, plr = pcall(function()
-				return PlayersService:GetPlayerByUserId(msg.TextSource.UserId)
-			end)
-			if not ok or not plr then return end
-
-			-- If a custom unfiltered-local echo is enabled, SendingMessage below already
-			-- showed the local player's copy, so don't duplicate it here.
-			if LocalChatsAreUnfiltered() and plr == Player then return end
-
-			this:OnPlayerChatted(Enum.PlayerChatType.All, plr, msg.Text, nil)
-		end)
-
-		TextChatService.SendingMessage:Connect(function(msg)
-			if LocalChatsAreUnfiltered() then
-				this:OnPlayerChatted(Enum.PlayerChatType.All, Player, msg.Text, nil)
-			end
-		end)
 
 		this:CoreGuiChanged(Enum.CoreGuiType.Chat, true)
-		this.CoreGuiChangedConn = Util.DisconnectEvent(this.CoreGuiChangedConn)
-		pcall(function()
-			--this.CoreGuiChangedConn = StarterGui.CoreGuiChangedSignal:connect(
-			--	function(coreGuiType,enabled)
-			--		this:CoreGuiChanged(coreGuiType, enabled)
-			--	end)
-		end)
+		-- Native CoreGui Chat button is intentionally not connected.
 
-		-- Keep startup clean: do not force the legacy welcome/help hint into the chat window.
-		-- /? and /help still work normally.
-		-- if not NON_CORESCRIPT_MODE then
-		-- 	this:PrintWelcome()
-		-- end
+		if not NON_CORESCRIPT_MODE then
+			this:PrintWelcome()
+		end
 
 		--SetVisbility(true)
 	end
@@ -6198,47 +6170,111 @@ local function CreateChat()
 	return this
 end
 
+-- ModuleScript entry point: required once by the classic Topbar script.
 local moduleApiTable = {}
--- Main Entry Point
+local ChatInstance = CreateChat()
+ChatInstance:Initialize()
+ChatInstance:SetVisible(true)
+
+-- The slash hotkey is managed by this custom chat, not the native CoreGui button.
+-- Wait until the opening key is released before focusing, so its slash is
+-- not inserted into the TextBox. Once focused, slashes type normally.
 do
-	local ChatInstance = CreateChat()
-	ChatInstance:Initialize()
-
-	function moduleApiTable:ToggleVisibility()
-		ChatInstance:ToggleVisibility()
-	end
-
-	function moduleApiTable:SetVisible(visible)
-		ChatInstance:SetVisible(visible)
-	end
-
-	function moduleApiTable:FocusChatBar()
-		ChatInstance:FocusChatBar()
-	end
-
-	function moduleApiTable:GetVisibility()
-		return ChatInstance.Visible
-	end
-
-	function moduleApiTable:GetMessageCount()
-		return ChatInstance:GetCurrentWindowMessageCount()
-	end
-
-	function moduleApiTable:TopbarEnabledChanged(...)
-		return ChatInstance:TopbarEnabledChanged(...)
-	end
-
-	function moduleApiTable:IsFocused(useWasFocused)
-		return ChatInstance:IsFocused(useWasFocused)
-	end
-
-	moduleApiTable.ChatBarFocusChanged = ChatInstance.ChatBarFocusChanged
-	moduleApiTable.VisibilityStateChanged = ChatInstance.VisibilityStateChanged
-	moduleApiTable.MessagesChanged = ChatInstance.CurrentWindowMessageCountChanged
-
+    local pendingOpenSlash = false
+    pcall(function() ContextActionService:UnbindAction("Classic2016SlashFocus") end)
+    ContextActionService:BindActionAtPriority(
+        "Classic2016SlashFocus",
+        function(_, state, input)
+            if input.KeyCode ~= Enum.KeyCode.Slash then
+                return Enum.ContextActionResult.Pass
+            end
+            if state == Enum.UserInputState.Begin then
+                if ChatInstance:IsFocused() then
+                    pendingOpenSlash = false
+                    return Enum.ContextActionResult.Pass
+                end
+                if not ChatInstance.Visible then
+                    pendingOpenSlash = false
+                    return Enum.ContextActionResult.Pass
+                end
+                pendingOpenSlash = true
+                return Enum.ContextActionResult.Sink
+            elseif state == Enum.UserInputState.End then
+                if pendingOpenSlash then
+                    pendingOpenSlash = false
+                    task.defer(function()
+                        RunService.RenderStepped:Wait()
+                        if ChatInstance.Visible and not ChatInstance:IsFocused() then
+                            ChatInstance:FocusChatBar()
+                        end
+                    end)
+                    return Enum.ContextActionResult.Sink
+                end
+            elseif state == Enum.UserInputState.Cancel then
+                pendingOpenSlash = false
+            end
+            return Enum.ContextActionResult.Pass
+        end,
+        false,
+        10000,
+        Enum.KeyCode.Slash
+    )
 end
 
+-- Filtered incoming player messages via TextChatService.
+local delivered = {}
+TextChatService.MessageReceived:Connect(function(textMessage)
+    if not textMessage or textMessage.Status ~= Enum.TextChatMessageStatus.Success then return end
+    if not textMessage.TextSource then return end
+    local id = textMessage.MessageId
+    if id and delivered[id] then return end
+    if id then
+        delivered[id] = true
+        task.delay(90, function() delivered[id] = nil end)
+    end
+    local sender = PlayersService:GetPlayerByUserId(textMessage.TextSource.UserId)
+    if not sender then return end
+    local kind = Enum.PlayerChatType.All
+    local channel = textMessage.TextChannel
+    if channel then
+        if channel.Name:find("RBXTeam", 1, true) then
+            kind = Enum.PlayerChatType.Team
+        elseif channel.Name:find("RBXWhisper", 1, true) then
+            kind = Enum.PlayerChatType.Whisper
+        end
+    end
+    ChatInstance:OnPlayerChatted(kind, sender, textMessage.Text, nil)
+end)
+
+-- Public 2016 chat-module contract used by the topbar.
+function moduleApiTable:ToggleVisibility()
+    ChatInstance:ToggleVisibility()
+end
+function moduleApiTable:SetVisible(visible)
+    ChatInstance:SetVisible(visible)
+end
+function moduleApiTable:FocusChatBar()
+    ChatInstance:FocusChatBar()
+end
+function moduleApiTable:GetVisibility()
+    return ChatInstance.Visible
+end
+function moduleApiTable:GetMessageCount()
+    return ChatInstance:GetCurrentWindowMessageCount()
+end
+function moduleApiTable:TopbarEnabledChanged(enabled)
+    -- Only the custom topbar/module controls visibility.
+    topbarEnabled = enabled
+end
+function moduleApiTable:IsFocused(useWasFocused)
+    return ChatInstance:IsFocused(useWasFocused)
+end
+moduleApiTable.ChatBarFocusChanged = ChatInstance.ChatBarFocusChanged
+moduleApiTable.VisibilityStateChanged = ChatInstance.VisibilityStateChanged
+moduleApiTable.MessagesChanged = ChatInstance.CurrentWindowMessageCountChanged
+
 return moduleApiTable
+
 
 
 end;
