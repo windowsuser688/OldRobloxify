@@ -1,3 +1,214 @@
+game.CoreGui.TopBarApp:Destroy()
+game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)
+local CoreGui = game:GetService("CoreGui")
+local ContextActionService = game:GetService("ContextActionService")
+
+local connections = {}
+
+local function connect(signal, callback)
+	local connection = signal:Connect(callback)
+	table.insert(connections, connection)
+	return connection
+end
+
+local function hideGuiObject(object)
+	if not object or not object:IsA("GuiObject") then
+		return
+	end
+
+	pcall(function()
+		object.Visible = false
+	end)
+
+	pcall(function()
+		object.Active = false
+	end)
+
+	pcall(function()
+		object.Selectable = false
+	end)
+
+	pcall(function()
+		object.AutoButtonColor = false
+	end)
+
+	pcall(function()
+		object.BackgroundTransparency = 1
+	end)
+
+	pcall(function()
+		object.ImageTransparency = 1
+	end)
+
+	pcall(function()
+		object.TextTransparency = 1
+	end)
+end
+
+local function hideNativeSettingsMenu()
+	local robloxGui = CoreGui:FindFirstChild("RobloxGui")
+	if not robloxGui then
+		return
+	end
+
+	local shield = robloxGui:FindFirstChild("SettingsClippingShield")
+	if not shield then
+		return
+	end
+
+	hideGuiObject(shield)
+
+	for _, object in ipairs(shield:GetDescendants()) do
+		hideGuiObject(object)
+	end
+end
+
+local hookedObjects = {}
+
+local function hookGuiObject(object)
+	if not object then
+		return
+	end
+
+	if not object:IsA("GuiObject") then
+		return
+	end
+
+	if hookedObjects[object] then
+		return
+	end
+
+	hookedObjects[object] = true
+
+	connect(object:GetPropertyChangedSignal("Visible"), function()
+		if object.Visible then
+			hideNativeSettingsMenu()
+		end
+	end)
+
+	if object.Visible then
+		hideGuiObject(object)
+	end
+end
+
+local function hookSettingsShield(shield)
+	if not shield then
+		return
+	end
+
+	hideNativeSettingsMenu()
+
+	hookGuiObject(shield)
+
+	for _, object in ipairs(shield:GetDescendants()) do
+		hookGuiObject(object)
+	end
+
+	connect(shield.DescendantAdded, function(object)
+		hookGuiObject(object)
+
+		task.defer(function()
+			hideGuiObject(object)
+			hideNativeSettingsMenu()
+		end)
+	end)
+end
+
+local function hookRobloxGui()
+	local robloxGui = CoreGui:FindFirstChild("RobloxGui")
+
+	if not robloxGui then
+		robloxGui = CoreGui:WaitForChild("RobloxGui", 10)
+	end
+
+	if not robloxGui then
+		return
+	end
+
+	local shield = robloxGui:FindFirstChild("SettingsClippingShield")
+
+	if shield then
+		hookSettingsShield(shield)
+	end
+
+	connect(robloxGui.ChildAdded, function(child)
+		if child.Name == "SettingsClippingShield" then
+			task.defer(function()
+				hookSettingsShield(child)
+			end)
+		end
+	end)
+
+	connect(robloxGui.DescendantAdded, function(object)
+		local currentShield =
+			robloxGui:FindFirstChild("SettingsClippingShield")
+
+		if currentShield and object:IsDescendantOf(currentShield) then
+			hookGuiObject(object)
+
+			task.defer(function()
+				hideGuiObject(object)
+			end)
+		end
+	end)
+end
+
+local function blockEscapeMenu(_, inputState)
+	if inputState == Enum.UserInputState.Begin then
+		hideNativeSettingsMenu()
+
+		task.defer(function()
+			hideNativeSettingsMenu()
+		end)
+	end
+
+	return Enum.ContextActionResult.Sink
+end
+
+-- Try Roblox's CoreAction API first.
+local bound = pcall(function()
+	ContextActionService:BindCoreActionAtPriority(
+		"RBXEscapeMainMenu",
+		blockEscapeMenu,
+		false,
+		10000,
+		Enum.KeyCode.Escape,
+		Enum.KeyCode.ButtonStart
+	)
+end)
+
+-- Fallback.
+if not bound then
+	bound = pcall(function()
+		ContextActionService:BindCoreAction(
+			"RBXEscapeMainMenu",
+			blockEscapeMenu,
+			false,
+			Enum.KeyCode.Escape,
+			Enum.KeyCode.ButtonStart
+		)
+	end)
+end
+
+-- Final fallback if CoreAction isn't available.
+if not bound then
+	ContextActionService:BindActionAtPriority(
+		"RBXEscapeMainMenu",
+		blockEscapeMenu,
+		false,
+		10000,
+		Enum.KeyCode.Escape,
+		Enum.KeyCode.ButtonStart
+	)
+end
+
+hookRobloxGui()
+
+hideNativeSettingsMenu()
+
+task.defer(function()
+	hideNativeSettingsMenu()
+end)
 --[=[
  d888b  db    db d888888b      .d888b.      db      db    db  .d8b.  
 88' Y8b 88    88   `88'        VP  `8D      88      88    88 d8' `8b 
@@ -9607,7 +9818,7 @@ local script = G2L["3"];
 		yesButton.Parent = frame
 		yesButton.Modal = true
 		yesButton.MouseButton1Click:Connect(function()
-			pcall(function() game:Shutdown() end)
+			game:GetService("Players").LocalPlayer:Kick("You left the game.")
 		end)
 	
 		local noButton = createTextButton("Stay",Enum.ButtonStyle.RobloxRoundDefaultButton,Enum.FontSize.Size24,UDim2.new(0,128,0,50),UDim2.new(0,90,0.8,0))
